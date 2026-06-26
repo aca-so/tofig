@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { margin: 0; box-sizing: border-box; font-family: Inter, Arial, sans-serif; }
+      body { background: #0b1020; padding: 48px; }
+      .card {
+        width: 520px; margin: 0 auto;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border: 1px solid #334155; border-radius: 20px; padding: 36px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+      .badge {
+        display: inline-block; background: #22d3ee; color: #0b1020;
+        font-weight: 700; font-size: 12px; padding: 6px 12px; border-radius: 999px;
+      }
+      .icon { width: 40px; height: 40px; margin-top: 20px; }
+      h1 { color: #f8fafc; font-size: 34px; font-weight: 800; margin: 14px 0 10px; line-height: 1.1; }
+      p { color: #94a3b8; font-size: 16px; line-height: 1.5; }
+      .row { display: flex; gap: 12px; margin-top: 24px; }
+      .btn { flex: 1; text-align: center; padding: 12px; border-radius: 10px; font-weight: 600; }
+      .btn.primary { background: #22d3ee; color: #0b1020; }
+      .btn.ghost { border: 1px solid #475569; color: #e2e8f0; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <span class="badge">NEW</span>
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+      </svg>
+      <h1>Design in HTML.<br />Ship to Figma.</h1>
+      <p>tofig converts self-contained HTML into native, editable Figma layers — text, vectors, gradients and all.</p>
+      <div class="row">
+        <div class="btn primary">Get started</div>
+        <div class="btn ghost">Docs</div>
+      </div>
+    </div>
+  </body>
+</html>

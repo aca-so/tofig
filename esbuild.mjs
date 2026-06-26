@@ -1,0 +1,81 @@
+// Builds two artifacts required by Figma:
+//   1. code.js  — the sandbox (no DOM), a single IIFE
+//   2. ui.html  — the UI iframe, a single self-contained HTML file with JS inlined
+import * as esbuild from "esbuild";
+import { readFile, writeFile } from "node:fs/promises";
+
+const watch = process.argv.includes("--watch");
+
+const common = {
+  bundle: true,
+  target: "es2017",
+  logLevel: "info",
+  define: { "process.env.NODE_ENV": '"production"' },
+};
+
+const TEMPLATE = "src/ui/index.html";
+const PLACEHOLDER = "/*INLINE_SCRIPT*/";
+
+async function inlineUI(outputFiles) {
+  // Escape any "</script>" so the inlined code can't terminate the host <script>.
+  const js = outputFiles[0].text.replace(/<\/script>/gi, "<\\/script>");
+  const template = await readFile(TEMPLATE, "utf8");
+  if (!template.includes(PLACEHOLDER)) {
+    throw new Error(`UI template is missing the ${PLACEHOLDER} marker`);
+  }
+  // Replace ALL occurrences of the marker; function replacer avoids $-pattern
+  // interpretation in the bundled JS.
+  const html = template.split(PLACEHOLDER).join(js);
+  if (html.includes(PLACEHOLDER)) {
+    throw new Error("inline failed: placeholder still present in ui.html");
+  }
+  await writeFile("ui.html", html);
+  console.log(`built ui.html (${js.length} bytes of inlined JS)`);
+}
+
+// The extractor is bundled to an IIFE string and injected into the UI build via
+// `define`, so the UI can run it inside the render iframe's own context.
+async function buildExtractorSource() {
+  const out = await esbuild.build({
+    ...common,
+    entryPoints: ["src/ui/extractor.ts"],
+    write: false,
+    format: "iife",
+    minify: true,
+  });
+  return out.outputFiles[0].text;
+}
+const extractorSrc = await buildExtractorSource();
+
+const codeOpts = { ...common, entryPoints: ["src/code.ts"], outfile: "code.js", format: "iife" };
+const uiOpts = {
+  ...common,
+  entryPoints: ["src/ui/ui.ts"],
+  write: false,
+  format: "iife",
+  define: { ...common.define, TOFIG_EXTRACTOR_SRC: JSON.stringify(extractorSrc) },
+};
+
+if (watch) {
+  const codeCtx = await esbuild.context(codeOpts);
+  const uiCtx = await esbuild.context({
+    ...uiOpts,
+    plugins: [
+      {
+        name: "inline-ui-html",
+        setup(build) {
+          build.onEnd(async (res) => {
+            if (res.outputFiles?.length) await inlineUI(res.outputFiles);
+          });
+        },
+      },
+    ],
+  });
+  await codeCtx.watch();
+  await uiCtx.watch();
+  console.log("watching for changes…");
+} else {
+  await esbuild.build(codeOpts);
+  const ui = await esbuild.build(uiOpts);
+  await inlineUI(ui.outputFiles);
+}

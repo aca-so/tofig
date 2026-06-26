@@ -1,0 +1,20 @@
+{
+  "name": "tofig",
+  "version": "0.1.0",
+  "description": "Convert HTML (e.g. Claude designs) into native Figma designs or Slides",
+  "license": "MIT",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@builder.io/html-to-figma": "^0.0.3"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "*",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,122 @@
+<!-- Template: esbuild replaces the marker in the script tag at the bottom with the
+     bundled UI code and writes the result to ui.html at the repo root. -->
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: var(--figma-color-bg, #fff);
+    --bg-secondary: var(--figma-color-bg-secondary, #f5f5f5);
+    --text: var(--figma-color-text, #1a1a1a);
+    --text-secondary: var(--figma-color-text-secondary, #666);
+    --border: var(--figma-color-border, #e5e5e5);
+    --accent: var(--figma-color-bg-brand, #0d99ff);
+    --accent-text: var(--figma-color-text-onbrand, #fff);
+    --ok: #1a7f37;
+    --err: var(--figma-color-text-danger, #d4380d);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+  }
+  .head { display: flex; align-items: center; gap: 8px; }
+  .head h1 { font-size: 13px; margin: 0; font-weight: 600; }
+  .badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  .badge[data-target="slides"] { color: var(--accent); border-color: var(--accent); }
+  #drop {
+    position: relative;
+    flex: 1;
+    min-height: 160px;
+    display: flex;
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    transition: border-color .12s, background .12s;
+  }
+  #drop.over { border-color: var(--accent); background: var(--bg-secondary); }
+  textarea {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    resize: none;
+    padding: 10px;
+    font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+    outline: none;
+  }
+  .hint {
+    position: absolute;
+    right: 10px;
+    bottom: 8px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    pointer-events: none;
+  }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .muted { color: var(--text-secondary); }
+  button {
+    font: inherit;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  button:hover { background: var(--bg-secondary); }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+  button.primary:disabled { opacity: .55; cursor: default; }
+  input[type="number"] {
+    width: 72px;
+    font: inherit;
+    padding: 5px 7px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  .status { font-size: 11px; min-height: 14px; color: var(--text-secondary); }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); }
+  .spacer { flex: 1; }
+</style>
+
+<div class="head">
+  <h1>tofig</h1>
+  <span class="badge" id="badge" data-target="design">Design</span>
+</div>
+
+<div id="drop">
+  <textarea id="html" placeholder="Paste self-contained HTML here, or drop an .html file…&#10;&#10;Inline CSS, data:/base64 images and inline <svg> all work. External URLs are not fetched (networkAccess: none)."></textarea>
+  <span class="hint">⌘/Ctrl + Enter</span>
+</div>
+
+<div class="row" id="widthRow">
+  <span class="muted">Render width</span>
+  <input type="number" id="width" value="1440" min="320" max="3840" step="20" />
+  <span class="muted">px</span>
+  <button id="pick" class="spacer" style="flex:0 0 auto">Choose .html…</button>
+</div>
+
+<input type="file" id="file" accept=".html,.htm,text/html" hidden />
+
+<div class="status" id="status"></div>
+
+<button id="convert" class="primary">Convert to Frames</button>
+
+<script>/*INLINE_SCRIPT*/</script>
