@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;600&display=swap" rel="stylesheet" />
+    <style>
+      html, body { margin: 0; padding: 0; }
+      /* tofig "t/" monogram — acaso DS, subtle tonal-purple gradient.
+         FULL-BLEED on purpose: Figma applies its own rounded mask to plugin icons,
+         and a transparent rounded corner would composite to white in a screenshot.
+         Render large, downscale to 128. */
+      .icon {
+        width: 100vw; height: 100vw;
+        position: relative; overflow: hidden;
+        background: linear-gradient(160deg, #8b2bf9 0%, #6406ec 100%);
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Sora", system-ui, -apple-system, sans-serif;
+      }
+      .icon::after {
+        content: ""; position: absolute; inset: 0;
+        background: radial-gradient(120% 75% at 28% -8%, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0) 60%);
+      }
+      .glyph {
+        position: relative; z-index: 1; color: #fff;
+        font-size: 50vw; line-height: 1; letter-spacing: -0.04em;
+        display: inline-flex; align-items: baseline;
+        text-shadow: 0 1.2% 4% rgba(0, 0, 0, 0.16);
+      }
+      .glyph .t { font-weight: 600; }
+      .glyph .s { font-weight: 300; }
+    </style>
+  </head>
+  <body>
+    <div class="icon" role="img" aria-label="tofig icon"><span class="glyph"><span class="t">t</span><span class="s">/</span></span></div>
+  </body>
+</html>
