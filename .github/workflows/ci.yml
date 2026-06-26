@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel in-progress runs for the same ref to save CI minutes
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Lint, typecheck, test & build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The toolchain isn't committed yet (specs are still being defined).
+      # This scaffold runs the standard Node checks as soon as a package.json
+      # lands, and is a friendly no-op until then. Each step is gated with
+      # `--if-present`, so missing scripts won't fail the build.
+      - name: Detect package.json
+        id: pkg
+        run: |
+          if [ -f package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js
+        if: steps.pkg.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        if: steps.pkg.outputs.exists == 'true'
+        run: npm install --no-audit --no-fund
+
+      - name: Lint
+        if: steps.pkg.outputs.exists == 'true'
+        run: npm run lint --if-present
+
+      - name: Typecheck
+        if: steps.pkg.outputs.exists == 'true'
+        run: npm run typecheck --if-present
+
+      - name: Test
+        if: steps.pkg.outputs.exists == 'true'
+        run: npm test --if-present
+
+      - name: Build
+        if: steps.pkg.outputs.exists == 'true'
+        run: npm run build --if-present
+
+      - name: No toolchain yet
+        if: steps.pkg.outputs.exists == 'false'
+        run: echo "No package.json found — CI scaffold is in place and will run automatically once the toolchain is added."

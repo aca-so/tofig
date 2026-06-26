@@ -1,0 +1,9 @@
+# Code owners for tofig.
+# These users/teams are automatically requested for review when matching files change.
+# Docs: https://docs.github.com/en/repositories/managing-your-repos-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+*       @tiagomoraes
+
+# Repo & CI configuration
+/.github/        @tiagomoraes
