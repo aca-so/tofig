@@ -1,0 +1,30 @@
+# Normalize line endings to LF on checkin, auto on checkout
+* text=auto eol=lf
+
+# Explicit text files
+*.ts    text
+*.tsx   text
+*.js    text
+*.jsx   text
+*.json  text
+*.md    text
+*.yml   text
+*.yaml  text
+*.css   text
+*.html  text
+
+# Binary files (never normalize)
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.svg   text
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+
+# Collapse generated files in diffs / language stats
+package-lock.json   linguist-generated=true -diff
+pnpm-lock.yaml      linguist-generated=true -diff
+yarn.lock           linguist-generated=true -diff
