@@ -84,6 +84,23 @@ function renderSignature(doc: Document): string {
   return `${booting ? "boot" : "ok"}:${count}:${w}:${h}:${textLen}`;
 }
 
+// A self-bootstrapping export (Claude/`__bundler`) renders by swapping its whole
+// document in via replaceWith — on success the boot shell (thumbnail / loading /
+// error sink) is gone. If any of those are STILL present after we've waited, the
+// export never rendered: its runtime failed to start inside the plugin sandbox
+// (commonly: it uses `eval`/`new Function` or `blob:`/storage that Figma's
+// plugin iframe restricts — such exports render fine in a normal browser). We
+// return a short reason so capture() can throw instead of importing the failure
+// screen. Returns null for a clean render or a plain (non-bundler) page.
+function bundlerFailure(doc: Document): string | null {
+  const err = doc.getElementById("__bundler_err");
+  const thumb = doc.getElementById("__bundler_thumbnail");
+  const loading = doc.getElementById("__bundler_loading");
+  if (!err && !thumb) return null;
+  const text = (el: Element | null) => (el && (el.textContent || "").trim()) || "";
+  return text(err) || text(loading) || "its embedded runtime did not finish rendering";
+}
+
 interface WaitOpts {
   maxMs?: number; // hard cap — extract whatever's there once we hit it
   interval?: number; // ms between samples
@@ -113,6 +130,10 @@ async function waitForRender(
       /* ignore */
     }
     await decodeImages(doc);
+    // A self-bootstrapping export that errors shows a "[bundle] error" sink — that
+    // is terminal, so stop waiting (capture() turns it into a clear error) instead
+    // of spinning out the full timeout on a page that will never render.
+    if (doc.getElementById("__bundler_err")) break;
     const sig = renderSignature(doc);
     const tooWide =
       maxContentWidth > 0 &&
@@ -382,6 +403,18 @@ export async function capture(
   const iframe = await renderHTML(html, width, height, !isSlides);
   try {
     const doc = iframe.contentDocument!;
+
+    // Bail out clearly if a self-bootstrapping export failed to render, rather
+    // than importing its "[bundle] error" / loading screen as if it were content.
+    const failure = bundlerFailure(doc);
+    if (failure) {
+      throw new Error(
+        `This HTML didn't render inside Figma's plugin sandbox — ${failure}. ` +
+          `Self-contained exports that rely on eval/new Function or blob: scripts can be blocked here even though they render in a normal browser. ` +
+          `Open the plugin console (Plugins → Development → Show/Hide console) for the exact error, or re-export as a static/standalone HTML.`
+      );
+    }
+
     const title = (doc.title || "").trim() || "import";
     const extract = injectExtractor(iframe);
 
