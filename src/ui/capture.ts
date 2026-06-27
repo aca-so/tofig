@@ -216,26 +216,26 @@ function deckAuthoredSize(deckEl: any): { w: number; h: number } {
   return { w: 1920, h: 1080 };
 }
 
-// Put a slide-deck export into its capture-friendly state and return the slide's
-// authored size. The decks Claude emits ship a `noscale` hook (their `_fit`
-// does `transform:none` when set) *specifically so a DOM capture sees
-// authored-size geometry* — without it the slide renders under a CSS
-// `transform: scale()`, and the deck's inner React layout, measuring a scaled
-// container, fails to fit-to-width and overflows to many times the slide width
-// (the giant/stretched frame). We set `noscale`, render the iframe at the
-// authored size so the fit lands 1:1, and wait until the content is no longer
-// overflowing (not just "stable" — a wrong layout can be stable too).
+// Render a slide-deck export at its authored resolution and return that size.
+//
+// We DON'T disable the deck's own fit logic (e.g. a `noscale` hook). That was the
+// 36864px-explosion bug: a deck fits its slide to the stage AND uses that same
+// fit to constrain its inner layout, so removing it lets the content expand to
+// its full intrinsic width (a wide timeline blows out to ~19× the slide). Proof:
+// deckAuthoredSize() measures the slide at its real width *before* we touch the
+// deck — it's only the fit-disable that explodes it.
+//
+// Instead we size the iframe to the deck's authored size so the deck's fit lands
+// at scale ≈ 1: no visible CSS transform, so htmlToFigma's box geometry (from the
+// transform-aware getBoundingClientRect) and font size (from the transform-blind
+// computed style) stay consistent — a clean 1:1 capture with the width still
+// constrained by the deck.
 async function prepareDeck(iframe: HTMLIFrameElement, deckEl: any): Promise<{ w: number; h: number }> {
   const size = deckAuthoredSize(deckEl);
-  try {
-    deckEl.setAttribute("noscale", "");
-  } catch {
-    /* attribute may be rejected — the size + wait below still help */
-  }
   iframe.style.width = `${size.w}px`;
   iframe.style.height = `${size.h}px`;
-  // Nudge the deck (and any ResizeObserver-driven inner layout) to recompute for
-  // the new stage size, using the iframe's own Event constructor so listeners fire.
+  // Nudge the deck (and any ResizeObserver-driven inner layout) to re-fit to the
+  // new stage size, using the iframe's own Event constructor so listeners fire.
   try {
     const win = iframe.contentWindow as any;
     win.dispatchEvent(new win.Event("resize"));
@@ -251,14 +251,11 @@ async function prepareDeck(iframe: HTMLIFrameElement, deckEl: any): Promise<{ w:
 }
 
 // Tag a deck-captured root with the authored slide size so the inject layer can
-// rescale the WHOLE subtree to fit it. This must be a uniform rescale, never a
-// root-only resize: htmlToFigma reads box geometry from a transform-aware
-// getBoundingClientRect but font-size from the (transform-blind) computed style,
-// so we capture decks at authored size (`noscale`) and then scale geometry AND
-// fonts together via Figma's native node.rescale (see inject.ts). The old
-// fitRootToSlide pinned only root.width/height — so a deck whose inner layout
-// overflows (e.g. a wide timeline) ended up a correct-size frame wrapping a
-// 36864px-wide "layer behind", every child still at full authored width.
+// rescale the WHOLE subtree to fit, via Figma's native node.rescale (geometry AND
+// fonts together — see inject.ts). With the deck rendered at scale ≈ 1 the content
+// already fits and this is a no-op; it's a safety net against any residual
+// overflow, and it must never be a root-only resize (that leaves children at full
+// size — the "huge layer behind a correct-size frame" bug).
 function tagFit(root: LayerNode, size: { w: number; h: number }): void {
   if (size.w > 1 && size.h > 1) root.fitTo = { w: size.w, h: size.h };
 }
@@ -363,11 +360,10 @@ export async function capture(
     if (isSlides) {
       const deck = findDeck(doc);
       if (deck) {
-        // JS deck: put it in capture mode (noscale + authored size), then drive
-        // it through every slide and capture each visible one at authored size.
-        // importSlides' fitInto() then rescales each slide's whole subtree to the
-        // slide canvas — so oversized content (wide timelines) shrinks to fit
-        // instead of overflowing.
+        // JS deck: render it at its authored size (deck fits at scale ≈ 1), then
+        // drive it through every slide and capture each visible one. importSlides'
+        // fitInto() rescales each slide's whole subtree to the slide canvas as a
+        // safety net.
         await prepareDeck(iframe, deck.el);
         roots = [];
         const n = deck.count();
@@ -388,11 +384,11 @@ export async function capture(
     } else {
       // Design import. A slide-deck export (Claude timelines, decks) fills the
       // viewport with ONE web-component that scales its slide to fit the stage.
-      // Capturing <body> then grabs the deck's chrome and the unscaled,
-      // overflowing internals. Instead put the deck in capture mode (noscale +
-      // authored size) and capture the visible slide itself, tagged with the
-      // authored size so importDesign rescales the whole subtree down to fit
-      // (importDesign has no fit step of its own, unlike importSlides).
+      // Capturing <body> then grabs the deck's chrome and surrounding internals.
+      // Instead render the deck at its authored size and capture the visible slide
+      // itself, tagged with the authored size so importDesign can rescale the
+      // subtree if needed (importDesign has no fit step of its own, unlike
+      // importSlides).
       const deck = findDeck(doc);
       if (deck) {
         const size = await prepareDeck(iframe, deck.el);

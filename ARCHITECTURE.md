@@ -65,22 +65,22 @@ parameter, so the same code can later run under the Figma MCP `use_figma` or a C
      attaches them to text layers (the lib drops weight and `removeRefs()` strips
      DOM refs before returning, so this must happen at extraction time).
    - Slide-deck exports (a web component exposing `goTo`/`next`/`length`, common in
-     Claude exports) get `prepareDeck`: we set the deck's **`noscale`** attribute —
-     a hook these decks ship *specifically for DOM capture* (`_fit` then does
-     `transform:none`) — and render the iframe at the deck's authored
-     `designWidth`/`designHeight`. This is essential because **`htmlToFigma` reads
-     box geometry from the transform-aware `getBoundingClientRect` but font size
-     from the transform-*blind* computed style.** Capturing while the deck's
-     fit-to-stage `transform: scale()` is live therefore yields *scaled boxes with
-     unscaled fonts* — broken, stretched text. `noscale` removes the transform so
-     the slide lays out at authored size and box + font are consistent.
-   - The flip side: at authored size an oversized slide (e.g. a wide timeline) lays
-     out at its full width. We do **not** fix that by resizing the root frame — that
-     leaves every child at full width (a correct-size frame wrapping a 36864px
-     "layer behind"). Instead the captured root carries its authored size as
-     `fitTo`, and the inject layer rescales the **whole subtree** to fit via Figma's
-     native `node.rescale` (geometry *and* fonts together). Slides get this for free
-     through `importSlides`' `fitInto`; Design imports honor `fitTo` explicitly.
+     Claude exports) get `prepareDeck`: we render the iframe at the deck's authored
+     `designWidth`/`designHeight` so the deck's own fit-to-stage logic lands at
+     **scale ≈ 1**. This matters because **`htmlToFigma` reads box geometry from the
+     transform-aware `getBoundingClientRect` but font size from the transform-*blind*
+     computed style** — capturing under a live `transform: scale()` yields scaled
+     boxes with unscaled fonts (stretched text). Rendering at authored size means
+     there's effectively no transform, so box + font stay consistent: a clean 1:1
+     capture.
+   - We deliberately **do not disable the deck's fit** (e.g. via a `noscale` hook).
+     A deck uses that same fit to *constrain its inner layout*; disabling it lets a
+     wide slide (e.g. a timeline) expand to its full intrinsic width — the 36864px
+     "exploded slide" bug, ~19× too wide. As a safety net the captured root still
+     carries its authored size as `fitTo`, and the inject layer rescales the **whole
+     subtree** to fit via Figma's native `node.rescale` (geometry *and* fonts
+     together — never a root-only resize, which would leave children oversized).
+     Slides get this through `importSlides`' `fitInto`; Design imports honor `fitTo`.
    - Design: capture the deck's *visible slide* (not `<body>`, which would grab the
      deck chrome). Slides: `engine/slides.ts` cascade picks one element per slide
      for static HTML, or the deck is driven through every slide (settling between
