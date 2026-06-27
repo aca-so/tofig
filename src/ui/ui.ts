@@ -57,14 +57,14 @@ async function run(): Promise<void> {
   try {
     setStatus("Rendering & measuring…");
     const width = parseInt(els.width.value, 10) || renderWidth;
-    const { roots, title } = await capture(html, target, width, slideSize);
+    const { roots, title, multiFrame } = await capture(html, target, width, slideSize);
     if (!roots.length) {
       setStatus("Nothing to import — the HTML produced no layers.", "err");
       setBusy(false);
       return;
     }
     setStatus("Building Figma layers…");
-    post({ type: "import", target, title, roots });
+    post({ type: "import", target, title, roots, multiFrame });
   } catch (err: any) {
     console.error(err);
     setStatus(`Capture failed: ${err?.message || err}`, "err");

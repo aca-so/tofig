@@ -34,7 +34,7 @@ figma.ui.onmessage = async (msg: UIToSandbox) => {
       const result =
         msg.target === "slides"
           ? await importSlides(figma, msg.roots, msg.title)
-          : await importDesign(figma, msg.roots, msg.title);
+          : await importDesign(figma, msg.roots, msg.title, msg.multiFrame);
 
       const { nodes, fontsSubstituted } = result;
       if (nodes.length) {
@@ -45,7 +45,7 @@ figma.ui.onmessage = async (msg: UIToSandbox) => {
       const base =
         msg.target === "slides"
           ? `tofig: imported ${nodes.length} slide${nodes.length === 1 ? "" : "s"}`
-          : "tofig: imported design";
+          : `tofig: imported ${nodes.length} frame${nodes.length === 1 ? "" : "s"}`;
       figma.notify(
         fontsSubstituted.length
           ? `${base} · fonts not in Figma: ${fontsSubstituted.join(", ")}`

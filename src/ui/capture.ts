@@ -17,6 +17,9 @@ type ExtractFn = (selector: HTMLElement | string, useFrames?: boolean) => LayerN
 export interface CaptureResult {
   roots: LayerNode[];
   title: string;
+  // Design imports only: when true each root is an independent slide and should
+  // become its own Figma frame (a deck), rather than the page-wrapping default.
+  multiFrame?: boolean;
 }
 
 const raf = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
@@ -260,6 +263,32 @@ function tagFit(root: LayerNode, size: { w: number; h: number }): void {
   if (size.w > 1 && size.h > 1) root.fitTo = { w: size.w, h: size.h };
 }
 
+// Drive a JS deck through every slide and capture each visible one as its own
+// root (tagged with the authored size). Shared by the Slides path (one SlideNode
+// per root) and the Design path (one frame per root) — so a multi-slide deck
+// imported into a Design file yields every slide, not just the visible one.
+async function captureDeckSlides(
+  iframe: HTMLIFrameElement,
+  deck: DeckController,
+  extract: ExtractFn
+): Promise<LayerNode[]> {
+  const size = await prepareDeck(iframe, deck.el);
+  const roots: LayerNode[] = [];
+  const n = deck.count();
+  for (let i = 0; i < n; i++) {
+    try {
+      deck.goTo(i);
+    } catch {
+      /* keep going — capture whatever slide is shown */
+    }
+    await settle(iframe);
+    const root = normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement));
+    tagFit(root, size);
+    roots.push(root);
+  }
+  return roots;
+}
+
 async function decodeImages(doc: Document): Promise<void> {
   const imgs = Array.from(doc.images || []);
   await Promise.all(
@@ -357,25 +386,13 @@ export async function capture(
     const extract = injectExtractor(iframe);
 
     let roots: LayerNode[];
+    let multiFrame = false;
     if (isSlides) {
       const deck = findDeck(doc);
       if (deck) {
-        // JS deck: render it at its authored size (deck fits at scale ≈ 1), then
-        // drive it through every slide and capture each visible one. importSlides'
-        // fitInto() rescales each slide's whole subtree to the slide canvas as a
-        // safety net.
-        await prepareDeck(iframe, deck.el);
-        roots = [];
-        const n = deck.count();
-        for (let i = 0; i < n; i++) {
-          try {
-            deck.goTo(i);
-          } catch {
-            /* keep going */
-          }
-          await settle(iframe);
-          roots.push(normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement)));
-        }
+        // JS deck: drive it through every slide and capture each. importSlides'
+        // fitInto() rescales each slide's subtree to the slide canvas as a safety net.
+        roots = await captureDeckSlides(iframe, deck, extract);
       } else {
         // Static HTML: cascade split (markers -> sections -> body children -> whole).
         const slideEls = detectSlides(doc);
@@ -385,16 +402,13 @@ export async function capture(
       // Design import. A slide-deck export (Claude timelines, decks) fills the
       // viewport with ONE web-component that scales its slide to fit the stage.
       // Capturing <body> then grabs the deck's chrome and surrounding internals.
-      // Instead render the deck at its authored size and capture the visible slide
-      // itself, tagged with the authored size so importDesign can rescale the
-      // subtree if needed (importDesign has no fit step of its own, unlike
-      // importSlides).
+      // Instead render the deck at its authored size and capture EVERY slide
+      // (each tagged with its authored size), then lay them out as one frame per
+      // slide — so a multi-slide deck becomes multiple frames, not just the first.
       const deck = findDeck(doc);
       if (deck) {
-        const size = await prepareDeck(iframe, deck.el);
-        const root = normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement));
-        tagFit(root, size);
-        roots = [root];
+        roots = await captureDeckSlides(iframe, deck, extract);
+        multiFrame = true;
       } else {
         roots = extract(doc.body);
       }
@@ -402,7 +416,7 @@ export async function capture(
 
     await embedImages(roots);
     stripRefs(roots);
-    return { roots, title };
+    return { roots, title, multiFrame };
   } finally {
     iframe.remove();
   }
