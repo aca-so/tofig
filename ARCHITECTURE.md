@@ -46,6 +46,16 @@ parameter, so the same code can later run under the Figma MCP `use_figma` or a C
 2. **`ui/ui.ts`** takes pasted/dropped HTML and calls **`ui/capture.ts`**.
 3. **`capture.ts`** renders the HTML in a hidden, offscreen iframe (sized to the
    render width / slide width), then:
+   - **waits for the page to actually settle** (`waitForRender`) before measuring
+     or extracting. The iframe `load` event only covers the *initial* markup, but
+     self-contained exports (Claude designs, single-file bundles) ship a tiny
+     loading thumbnail, then on `DOMContentLoaded` unpack/gunzip their assets, swap
+     the whole document via `replaceWith`, mount React/Babel, and run a slide-deck
+     web component that applies a fit-to-stage `transform` — none of which refires
+     `load`. Extracting too early captures a half-built, **unscaled, overflowing**
+     DOM (the "huge / stretched import" bug). `waitForRender` polls a cheap DOM
+     signature until it stops changing (gated on the bundler thumbnail being gone),
+     awaiting fonts + image decode, capped by a timeout.
    - **injects `ui/extractor.ts` as a script *inside* the iframe** and calls it
      there. This is essential — `htmlToFigma` uses ambient `document`,
      `HTMLElement`, and `getComputedStyle`; running it in the iframe makes them
@@ -54,7 +64,22 @@ parameter, so the same code can later run under the Figma MCP `use_figma` or a C
    - the extractor also re-reads **font weight + italic** from computed styles and
      attaches them to text layers (the lib drops weight and `removeRefs()` strips
      DOM refs before returning, so this must happen at extraction time).
-   - Slides: `engine/slides.ts` runs the cascade to pick one element per slide.
+   - Slide-deck exports (a web component exposing `goTo`/`next`/`length`, common in
+     Claude exports) get `prepareDeck`: we set the deck's **`noscale`** attribute —
+     a hook these decks ship *specifically for DOM capture* (`_fit` then does
+     `transform:none`) — and render the iframe at the deck's authored
+     `designWidth`/`designHeight`. This matters: under the normal fit-to-stage
+     `transform: scale()`, the deck's inner React layout measures a *scaled*
+     container, miscomputes its fit-to-width, and overflows to many times the
+     slide width — the giant/stretched frame. `noscale` + authored size makes the
+     content lay out 1:1. `waitForRender` additionally refuses to settle while the
+     content is still overflowing (`maxContentWidth`), and each captured slide root
+     is finally pinned to the authored size with `clipsContent` (`fitRootToSlide`)
+     as a hard guarantee that the import can never exceed one slide.
+   - Design: capture the deck's *visible slide* (not `<body>`, which would grab the
+     deck chrome). Slides: `engine/slides.ts` cascade picks one element per slide
+     for static HTML, or the deck is driven through every slide (settling between
+     each).
    - converts image fill `url`s → bytes (`createImage` only takes PNG/JPEG/GIF, so
      webp/svg-as-img/etc. are canvas-rasterized to PNG), and strips DOM refs.
 4. UI posts an `import` message (`roots`, `title`, `target`) to the sandbox.
