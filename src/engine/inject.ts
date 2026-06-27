@@ -15,6 +15,7 @@ import { imageFills } from "./layers";
 const SKIP = new Set([
   "ref", "type", "children", "svg", "width", "height", "x", "y",
   "intArr", "url", "fontFamily", "fontWeight", "fontStyle", "id", "parent",
+  "fitTo", // capture-layer hint (rescale subtree to fit), not a Figma node prop
 ]);
 
 const DEFAULT_FONTS: FontName[] = [
@@ -283,11 +284,18 @@ function fitWrapperToChildren(wrapper: FrameNode): void {
   wrapper.resize(Math.max(1, maxX - minX), Math.max(1, maxY - minY));
 }
 
-function fitInto(node: SceneNode, W: number, H: number): void {
+// Uniformly shrink a node's whole subtree — geometry, font size, strokes and all
+// — so it fits within W×H. Only ever scales DOWN. Figma's native rescale is the
+// right tool: it scales every descendant together (unlike a root-only resize,
+// which leaves children at full size — the "huge layer behind a correct frame").
+function rescaleToFit(node: SceneNode, W: number, H: number): void {
+  if (!("rescale" in node)) return;
   const scale = Math.min(W / node.width, H / node.height, 1);
-  if (scale < 1 && "rescale" in node) {
-    (node as FrameNode).rescale(scale);
-  }
+  if (scale < 1) (node as FrameNode).rescale(scale);
+}
+
+function fitInto(node: SceneNode, W: number, H: number): void {
+  rescaleToFit(node, W, H);
   node.x = Math.round((W - node.width) / 2);
   node.y = Math.round((H - node.height) / 2);
 }
@@ -311,6 +319,10 @@ export async function importDesign(
     if (node) {
       wrapper.appendChild(node);
       setPos(node, root);
+      // A deck-captured root carries the authored slide size: rescale its whole
+      // subtree down to fit so an oversized capture (e.g. a wide timeline laid
+      // out at authored width under `noscale`) shrinks instead of overflowing.
+      if (root.fitTo) rescaleToFit(node, root.fitTo.w, root.fitTo.h);
     }
   }
   fitWrapperToChildren(wrapper);

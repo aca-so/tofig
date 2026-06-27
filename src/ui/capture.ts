@@ -250,15 +250,17 @@ async function prepareDeck(iframe: HTMLIFrameElement, deckEl: any): Promise<{ w:
   return size;
 }
 
-// Hard guarantee against a runaway frame: pin the captured slide root to its
-// authored size and clip. In the normal (settled) case the content already fits
-// and this is a no-op; if a deck's inner layout never fit-to-width (e.g. a
-// throttled, offscreen render), this bounds the import to one slide-sized frame
-// instead of a 20000px-wide monster.
-function fitRootToSlide(root: LayerNode, size: { w: number; h: number }): void {
-  if (size.w > 1) root.width = size.w;
-  if (size.h > 1) root.height = size.h;
-  root.clipsContent = true;
+// Tag a deck-captured root with the authored slide size so the inject layer can
+// rescale the WHOLE subtree to fit it. This must be a uniform rescale, never a
+// root-only resize: htmlToFigma reads box geometry from a transform-aware
+// getBoundingClientRect but font-size from the (transform-blind) computed style,
+// so we capture decks at authored size (`noscale`) and then scale geometry AND
+// fonts together via Figma's native node.rescale (see inject.ts). The old
+// fitRootToSlide pinned only root.width/height — so a deck whose inner layout
+// overflows (e.g. a wide timeline) ended up a correct-size frame wrapping a
+// 36864px-wide "layer behind", every child still at full authored width.
+function tagFit(root: LayerNode, size: { w: number; h: number }): void {
+  if (size.w > 1 && size.h > 1) root.fitTo = { w: size.w, h: size.h };
 }
 
 async function decodeImages(doc: Document): Promise<void> {
@@ -362,8 +364,11 @@ export async function capture(
       const deck = findDeck(doc);
       if (deck) {
         // JS deck: put it in capture mode (noscale + authored size), then drive
-        // it through every slide and capture each visible one at 1:1.
-        const size = await prepareDeck(iframe, deck.el);
+        // it through every slide and capture each visible one at authored size.
+        // importSlides' fitInto() then rescales each slide's whole subtree to the
+        // slide canvas — so oversized content (wide timelines) shrinks to fit
+        // instead of overflowing.
+        await prepareDeck(iframe, deck.el);
         roots = [];
         const n = deck.count();
         for (let i = 0; i < n; i++) {
@@ -373,9 +378,7 @@ export async function capture(
             /* keep going */
           }
           await settle(iframe);
-          const root = normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement));
-          fitRootToSlide(root, size);
-          roots.push(root);
+          roots.push(normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement)));
         }
       } else {
         // Static HTML: cascade split (markers -> sections -> body children -> whole).
@@ -387,13 +390,14 @@ export async function capture(
       // viewport with ONE web-component that scales its slide to fit the stage.
       // Capturing <body> then grabs the deck's chrome and the unscaled,
       // overflowing internals. Instead put the deck in capture mode (noscale +
-      // authored size, so its inner React layout fits-to-width at 1:1) and
-      // capture the visible slide itself, pinned to the slide's authored size.
+      // authored size) and capture the visible slide itself, tagged with the
+      // authored size so importDesign rescales the whole subtree down to fit
+      // (importDesign has no fit step of its own, unlike importSlides).
       const deck = findDeck(doc);
       if (deck) {
         const size = await prepareDeck(iframe, deck.el);
         const root = normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement));
-        fitRootToSlide(root, size);
+        tagFit(root, size);
         roots = [root];
       } else {
         roots = extract(doc.body);

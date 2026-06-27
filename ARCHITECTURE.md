@@ -68,14 +68,19 @@ parameter, so the same code can later run under the Figma MCP `use_figma` or a C
      Claude exports) get `prepareDeck`: we set the deck's **`noscale`** attribute —
      a hook these decks ship *specifically for DOM capture* (`_fit` then does
      `transform:none`) — and render the iframe at the deck's authored
-     `designWidth`/`designHeight`. This matters: under the normal fit-to-stage
-     `transform: scale()`, the deck's inner React layout measures a *scaled*
-     container, miscomputes its fit-to-width, and overflows to many times the
-     slide width — the giant/stretched frame. `noscale` + authored size makes the
-     content lay out 1:1. `waitForRender` additionally refuses to settle while the
-     content is still overflowing (`maxContentWidth`), and each captured slide root
-     is finally pinned to the authored size with `clipsContent` (`fitRootToSlide`)
-     as a hard guarantee that the import can never exceed one slide.
+     `designWidth`/`designHeight`. This is essential because **`htmlToFigma` reads
+     box geometry from the transform-aware `getBoundingClientRect` but font size
+     from the transform-*blind* computed style.** Capturing while the deck's
+     fit-to-stage `transform: scale()` is live therefore yields *scaled boxes with
+     unscaled fonts* — broken, stretched text. `noscale` removes the transform so
+     the slide lays out at authored size and box + font are consistent.
+   - The flip side: at authored size an oversized slide (e.g. a wide timeline) lays
+     out at its full width. We do **not** fix that by resizing the root frame — that
+     leaves every child at full width (a correct-size frame wrapping a 36864px
+     "layer behind"). Instead the captured root carries its authored size as
+     `fitTo`, and the inject layer rescales the **whole subtree** to fit via Figma's
+     native `node.rescale` (geometry *and* fonts together). Slides get this for free
+     through `importSlides`' `fitInto`; Design imports honor `fitTo` explicitly.
    - Design: capture the deck's *visible slide* (not `<body>`, which would grab the
      deck chrome). Slides: `engine/slides.ts` cascade picks one element per slide
      for static HTML, or the deck is driven through every slide (settling between
@@ -85,8 +90,9 @@ parameter, so the same code can later run under the Figma MCP `use_figma` or a C
 4. UI posts an `import` message (`roots`, `title`, `target`) to the sandbox.
 5. **`engine/inject.ts`** walks the IR and builds nodes: frames/groups,
    rectangles (with image fills), editable SVG vectors, and text (font resolved &
-   loaded, then a shrink-to-fit pass). Design → one centered wrapper frame;
-   Slides → one `SlideNode` per root, content scaled to fit.
+   loaded, then a shrink-to-fit pass). Design → one centered wrapper frame (a
+   deck root's `fitTo` rescales its subtree to fit first); Slides → one `SlideNode`
+   per root, content scaled to fit the slide canvas (`fitInto` → `rescaleToFit`).
 
 ## File map
 

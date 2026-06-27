@@ -18,6 +18,10 @@ export interface LayerNode {
   fontWeight?: number | string; // recovered from computed style in the UI
   fontStyle?: string; // "normal" | "italic" | "oblique"
   characters?: string;
+  // Set by the capture layer on a deck-captured root: the authored slide size the
+  // whole subtree should be uniformly rescaled to fit (via Figma's native
+  // node.rescale, which scales geometry AND font size together). See capture.ts.
+  fitTo?: { w: number; h: number };
   [key: string]: any;
 }
 
