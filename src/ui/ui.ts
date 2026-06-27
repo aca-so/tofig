@@ -204,12 +204,17 @@ window.onmessage = (event: MessageEvent) => {
       setStatus(msg.message);
       break;
     case "done": {
-      const base =
-        target === "slides"
-          ? `Imported ${msg.count} slide${msg.count === 1 ? "" : "s"}. ✓`
-          : "Imported ✓";
-      if (msg.fontsSubstituted && msg.fontsSubstituted.length) {
-        setStatus(`${base}  ⚠ Fonts not in Figma → fell back: ${msg.fontsSubstituted.join(", ")}`, "err");
+      const unit = target === "slides" ? "slide" : "frame";
+      const base = `Imported ${msg.count} ${unit}${msg.count === 1 ? "" : "s"} ✓`;
+      const subs = msg.fontsSubstituted || [];
+      if (subs.length) {
+        // The #1 cause of shifted/overlapping text: the design's font isn't in
+        // Figma, so we fell back — different metrics reflow the text. Tell the
+        // user exactly which fonts to install for an accurate re-import.
+        setStatus(
+          `${base} · ⚠ ${subs.length} font${subs.length === 1 ? "" : "s"} not in Figma → fell back (text may shift). Install & re-import: ${subs.join(", ")}`,
+          "err"
+        );
       } else {
         setStatus(base, "ok");
       }

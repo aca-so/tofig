@@ -189,18 +189,27 @@ async function processImages(ctx: InjectCtx, layer: LayerNode): Promise<void> {
   }
 }
 
+// Shrink a text node's font until it fits within its captured box. When the
+// design's font isn't installed in Figma we fall back to another (Inter), whose
+// metrics differ — so the text reflows TALLER and, since every layer is
+// absolutely positioned, spills onto the element below it (the "text on top of
+// text" bug). Containing the text in its measured box trades a slightly smaller
+// glyph for no overlap. Shrinks in 0.5px steps down to a readable floor; if it
+// still won't fit there (a wildly different fallback), we stop and accept it.
 function shrinkToFit(text: TextNode, layer: LayerNode): void {
-  const targetH = Math.max(layer.height || 0, layer.lineHeightPx || 0);
+  if (typeof text.fontSize !== "number") return;
+  const targetH = Math.max(layer.height || 0, layer.lineHeightPx || 0, 1);
+  const targetW = layer.width || 0;
+  const floor = Math.max(8, Math.round((text.fontSize as number) * 0.5));
   let guard = 0;
-  const maxDrops = typeof layer.fontSize === "number" ? layer.fontSize * 0.3 : 6;
   while (
     typeof text.fontSize === "number" &&
-    (text.height > Math.max(targetH, 1) * 1.2 ||
-      (layer.width ? text.width > layer.width * 1.2 : false))
+    text.fontSize > floor &&
+    guard++ < 120 &&
+    (text.height > targetH * 1.06 || (targetW > 0 && text.width > targetW * 1.02))
   ) {
-    if (guard++ > maxDrops || text.fontSize <= 1) break;
     try {
-      text.fontSize = text.fontSize - 1;
+      text.fontSize = (text.fontSize as number) - 0.5;
     } catch {
       break;
     }
@@ -300,6 +309,15 @@ function fitInto(node: SceneNode, W: number, H: number): void {
   node.y = Math.round((H - node.height) / 2);
 }
 
+// Bound a captured root to its own frame: a child whose measured box exceeds the
+// root (overflow content, negative margins, an absolutely-positioned element) is
+// clipped instead of sticking out behind the frame (the "layer wider than the
+// frame" bug). We clip only the captured root, not every nested frame, so internal
+// decorations that legitimately overflow their sub-box are preserved.
+function clipToFrame(node: SceneNode): void {
+  if (node && "clipsContent" in node) (node as FrameNode).clipsContent = true;
+}
+
 // --- public entry points ---------------------------------------------------
 
 /**
@@ -334,6 +352,7 @@ export async function importDesign(
       // subtree down to fit, as a safety net against any residual overflow (a
       // no-op when the deck already rendered the slide at its authored size).
       if (root.fitTo) rescaleToFit(node, root.fitTo.w, root.fitTo.h);
+      clipToFrame(node);
     }
   }
   fitWrapperToChildren(wrapper);
@@ -358,6 +377,7 @@ async function importDeckFrames(
     const node = await buildLayer(ctx, root);
     if (!node) continue;
     if (root.fitTo) rescaleToFit(node, root.fitTo.w, root.fitTo.h);
+    clipToFrame(node);
     try {
       node.name = `${title} · ${i + 1}`;
     } catch {
@@ -415,6 +435,7 @@ export async function importSlides(
       const W = (slide as any).width || 1920;
       const H = (slide as any).height || 1080;
       fitInto(content, W, H);
+      clipToFrame(content);
     }
     created.push(slide);
   }
