@@ -46,6 +46,16 @@ parameter, so the same code can later run under the Figma MCP `use_figma` or a C
 2. **`ui/ui.ts`** takes pasted/dropped HTML and calls **`ui/capture.ts`**.
 3. **`capture.ts`** renders the HTML in a hidden, offscreen iframe (sized to the
    render width / slide width), then:
+   - **waits for the page to actually settle** (`waitForRender`) before measuring
+     or extracting. The iframe `load` event only covers the *initial* markup, but
+     self-contained exports (Claude designs, single-file bundles) ship a tiny
+     loading thumbnail, then on `DOMContentLoaded` unpack/gunzip their assets, swap
+     the whole document via `replaceWith`, mount React/Babel, and run a slide-deck
+     web component that applies a fit-to-stage `transform` — none of which refires
+     `load`. Extracting too early captures a half-built, **unscaled, overflowing**
+     DOM (the "huge / stretched import" bug). `waitForRender` polls a cheap DOM
+     signature until it stops changing (gated on the bundler thumbnail being gone),
+     awaiting fonts + image decode, capped by a timeout.
    - **injects `ui/extractor.ts` as a script *inside* the iframe** and calls it
      there. This is essential — `htmlToFigma` uses ambient `document`,
      `HTMLElement`, and `getComputedStyle`; running it in the iframe makes them
@@ -54,14 +64,35 @@ parameter, so the same code can later run under the Figma MCP `use_figma` or a C
    - the extractor also re-reads **font weight + italic** from computed styles and
      attaches them to text layers (the lib drops weight and `removeRefs()` strips
      DOM refs before returning, so this must happen at extraction time).
-   - Slides: `engine/slides.ts` runs the cascade to pick one element per slide.
+   - Slide-deck exports (a web component exposing `goTo`/`next`/`length`, common in
+     Claude exports) get `prepareDeck`: we render the iframe at the deck's authored
+     `designWidth`/`designHeight` so the deck's own fit-to-stage logic lands at
+     **scale ≈ 1**. This matters because **`htmlToFigma` reads box geometry from the
+     transform-aware `getBoundingClientRect` but font size from the transform-*blind*
+     computed style** — capturing under a live `transform: scale()` yields scaled
+     boxes with unscaled fonts (stretched text). Rendering at authored size means
+     there's effectively no transform, so box + font stay consistent: a clean 1:1
+     capture.
+   - We deliberately **do not disable the deck's fit** (e.g. via a `noscale` hook).
+     A deck uses that same fit to *constrain its inner layout*; disabling it lets a
+     wide slide (e.g. a timeline) expand to its full intrinsic width — the 36864px
+     "exploded slide" bug, ~19× too wide. As a safety net the captured root still
+     carries its authored size as `fitTo`, and the inject layer rescales the **whole
+     subtree** to fit via Figma's native `node.rescale` (geometry *and* fonts
+     together — never a root-only resize, which would leave children oversized).
+     Slides get this through `importSlides`' `fitInto`; Design imports honor `fitTo`.
+   - Design: capture the deck's *visible slide* (not `<body>`, which would grab the
+     deck chrome). Slides: `engine/slides.ts` cascade picks one element per slide
+     for static HTML, or the deck is driven through every slide (settling between
+     each).
    - converts image fill `url`s → bytes (`createImage` only takes PNG/JPEG/GIF, so
      webp/svg-as-img/etc. are canvas-rasterized to PNG), and strips DOM refs.
 4. UI posts an `import` message (`roots`, `title`, `target`) to the sandbox.
 5. **`engine/inject.ts`** walks the IR and builds nodes: frames/groups,
    rectangles (with image fills), editable SVG vectors, and text (font resolved &
-   loaded, then a shrink-to-fit pass). Design → one centered wrapper frame;
-   Slides → one `SlideNode` per root, content scaled to fit.
+   loaded, then a shrink-to-fit pass). Design → one centered wrapper frame (a
+   deck root's `fitTo` rescales its subtree to fit first); Slides → one `SlideNode`
+   per root, content scaled to fit the slide canvas (`fitInto` → `rescaleToFit`).
 
 ## File map
 

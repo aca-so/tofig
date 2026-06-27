@@ -65,17 +65,73 @@ function visibleSlide(deckEl: Element): Element {
   return pool.reduce((a, b) => (opacityOf(b) > opacityOf(a) ? b : a));
 }
 
-// Let a slide transition finish and its fonts/images settle before extracting.
-async function settle(doc: Document): Promise<void> {
-  await raf();
-  await delay(400);
-  try {
-    await (doc as any).fonts?.ready;
-  } catch {
-    /* ignore */
+// A cheap, transform-insensitive signature of the rendered DOM. We poll it until
+// it stops changing — that's our proxy for "the page has finished rendering".
+// `booting` stays true while a self-bootstrapping export still shows its loading
+// thumbnail (Claude/`__bundler` HTML decodes assets, swaps the whole document via
+// replaceWith, then mounts React/Babel — none of which fires a `load` event).
+function renderSignature(doc: Document): string {
+  const de = doc.documentElement;
+  const body = doc.body;
+  const booting = !!(doc.getElementById("__bundler_thumbnail") || doc.getElementById("__bundler_loading"));
+  const count = doc.getElementsByTagName("*").length;
+  const w = Math.round((de && de.scrollWidth) || 0);
+  const h = Math.round((de && de.scrollHeight) || 0);
+  const textLen = body ? (body.innerText || "").length : 0;
+  return `${booting ? "boot" : "ok"}:${count}:${w}:${h}:${textLen}`;
+}
+
+interface WaitOpts {
+  maxMs?: number; // hard cap — extract whatever's there once we hit it
+  interval?: number; // ms between samples
+  stableFrames?: number; // consecutive equal samples that mean "settled"
+  // Refuse to treat the page as "ready" while its content is wider than this
+  // (a deck whose inner React layout hasn't fit-to-width yet overflows massively
+  // — extracting then yields the giant/stretched frame). 0 disables the gate.
+  maxContentWidth?: number;
+}
+
+// Wait until the document stops mutating (or we time out). This is the fix for
+// async-rendered exports: the old pipeline extracted right after `load`, before
+// the bundle unpacked / React mounted / a slide-deck web component applied its
+// fit-to-stage transform — capturing a half-built, unscaled, overflowing DOM.
+async function waitForRender(
+  iframe: HTMLIFrameElement,
+  { maxMs = 12000, interval = 150, stableFrames = 3, maxContentWidth = 0 }: WaitOpts = {}
+): Promise<void> {
+  const doc = iframe.contentDocument!;
+  const start = Date.now();
+  let last = "";
+  let stable = 0;
+  while (Date.now() - start < maxMs) {
+    try {
+      await (doc as any).fonts?.ready;
+    } catch {
+      /* ignore */
+    }
+    await decodeImages(doc);
+    const sig = renderSignature(doc);
+    const tooWide =
+      maxContentWidth > 0 &&
+      (doc.documentElement?.scrollWidth || 0) > maxContentWidth;
+    if (!sig.startsWith("boot") && !tooWide && sig === last) {
+      if (++stable >= stableFrames) break;
+    } else {
+      stable = 0;
+    }
+    last = sig;
+    await delay(interval);
   }
-  await decodeImages(doc);
+  // Let the final layout/paint (e.g. a deck's fit transform) commit.
   await raf();
+  await raf();
+  await delay(120);
+}
+
+// Per-slide settle when driving a JS deck: a navigation triggers a transition +
+// refit but not new top-level structure, so a short stability window suffices.
+async function settle(iframe: HTMLIFrameElement): Promise<void> {
+  await waitForRender(iframe, { maxMs: 3500, interval: 100, stableFrames: 2 });
 }
 
 function injectExtractor(iframe: HTMLIFrameElement): ExtractFn {
@@ -118,29 +174,90 @@ async function renderHTML(
     else iframe.addEventListener("load", () => resolve(), { once: true });
   });
 
+  // The `load` event only covers the initial markup. Self-contained exports
+  // (Claude designs, single-file bundles) unpack assets, swap the document and
+  // mount a framework *after* load, so we must wait for the DOM to actually
+  // settle before measuring or extracting — otherwise we capture a half-built,
+  // unscaled page (the classic "huge / stretched import").
+  await waitForRender(iframe);
+
   // For Design imports, grow to fit a page taller than the viewport (scrolling
-  // pages). For Slides we keep the fixed slide canvas size.
+  // pages). For Slides we keep the fixed slide canvas size. Measure only after
+  // the content has settled, then let a reflow settle again.
   if (grow) {
     const contentH = Math.max(
       height,
       doc.documentElement?.scrollHeight || 0,
       doc.body?.scrollHeight || 0
     );
-    if (contentH > height) {
+    if (contentH > height + 1) {
       iframe.style.height = `${contentH}px`;
-      await raf();
+      await waitForRender(iframe, { maxMs: 4000, stableFrames: 2 });
     }
   }
+  return iframe;
+}
 
+// The authored ("design") size of a deck slide — independent of whatever
+// fit-to-stage scale the deck is currently applying. These exports expose it as
+// `designWidth`/`designHeight`; fall back to the visible slide's layout box.
+function deckAuthoredSize(deckEl: any): { w: number; h: number } {
+  const w = Number(deckEl && deckEl.designWidth) || 0;
+  const h = Number(deckEl && deckEl.designHeight) || 0;
+  if (w > 1 && h > 1) return { w: Math.min(w, 8192), h: Math.min(h, 8192) };
   try {
-    await (doc as any).fonts?.ready;
+    const slide = visibleSlide(deckEl) as HTMLElement;
+    if (slide.offsetWidth > 1 && slide.offsetHeight > 1) {
+      return { w: Math.min(slide.offsetWidth, 8192), h: Math.min(slide.offsetHeight, 8192) };
+    }
+  } catch {
+    /* fall through */
+  }
+  return { w: 1920, h: 1080 };
+}
+
+// Render a slide-deck export at its authored resolution and return that size.
+//
+// We DON'T disable the deck's own fit logic (e.g. a `noscale` hook). That was the
+// 36864px-explosion bug: a deck fits its slide to the stage AND uses that same
+// fit to constrain its inner layout, so removing it lets the content expand to
+// its full intrinsic width (a wide timeline blows out to ~19× the slide). Proof:
+// deckAuthoredSize() measures the slide at its real width *before* we touch the
+// deck — it's only the fit-disable that explodes it.
+//
+// Instead we size the iframe to the deck's authored size so the deck's fit lands
+// at scale ≈ 1: no visible CSS transform, so htmlToFigma's box geometry (from the
+// transform-aware getBoundingClientRect) and font size (from the transform-blind
+// computed style) stay consistent — a clean 1:1 capture with the width still
+// constrained by the deck.
+async function prepareDeck(iframe: HTMLIFrameElement, deckEl: any): Promise<{ w: number; h: number }> {
+  const size = deckAuthoredSize(deckEl);
+  iframe.style.width = `${size.w}px`;
+  iframe.style.height = `${size.h}px`;
+  // Nudge the deck (and any ResizeObserver-driven inner layout) to re-fit to the
+  // new stage size, using the iframe's own Event constructor so listeners fire.
+  try {
+    const win = iframe.contentWindow as any;
+    win.dispatchEvent(new win.Event("resize"));
   } catch {
     /* ignore */
   }
-  await decodeImages(doc);
-  await raf();
-  await raf();
-  return iframe;
+  await waitForRender(iframe, {
+    maxMs: 8000,
+    stableFrames: 2,
+    maxContentWidth: Math.round(size.w * 1.25),
+  });
+  return size;
+}
+
+// Tag a deck-captured root with the authored slide size so the inject layer can
+// rescale the WHOLE subtree to fit, via Figma's native node.rescale (geometry AND
+// fonts together — see inject.ts). With the deck rendered at scale ≈ 1 the content
+// already fits and this is a no-op; it's a safety net against any residual
+// overflow, and it must never be a root-only resize (that leaves children at full
+// size — the "huge layer behind a correct-size frame" bug).
+function tagFit(root: LayerNode, size: { w: number; h: number }): void {
+  if (size.w > 1 && size.h > 1) root.fitTo = { w: size.w, h: size.h };
 }
 
 async function decodeImages(doc: Document): Promise<void> {
@@ -243,7 +360,11 @@ export async function capture(
     if (isSlides) {
       const deck = findDeck(doc);
       if (deck) {
-        // JS deck: drive it through every slide and capture each visible one.
+        // JS deck: render it at its authored size (deck fits at scale ≈ 1), then
+        // drive it through every slide and capture each visible one. importSlides'
+        // fitInto() rescales each slide's whole subtree to the slide canvas as a
+        // safety net.
+        await prepareDeck(iframe, deck.el);
         roots = [];
         const n = deck.count();
         for (let i = 0; i < n; i++) {
@@ -252,7 +373,7 @@ export async function capture(
           } catch {
             /* keep going */
           }
-          await settle(doc);
+          await settle(iframe);
           roots.push(normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement)));
         }
       } else {
@@ -261,7 +382,22 @@ export async function capture(
         roots = slideEls.map((el) => normalizeRoot(extract(el as HTMLElement)));
       }
     } else {
-      roots = extract(doc.body);
+      // Design import. A slide-deck export (Claude timelines, decks) fills the
+      // viewport with ONE web-component that scales its slide to fit the stage.
+      // Capturing <body> then grabs the deck's chrome and surrounding internals.
+      // Instead render the deck at its authored size and capture the visible slide
+      // itself, tagged with the authored size so importDesign can rescale the
+      // subtree if needed (importDesign has no fit step of its own, unlike
+      // importSlides).
+      const deck = findDeck(doc);
+      if (deck) {
+        const size = await prepareDeck(iframe, deck.el);
+        const root = normalizeRoot(extract(visibleSlide(deck.el) as HTMLElement));
+        tagFit(root, size);
+        roots = [root];
+      } else {
+        roots = extract(doc.body);
+      }
     }
 
     await embedImages(roots);
