@@ -35,4 +35,12 @@ export default tseslint.config(
       globals: globals.node,
     },
   },
+  {
+    // The renderer CLI runs in Node, but its page.evaluate()/waitForFunction()
+    // callbacks execute in the browser — they reference document/window.
+    files: ['bin/**/*.mjs'],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
+    },
+  },
 );

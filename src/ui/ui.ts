@@ -1,5 +1,17 @@
 import type { EditorTarget, SandboxToUI, UIToSandbox } from "../shared/messages";
-import { capture } from "./capture";
+import type { LayerNode } from "../engine/layers";
+import { capture, embedImages, stripRefs } from "./capture";
+
+// A `.tofig.json` payload produced by the external renderer (bin/tofig-render.mjs):
+// pre-extracted layers from an unrestricted headless browser, for exports the
+// in-plugin sandbox can't render.
+interface ImportPayload {
+  tofig: number;
+  target?: EditorTarget;
+  title?: string;
+  multiFrame?: boolean;
+  roots: LayerNode[];
+}
 
 function post(msg: UIToSandbox): void {
   parent.postMessage({ pluginMessage: msg }, "*");
@@ -72,11 +84,50 @@ async function run(): Promise<void> {
   }
 }
 
+function parsePayload(name: string, text: string): ImportPayload | null {
+  if (!/\.json$/i.test(name) && !text.trimStart().startsWith("{")) return null;
+  try {
+    const json = JSON.parse(text);
+    if (json && json.tofig && Array.isArray(json.roots) && json.roots.length) return json as ImportPayload;
+  } catch {
+    /* not a JSON payload */
+  }
+  return null;
+}
+
+// Import a pre-rendered `.tofig.json` directly: the layers were already extracted
+// (in an unrestricted browser), so we only re-embed images (their data: URLs →
+// bytes, done offline) and hand them to the sandbox — no in-plugin render.
+async function importPayload(payload: ImportPayload, name: string): Promise<void> {
+  if (busy) return;
+  setBusy(true);
+  try {
+    setStatus(`Loading ${name}…`);
+    await embedImages(payload.roots);
+    stripRefs(payload.roots);
+    // Import into the editor we're in. A multi-root payload in a Design file
+    // becomes one frame per root (a deck/slides export); Slides ignores this.
+    const multiFrame = !!payload.multiFrame || (target === "design" && payload.roots.length > 1);
+    setStatus("Building Figma layers…");
+    post({ type: "import", target, title: payload.title || "import", roots: payload.roots, multiFrame });
+  } catch (err: any) {
+    console.error(err);
+    setStatus(`Import failed: ${err?.message || err}`, "err");
+    setBusy(false);
+  }
+}
+
 function readFile(file: File): void {
   const reader = new FileReader();
   reader.onload = () => {
-    els.input.value = String(reader.result || "");
-    const looksHtml = /\.html?$/i.test(file.name) || /html/i.test(file.type) || /<\w+[\s>]/.test(els.input.value);
+    const text = String(reader.result || "");
+    const payload = parsePayload(file.name, text);
+    if (payload) {
+      void importPayload(payload, file.name);
+      return;
+    }
+    els.input.value = text;
+    const looksHtml = /\.html?$/i.test(file.name) || /html/i.test(file.type) || /<\w+[\s>]/.test(text);
     setStatus(looksHtml ? `Loaded ${file.name}.` : `Loaded ${file.name} (doesn't look like HTML).`, looksHtml ? "ok" : "err");
   };
   reader.onerror = () => setStatus("Could not read that file.", "err");

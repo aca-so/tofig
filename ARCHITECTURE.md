@@ -128,9 +128,34 @@ examples/              # sample-design.html, sample-slides.html
 ## Known limitations / roadmap
 
 - **Auto-layout** — phase 2; IR already carries the flex/grid hints.
-- **External URLs / authed or live pages** — out of scope (`networkAccess: none`).
-  The right answer is a companion **Chrome extension** (CDP capture), like
-  html.to.design — not the plugin's network allowlist.
+- **External URLs / authed or live pages** in the plugin — out of scope
+  (`networkAccess: none`). The answer is the **external renderer** below, not the
+  plugin's network allowlist.
+
+## External renderer (out-of-sandbox path)
+
+Some "self-contained" exports are really **live apps** (a Claude artifact that
+boots a React runtime, pulls React/Babel from a CDN, reads `localStorage`). Figma's
+plugin sandbox can't run them — no network, and the UI is a `data:` URL (opaque
+origin) where storage throws. They render fine in a normal browser, so we render
+them **outside** Figma and import the result:
+
+- **`bin/tofig-render.mjs`** (`npx tofig-render <file.html>`) launches real headless
+  Chrome via `puppeteer-core` (no bundled Chromium — uses the system Chrome),
+  loads the HTML **unrestricted**, and injects two IIFEs: the same
+  `ui/extractor.ts` (`__tofigExtract`) and **`cli/page-capture.ts`**
+  (`__tofigProbe` + `__tofigCapture`). It probes for the intended viewport (deck
+  `designWidth`/`designHeight`, dc-runtime `$preview`, or a grown static page),
+  sizes the page, drives a deck through every slide / captures `#dc-root` / the
+  body, resolves every image fill to a `data:` URL, and writes a
+  `<name>.tofig.json` payload (`{ tofig, target, title, multiFrame, roots }`).
+- **The plugin imports the payload directly**: `ui/ui.ts` detects a `.tofig.json`
+  (drop/picker), re-embeds the `data:` images to bytes offline (`embedImages`), and
+  posts the same `import` message — so the sandbox build path is unchanged.
+
+`cli/page-capture.ts` deliberately mirrors `ui/capture.ts`'s detection/driving (the
+page is the render surface instead of an iframe, with no sandbox shims). The hard
+part — `htmlToFigma` extraction + font recovery — is the *same* `extractor.ts`.
 - **Gradients/effects** rely on builder.io emitting Figma-valid paints; verify in
   Figma and patch in the mapper if any paint shape is rejected.
 - **Frozen dependency** — `@builder.io/html-to-figma@0.0.3` is unmaintained. If we

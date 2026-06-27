@@ -110,7 +110,7 @@
 </div>
 
 <div id="drop">
-  <textarea id="html" placeholder="Paste self-contained HTML here, or drop an .html file…&#10;&#10;Inline CSS, data:/base64 images and inline <svg> all work. External URLs are not fetched (networkAccess: none)."></textarea>
+  <textarea id="html" placeholder="Paste self-contained HTML here, or drop an .html file…&#10;&#10;Inline CSS, data:/base64 images and inline <svg> all work. External URLs are not fetched (networkAccess: none).&#10;&#10;For exports that won't render here (live React apps, CDN deps), render them with `tofig-render` and drop the resulting .tofig.json."></textarea>
   <span class="hint">⌘/Ctrl + Enter</span>
 </div>
 
@@ -118,10 +118,10 @@
   <span class="muted">Render width</span>
   <input type="number" id="width" value="1440" min="320" max="3840" step="20" />
   <span class="muted">px</span>
-  <button id="pick" class="spacer" style="flex:0 0 auto">Choose .html…</button>
+  <button id="pick" class="spacer" style="flex:0 0 auto">Choose .html / .tofig.json…</button>
 </div>
 
-<input type="file" id="file" accept=".html,.htm,text/html" hidden />
+<input type="file" id="file" accept=".html,.htm,text/html,.json,application/json" hidden />
 
 <div class="status" id="status"></div>
 

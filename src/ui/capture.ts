@@ -439,7 +439,7 @@ function rasterize(url: string): Promise<Uint8Array | null> {
   });
 }
 
-async function embedImages(roots: LayerNode[]): Promise<void> {
+export async function embedImages(roots: LayerNode[]): Promise<void> {
   const jobs: Promise<void>[] = [];
   walkLayers(roots, (layer) => {
     for (const fill of imageFills(layer)) {
@@ -456,7 +456,7 @@ async function embedImages(roots: LayerNode[]): Promise<void> {
   await Promise.all(jobs);
 }
 
-function stripRefs(roots: LayerNode[]): void {
+export function stripRefs(roots: LayerNode[]): void {
   walkLayers(roots, (layer) => {
     delete layer.ref;
   });
