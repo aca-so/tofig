@@ -4,8 +4,9 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    // Generated build output and dependencies — never lint these.
-    ignores: ['code.js', 'ui.html', 'dist/', 'out/', 'lib/', 'node_modules/'],
+    // Generated build output, vendored third-party bundles, and dependencies —
+    // never lint these.
+    ignores: ['code.js', 'ui.html', 'dist/', 'out/', 'lib/', 'node_modules/', 'src/ui/vendor/'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

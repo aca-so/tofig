@@ -1,6 +1,6 @@
 {
   "name": "tofig",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Convert HTML (e.g. Claude designs) into native Figma designs or Slides",
   "license": "MIT",
   "scripts": {

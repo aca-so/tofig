@@ -77,13 +77,32 @@ async function buildExtractorSource() {
 }
 const extractorSrc = await buildExtractorSource();
 
+// React + ReactDOM (UMD, production) vendored and injected into the render iframe
+// for self-bootstrapping exports. Some Claude exports (the `dc-runtime`) fetch
+// React from a CDN, which Figma's `networkAccess: none` blocks; pre-defining
+// window.React/ReactDOM lets the runtime boot offline (its loader skips the CDN
+// when those globals already exist). Escape </script> so it can be inlined.
+async function buildReactSource() {
+  const [react, reactDom] = await Promise.all([
+    readFile("src/ui/vendor/react.umd.js", "utf8"),
+    readFile("src/ui/vendor/react-dom.umd.js", "utf8"),
+  ]);
+  // react first (react-dom references window.React), then react-dom.
+  return `${react}\n;${reactDom}`.replace(/<\/script>/gi, "<\\/script>");
+}
+const reactSrc = await buildReactSource();
+
 const codeOpts = { ...common, entryPoints: ["src/code.ts"], outfile: "code.js", format: "iife" };
 const uiOpts = {
   ...common,
   entryPoints: ["src/ui/ui.ts"],
   write: false,
   format: "iife",
-  define: { ...common.define, TOFIG_EXTRACTOR_SRC: JSON.stringify(extractorSrc) },
+  define: {
+    ...common.define,
+    TOFIG_EXTRACTOR_SRC: JSON.stringify(extractorSrc),
+    TOFIG_REACT_SRC: JSON.stringify(reactSrc),
+  },
 };
 
 if (watch) {
