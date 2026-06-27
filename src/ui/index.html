@@ -25,8 +25,15 @@
     gap: 10px;
     height: 100%;
   }
-  .head { display: flex; align-items: center; gap: 8px; }
+  .head { display: flex; align-items: baseline; gap: 6px; }
   .head h1 { font-size: 13px; margin: 0; font-weight: 600; }
+  .ver {
+    font: 9px ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--text-secondary);
+    opacity: .6;
+    cursor: default;
+    user-select: text;
+  }
   .badge {
     margin-left: auto;
     font-size: 10px;
@@ -98,6 +105,7 @@
 
 <div class="head">
   <h1>tofig</h1>
+  <span class="ver" id="ver" title="build"></span>
   <span class="badge" id="badge" data-target="design">Design</span>
 </div>
 

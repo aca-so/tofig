@@ -5,6 +5,10 @@ import { importDesign, importSlides } from "./engine/inject";
 
 declare const __html__: string;
 
+// Build identity (see esbuild.mjs). Logged so the sandbox bundle is identifiable
+// in the console alongside the UI's discreet version badge.
+console.log(`[tofig] sandbox v${TOFIG_VERSION} (built ${TOFIG_BUILD_TIME})`);
+
 const target: EditorTarget = figma.editorType === "slides" ? "slides" : "design";
 
 figma.showUI(__html__, { width: 440, height: 600, themeColors: true });

@@ -9,6 +9,7 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 
 const els = {
   badge: $("badge") as HTMLSpanElement,
+  ver: $("ver") as HTMLSpanElement,
   input: $("html") as HTMLTextAreaElement,
   drop: $("drop") as HTMLDivElement,
   file: $("file") as HTMLInputElement,
@@ -18,6 +19,12 @@ const els = {
   convert: $("convert") as HTMLButtonElement,
   status: $("status") as HTMLDivElement,
 };
+
+// Discreet build identity, read straight from this (the UI) bundle — if the
+// number here matches the latest build, you know Figma isn't serving a stale UI.
+els.ver.textContent = `v${TOFIG_VERSION}`;
+els.ver.title = `Built ${TOFIG_BUILD_TIME}`;
+console.log(`[tofig] UI v${TOFIG_VERSION} (built ${TOFIG_BUILD_TIME})`);
 
 let target: EditorTarget = "design";
 let renderWidth = 1440;

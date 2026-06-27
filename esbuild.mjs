@@ -3,15 +3,45 @@
 //   2. ui.html  — the UI iframe, a single self-contained HTML file with JS inlined
 import * as esbuild from "esbuild";
 import { readFile, writeFile } from "node:fs/promises";
+import { execSync } from "node:child_process";
 
 const watch = process.argv.includes("--watch");
+
+// Build identity, baked into both bundles via `define` and shown discreetly in
+// the UI. The semver comes from package.json; the git short SHA (+ "-dirty" when
+// the tree has uncommitted changes) makes every build uniquely identifiable, so
+// we can tell at a glance whether Figma is running a fresh build or a stale one.
+function gitRev() {
+  try {
+    const sha = execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+    let dirty = "";
+    try {
+      execSync("git diff --quiet && git diff --cached --quiet", { stdio: "ignore" });
+    } catch {
+      dirty = "-dirty";
+    }
+    return sha + dirty;
+  } catch {
+    return "nogit";
+  }
+}
+const pkg = JSON.parse(await readFile("package.json", "utf8"));
+const TOFIG_VERSION = `${pkg.version}+${gitRev()}`;
+const TOFIG_BUILD_TIME = new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC";
 
 const common = {
   bundle: true,
   target: "es2017",
   logLevel: "info",
-  define: { "process.env.NODE_ENV": '"production"' },
+  define: {
+    "process.env.NODE_ENV": '"production"',
+    TOFIG_VERSION: JSON.stringify(TOFIG_VERSION),
+    TOFIG_BUILD_TIME: JSON.stringify(TOFIG_BUILD_TIME),
+  },
 };
+console.log(`tofig version: ${TOFIG_VERSION} (built ${TOFIG_BUILD_TIME})`);
 
 const TEMPLATE = "src/ui/index.html";
 const PLACEHOLDER = "/*INLINE_SCRIPT*/";
