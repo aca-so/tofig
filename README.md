@@ -50,6 +50,26 @@ Try the bundled examples:
 - ❌ External URLs / assets behind `http(s)` — the plugin runs with
   `networkAccess: none`. Make your HTML self-contained (inline styles & images).
 
+## Exports that won't render in the plugin → the external renderer
+
+Some self-contained exports are really **live apps** — a Claude artifact that
+boots a React runtime, fetches React/Babel from a CDN, reads `localStorage`, etc.
+Figma's plugin sandbox blocks those (no network, `data:`-URL origin), so they
+can't render *inside* the plugin.
+
+For those, render them in a **real, unrestricted headless Chrome** outside Figma,
+then import the result. Same extractor, deterministic — just an unrestricted
+browser:
+
+```bash
+npm install                                   # installs puppeteer-core (uses your Chrome)
+npx tofig-render path/to/export.html          # → path/to/export.tofig.json
+# options: --target design|slides  --width 1440  --out file.tofig.json  --chrome /path/to/chrome
+```
+
+Then in the plugin: **drop the `.tofig.json`** (or "Choose…") — it imports
+directly, no in-plugin render. Requires a local Google Chrome / Chromium.
+
 ## Status
 
 🚧 Early development — APIs and structure may still change.
