@@ -40,6 +40,8 @@ export interface ImportMessage {
   title: string;
   /** one root per Design import (the page) or one root per slide */
   roots: LayerNode[];
+  /** Design only: lay out each root as its own frame (a multi-slide deck) */
+  multiFrame?: boolean;
 }
 
 export interface CancelMessage {

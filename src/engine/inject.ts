@@ -302,13 +302,24 @@ function fitInto(node: SceneNode, W: number, H: number): void {
 
 // --- public entry points ---------------------------------------------------
 
-/** Build a Design import: one wrapper frame holding the page, centered in view. */
+/**
+ * Build a Design import. Two layouts:
+ *  - default: one wrapper frame holding the page's layers, centered in view.
+ *  - multiFrame (a multi-slide deck): one top-level frame per slide, arranged in
+ *    a centered grid in slide order — the Figma-native "artboards side by side".
+ */
 export async function importDesign(
   figma: PluginAPI,
   roots: LayerNode[],
-  title: string
+  title: string,
+  multiFrame = false
 ): Promise<ImportResult> {
   const ctx = await makeCtx(figma);
+
+  if (multiFrame && roots.length) {
+    return importDeckFrames(figma, ctx, roots, title);
+  }
+
   const wrapper = figma.createFrame();
   wrapper.name = `tofig · ${title}`;
   wrapper.fills = [];
@@ -332,6 +343,50 @@ export async function importDesign(
   wrapper.y = Math.round(center.y - wrapper.height / 2);
   figma.currentPage.selection = [wrapper];
   return { nodes: [wrapper], fontsSubstituted: reportSubstitutions(ctx) };
+}
+
+/** One top-level frame per deck slide, laid out in a centered grid (slide order). */
+async function importDeckFrames(
+  figma: PluginAPI,
+  ctx: InjectCtx,
+  roots: LayerNode[],
+  title: string
+): Promise<ImportResult> {
+  const frames: SceneNode[] = [];
+  for (let i = 0; i < roots.length; i++) {
+    const root = roots[i];
+    const node = await buildLayer(ctx, root);
+    if (!node) continue;
+    if (root.fitTo) rescaleToFit(node, root.fitTo.w, root.fitTo.h);
+    try {
+      node.name = `${title} · ${i + 1}`;
+    } catch {
+      /* name may be read-only on some node types */
+    }
+    frames.push(node);
+  }
+  if (!frames.length) return { nodes: [], fontsSubstituted: reportSubstitutions(ctx) };
+
+  // Centered grid, roughly square, filled in slide order (row-major).
+  const GAP = 120;
+  const cols = Math.ceil(Math.sqrt(frames.length));
+  const cellW = Math.max(...frames.map((f) => f.width));
+  const cellH = Math.max(...frames.map((f) => f.height));
+  const rows = Math.ceil(frames.length / cols);
+  const totalW = cols * cellW + (cols - 1) * GAP;
+  const totalH = rows * cellH + (rows - 1) * GAP;
+  const center = figma.viewport.center;
+  const x0 = Math.round(center.x - totalW / 2);
+  const y0 = Math.round(center.y - totalH / 2);
+  frames.forEach((f, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    f.x = x0 + c * (cellW + GAP);
+    f.y = y0 + r * (cellH + GAP);
+  });
+
+  figma.currentPage.selection = frames;
+  return { nodes: frames, fontsSubstituted: reportSubstitutions(ctx) };
 }
 
 /** Build a Slides import: one SlideNode per root, content scaled to fit. */
