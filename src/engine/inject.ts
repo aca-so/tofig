@@ -320,8 +320,8 @@ export async function importDesign(
       wrapper.appendChild(node);
       setPos(node, root);
       // A deck-captured root carries the authored slide size: rescale its whole
-      // subtree down to fit so an oversized capture (e.g. a wide timeline laid
-      // out at authored width under `noscale`) shrinks instead of overflowing.
+      // subtree down to fit, as a safety net against any residual overflow (a
+      // no-op when the deck already rendered the slide at its authored size).
       if (root.fitTo) rescaleToFit(node, root.fitTo.w, root.fitTo.h);
     }
   }
