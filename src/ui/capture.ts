@@ -151,6 +151,70 @@ function injectExtractor(iframe: HTMLIFrameElement): ExtractFn {
   return win.__tofigExtract as ExtractFn;
 }
 
+// Some self-bootstrapping exports (Claude's `dc-runtime`) fetch React from a CDN
+// at boot. Figma's `networkAccess: none` blocks that, so they never render. We
+// inject vendored React/ReactDOM as the FIRST scripts so `window.React` and
+// `window.ReactDOM` already exist when the runtime checks — its loader then skips
+// the CDN and boots offline. Scoped to `__bundler` exports: a deck that bundles
+// its own React is unaffected (verified), and plain HTML doesn't need it. The
+// globals persist across the bundler's document `replaceWith` (set on window).
+function withReactRuntime(html: string): string {
+  if (!/__bundler/.test(html)) return html;
+  const tag = `<script>${TOFIG_REACT_SRC}</script>`;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => m + tag);
+  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => m + tag);
+  return tag + html;
+}
+
+// Claude's `dc-runtime` renders its component into <div id="dc-root">. Capture
+// that app element (not <body>, which is only a flex-centering wrapper) so the
+// import is the component itself, at its authored size. Returns null when there
+// is no rendered dc-runtime app.
+function findDcRoot(doc: Document): HTMLElement | null {
+  const root = doc.getElementById("dc-root");
+  if (!root) return null;
+  const el = (root.firstElementChild as HTMLElement) || root;
+  const r = el.getBoundingClientRect();
+  return r.width > 1 && r.height > 1 ? el : null;
+}
+
+// dc-runtime apps are responsive (they fill the iframe), and the author's intended
+// size lives in the component script's data-props ({"$preview":{width,height}}).
+// We render at that size to capture the intended layout (e.g. a 416×776 phone)
+// instead of a viewport-stretched one.
+function dcPreviewSize(doc: Document): { w: number; h: number } | null {
+  const el = doc.querySelector('script[type="text/x-dc"][data-props]');
+  if (!el) return null;
+  try {
+    const preview = JSON.parse(el.getAttribute("data-props") || "{}")["$preview"];
+    const w = Number(preview && preview.width);
+    const h = Number(preview && preview.height);
+    if (w > 1 && h > 1) return { w: Math.min(w, 8192), h: Math.min(h, 8192) };
+  } catch {
+    /* malformed props — fall back to the current viewport size */
+  }
+  return null;
+}
+
+// Render a dc-runtime app at its authored preview size, settle, and capture the
+// component (#dc-root's content). Used by both Design and Slides imports.
+async function captureDcApp(iframe: HTMLIFrameElement, extract: ExtractFn): Promise<LayerNode> {
+  const size = dcPreviewSize(iframe.contentDocument!);
+  if (size) {
+    iframe.style.width = `${size.w}px`;
+    iframe.style.height = `${size.h}px`;
+    try {
+      const win = iframe.contentWindow as any;
+      win.dispatchEvent(new win.Event("resize"));
+    } catch {
+      /* ignore */
+    }
+    await waitForRender(iframe, { maxMs: 6000, stableFrames: 2 });
+  }
+  const app = findDcRoot(iframe.contentDocument!) || iframe.contentDocument!.body;
+  return normalizeRoot(extract(app as HTMLElement));
+}
+
 async function renderHTML(
   html: string,
   width: number,
@@ -169,7 +233,7 @@ async function renderHTML(
 
   const doc = iframe.contentDocument!;
   doc.open();
-  doc.write(html);
+  doc.write(withReactRuntime(html));
   doc.close();
 
   await new Promise<void>((resolve) => {
@@ -393,6 +457,9 @@ export async function capture(
         // JS deck: drive it through every slide and capture each. importSlides'
         // fitInto() rescales each slide's subtree to the slide canvas as a safety net.
         roots = await captureDeckSlides(iframe, deck, extract);
+      } else if (findDcRoot(doc)) {
+        // dc-runtime app: render at its preview size and capture the component.
+        roots = [await captureDcApp(iframe, extract)];
       } else {
         // Static HTML: cascade split (markers -> sections -> body children -> whole).
         const slideEls = detectSlides(doc);
@@ -409,6 +476,10 @@ export async function capture(
       if (deck) {
         roots = await captureDeckSlides(iframe, deck, extract);
         multiFrame = true;
+      } else if (findDcRoot(doc)) {
+        // A dc-runtime app renders into #dc-root; capture that (the component) at
+        // its preview size, not <body> (a flex-centering wrapper around it).
+        roots = [await captureDcApp(iframe, extract)];
       } else {
         roots = extract(doc.body);
       }
