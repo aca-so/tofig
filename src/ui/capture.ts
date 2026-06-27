@@ -151,19 +151,28 @@ function injectExtractor(iframe: HTMLIFrameElement): ExtractFn {
   return win.__tofigExtract as ExtractFn;
 }
 
-// Some self-bootstrapping exports (Claude's `dc-runtime`) fetch React from a CDN
-// at boot. Figma's `networkAccess: none` blocks that, so they never render. We
-// inject vendored React/ReactDOM as the FIRST scripts so `window.React` and
-// `window.ReactDOM` already exist when the runtime checks — its loader then skips
-// the CDN and boots offline. Scoped to `__bundler` exports: a deck that bundles
-// its own React is unaffected (verified), and plain HTML doesn't need it. The
-// globals persist across the bundler's document `replaceWith` (set on window).
-function withReactRuntime(html: string): string {
-  if (!/__bundler/.test(html)) return html;
-  const tag = `<script>${TOFIG_REACT_SRC}</script>`;
-  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => m + tag);
-  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => m + tag);
-  return tag + html;
+// Figma renders the plugin UI from a data: URL (opaque origin), where
+// localStorage/sessionStorage THROW on access. Apps that read them during render
+// (a useTheme hook reading a saved theme, etc.) crash. Install an in-memory stub
+// when native storage is unreachable — capture needs no persistence. (Validated:
+// redefining the window property works even in a data: URL.) Inlined as a string
+// so it can be the very first script in the render iframe.
+const STORAGE_SHIM =
+  "(function(){function m(){var s=Object.create(null),a={getItem:function(k){k=String(k);return k in s?s[k]:null},setItem:function(k,v){s[String(k)]=String(v)},removeItem:function(k){delete s[String(k)]},clear:function(){s=Object.create(null)},key:function(i){return Object.keys(s)[i]||null}};Object.defineProperty(a,'length',{get:function(){return Object.keys(s).length}});return a}['localStorage','sessionStorage'].forEach(function(p){var ok=false;try{var x=window[p];if(x){x.getItem;ok=true}}catch(e){ok=false}if(!ok){try{Object.defineProperty(window,p,{value:m(),configurable:true})}catch(e){}}})})();";
+
+// Prepend a runtime prelude into the render iframe before anything else runs:
+//  - always a storage shim, so the data:-URL plugin sandbox doesn't crash apps
+//    that touch localStorage/sessionStorage (the shim no-ops in a normal browser);
+//  - React/ReactDOM for self-bootstrapping (`__bundler`) exports whose runtime
+//    fetches React from a CDN that Figma's networkAccess:none blocks.
+// The globals persist across the bundler's document `replaceWith` (set on window),
+// so the app boots offline. A deck that bundles its own React is unaffected.
+function withRuntimePrelude(html: string): string {
+  let prelude = `<script>${STORAGE_SHIM}</script>`;
+  if (/__bundler/.test(html)) prelude += `<script>${TOFIG_REACT_SRC}</script>`;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => m + prelude);
+  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => m + prelude);
+  return prelude + html;
 }
 
 // Claude's `dc-runtime` renders its component into <div id="dc-root">. Capture
@@ -233,7 +242,7 @@ async function renderHTML(
 
   const doc = iframe.contentDocument!;
   doc.open();
-  doc.write(withReactRuntime(html));
+  doc.write(withRuntimePrelude(html));
   doc.close();
 
   await new Promise<void>((resolve) => {
