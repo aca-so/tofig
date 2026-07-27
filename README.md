@@ -2,7 +2,7 @@
 
 > Export HTML and other formats — such as Claude-generated designs — to Figma.
 
-[![CI](https://github.com/tiagomoraes/tofig/actions/workflows/ci.yml/badge.svg)](https://github.com/tiagomoraes/tofig/actions/workflows/ci.yml)
+[![CI](https://github.com/aca-so/tofig/actions/workflows/ci.yml/badge.svg)](https://github.com/aca-so/tofig/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 Convert **self-contained HTML** (a Claude design, or any single `.html` file) into
@@ -70,6 +70,21 @@ npx tofig-render path/to/export.html          # → path/to/export.tofig.json
 Then in the plugin: **drop the `.tofig.json`** (or "Choose…") — it imports
 directly, no in-plugin render. Requires a local Google Chrome / Chromium.
 
+### Using the renderer without cloning the repo
+
+If you installed tofig from the Figma plugin list, you don't have this repo — the
+renderer is a separate Node CLI. Install it straight from GitHub:
+
+```bash
+npm install -g github:aca-so/tofig     # then: tofig-render export.html
+```
+
+Or run it one-off, without installing:
+
+```bash
+npx --package=github:aca-so/tofig tofig-render export.html
+```
+
 ## Status
 
 🚧 Early development — APIs and structure may still change.
@@ -85,11 +100,15 @@ Contributions are welcome! Please read the
 [Contributing Guide](./CONTRIBUTING.md) to learn about the branching model
 (Git Flow), commit conventions, and the pull request process.
 
-- 🐛 [Report a bug](https://github.com/tiagomoraes/tofig/issues/new/choose)
-- ✨ [Request a feature](https://github.com/tiagomoraes/tofig/issues/new/choose)
+- 🐛 [Report a bug](https://github.com/aca-so/tofig/issues/new/choose)
+- ✨ [Request a feature](https://github.com/aca-so/tofig/issues/new/choose)
 - 🔒 [Report a security issue](./SECURITY.md)
 
 ## License
 
-Distributed under the [MIT License](./LICENSE). Copyright © 2026 Tiago Moraes.
-Bundles `@builder.io/html-to-figma` (MIT).
+Distributed under the [MIT License](./LICENSE). Copyright © 2026 acaso.
+
+Third-party code, all MIT, with license headers preserved in the bundle:
+- [`@builder.io/html-to-figma`](https://github.com/BuilderIO/html-to-figma) — style/geometry extraction.
+- **React** and **ReactDOM** (production UMD builds, vendored in `src/ui/vendor/`) —
+  injected into the render iframe so React-based exports can boot.
