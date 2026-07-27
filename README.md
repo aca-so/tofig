@@ -73,17 +73,21 @@ directly, no in-plugin render. Requires a local Google Chrome / Chromium.
 ### Using the renderer without cloning the repo
 
 If you installed tofig from the Figma plugin list, you don't have this repo — the
-renderer is a separate Node CLI. Install it straight from GitHub:
+renderer is published separately as [`@aca-so/tofig`](https://www.npmjs.com/package/@aca-so/tofig):
 
 ```bash
-npm install -g github:aca-so/tofig     # then: tofig-render export.html
+npm install -g @aca-so/tofig            # then: tofig-render export.html
 ```
 
 Or run it one-off, without installing:
 
 ```bash
-npx --package=github:aca-so/tofig tofig-render export.html
+npx --package=@aca-so/tofig tofig-render export.html
 ```
+
+The `--package` flag is needed because the binary (`tofig-render`) is named
+differently from the package. Installing straight from source also works:
+`npm install -g github:aca-so/tofig`.
 
 ## Status
 

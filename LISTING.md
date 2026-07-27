@@ -65,7 +65,7 @@ Babel from a CDN, or touch localStorage. Figma's plugin sandbox blocks all of th
 so those can't render inside the plugin. For them, render on your own machine with
 the companion CLI and import the result:
 
-  npx --package=github:aca-so/tofig tofig-render export.html
+  npx --package=@aca-so/tofig tofig-render export.html
 
 That writes an export.tofig.json — drop it into the plugin and it imports directly.
 Still fully local (it drives your own Chrome); it just isn't sandbox-restricted.
@@ -117,7 +117,7 @@ React ou Babel de uma CDN, ou usam localStorage. O sandbox de plugins do Figma
 bloqueia tudo isso, então esses casos não renderizam dentro do plugin. Para eles,
 renderize na sua máquina com a CLI complementar e importe o resultado:
 
-  npx --package=github:aca-so/tofig tofig-render export.html
+  npx --package=@aca-so/tofig tofig-render export.html
 
 Isso gera um export.tofig.json — arraste esse arquivo para o plugin e ele importa
 direto. Continua 100% local (usa o seu próprio Chrome), só não fica limitado pelo
