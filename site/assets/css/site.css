@@ -1,0 +1,701 @@
+/* ──────────────────────────────────────────────────────────────────
+   tofig.aca.so — site styles
+   ────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking);
+  color: var(--fg-secondary);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg { display: block; max-width: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+::selection { background: var(--brand-tint); color: var(--neutral-950); }
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-3);
+  z-index: var(--z-toast);
+  padding: var(--space-3) var(--space-5);
+  background: var(--neutral-950);
+  color: var(--neutral-0);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip:focus { left: var(--space-4); }
+
+/* ─────────────────────────── Typography ─────────────────────────── */
+
+h1, h2, h3, h4 {
+  margin: 0;
+  color: var(--fg-primary);
+  letter-spacing: var(--tracking);
+  text-wrap: balance;
+}
+
+.display {
+  font-size: clamp(2.75rem, 8.5vw, 6rem);
+  font-weight: 200;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+.display em {
+  font-style: normal;
+  font-weight: 500;
+}
+
+h2 {
+  font-size: clamp(1.75rem, 3.4vw, 2rem);
+  font-weight: 600;
+  line-height: var(--leading-heading);
+}
+
+h3 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: var(--leading-display);
+}
+
+p { margin: 0; text-wrap: pretty; }
+
+.lede {
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+  max-width: 54ch;
+}
+
+.label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--fg-primary);
+}
+
+/* Syntropic sets captions at weight 300 / neutral-600. Both are raised here:
+   600 on paper is 4.48:1, under the 4.5 floor for 12px, and 300 at this size
+   renders too thin to read comfortably. Accessibility wins over fidelity. */
+.caption {
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--fg-secondary);
+}
+
+a { color: var(--brand-600); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { color: var(--brand-700); }
+
+code, kbd, pre { font-family: var(--font-mono); letter-spacing: 0; }
+
+code:not(pre code) {
+  font-size: 0.875em;
+  background: var(--neutral-100);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0.1em 0.36em;
+  color: var(--neutral-850);
+}
+
+/* ───────────────────────────── Layout ───────────────────────────── */
+
+.wrap {
+  width: 100%;
+  max-width: var(--content);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+section { padding-block: var(--space-11); }
+section.tight  { padding-block: var(--space-9); }
+section.roomy  { padding-block: var(--space-13); }
+section.banded { background: var(--bg-section); border-block: 1px solid var(--border-subtle); }
+
+.stack   { display: flex; flex-direction: column; }
+.gap-2 { gap: var(--space-2); } .gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); } .gap-6 { gap: var(--space-6); }
+.gap-7 { gap: var(--space-7); } .gap-9 { gap: var(--space-9); }
+
+.head { max-width: 60ch; margin-bottom: var(--space-9); }
+.head h2 + p { margin-top: var(--space-4); }
+
+/* Grid and flex children default to min-width:auto, so one non-wrapping
+   <pre> widens its whole track past the viewport and the code block's
+   overflow-x never engages. This is what made every page scroll at 390px. */
+.split > *, .docs > *, .stack > *, .hero__grid > *, .def > * { min-width: 0; }
+.code, .tbl-scroll { max-width: 100%; }
+
+/* ───────────────────────────── Nav ──────────────────────────────── */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: color-mix(in srgb, var(--neutral-0) 88%, transparent);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-fast) var(--ease),
+              background   var(--dur-fast) var(--ease);
+}
+@supports (backdrop-filter: blur(8px)) {
+  .nav { backdrop-filter: blur(10px) saturate(1.4); }
+}
+.nav.is-stuck { border-bottom-color: var(--border-subtle); }
+
+.nav__in {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  height: 60px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: var(--fg-primary);
+  flex: none;
+}
+.brand__mark { width: 22px; height: 22px; flex: none; }
+.brand__sep {
+  width: 1px; height: 18px;
+  background: var(--border-default);
+  transform: rotate(15deg);
+}
+/* The wordmark device: `to` light, `fig` heavier — carried over from the
+   plugin's own mark rather than invented here. */
+.brand__word {
+  font-size: var(--text-lg);
+  letter-spacing: -0.04em;
+  color: var(--fg-primary);
+}
+.brand__word b { font-weight: 500; }
+.brand__word span { font-weight: 200; }
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-left: auto;
+  list-style: none;
+  margin-block: 0;
+  padding: 0;
+}
+.nav__links a {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--fg-secondary);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+.nav__links a:hover { color: var(--fg-primary); }
+.nav__links a[aria-current="page"] { color: var(--fg-primary); font-weight: 600; }
+
+.lang {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 2px;
+  gap: 2px;
+}
+.lang a {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  color: var(--fg-tertiary);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.lang a:hover { color: var(--fg-primary); }
+.lang a[aria-current="true"] { background: var(--neutral-950); color: var(--neutral-0); }
+
+@media (max-width: 720px) {
+  /* Six links don't fit at 390px. Drop the two same-page anchors — the
+     sections are a scroll away and both are repeated in the footer. */
+  .nav__links > li:nth-child(1),
+  .nav__links > li:nth-child(2) { display: none; }
+  .nav__links { gap: var(--space-4); }
+  .nav__in { gap: var(--space-3); }
+  .brand__word { font-size: var(--text-md); }
+  .wrap { padding-inline: var(--space-5); }
+}
+
+/* ─────────────────────────── Buttons ────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
+}
+.btn--primary { background: var(--brand-600); color: var(--fg-on-brand); }
+.btn--primary:hover  { background: var(--brand-700); color: var(--fg-on-brand); }
+.btn--primary:active { background: var(--brand-800); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--fg-primary);
+  border-color: var(--border-default);
+}
+.btn--ghost:hover { background: var(--neutral-100); color: var(--fg-primary); }
+
+.btn--onDark {
+  background: var(--neutral-0);
+  color: var(--neutral-950);
+}
+.btn--onDark:hover { background: var(--neutral-300); color: var(--neutral-950); }
+
+.btn--sm { padding: 6px var(--space-4); font-size: var(--text-xs); }
+
+/* ──────────────────────────── Hero ──────────────────────────────── */
+
+/* Single column: the display type needs the full measure to land, and the
+   demo needs the full content width to stop looking like a thumbnail. */
+.hero { padding-block: var(--space-12) var(--space-8); }
+.hero__grid { display: grid; gap: var(--space-9); max-width: 54rem; }
+.hero .display { margin-bottom: var(--space-6); }
+.hero-demo { padding-bottom: var(--space-12); }
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+.hero__note {
+  margin-top: var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+.hero__note span { display: inline-flex; align-items: center; gap: 6px; }
+.hero__note i { color: var(--brand-500); font-size: 14px; }
+
+/* ══════════════════ SIGNATURE — the decomposition ══════════════════
+   One rendered HTML card. Activate it and the render peels back to show
+   what tofig actually emits: every element outlined as a named Figma
+   node, with the layer tree assembling alongside.
+   Default state is the fully-rendered design — nothing is gated. */
+
+.demo {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--neutral-0);
+  overflow: hidden;
+}
+
+.demo__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--neutral-50);
+}
+.demo__dots { display: flex; gap: 6px; }
+.demo__dots i {
+  width: 9px; height: 9px; border-radius: var(--radius-full);
+  background: var(--neutral-400);
+}
+.demo__file {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+  color: var(--fg-secondary);
+}
+.demo__toggle { margin-left: auto; }
+
+.demo__stage {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 400px;
+}
+
+.demo__canvas {
+  position: relative;
+  padding: var(--space-10) var(--space-7);
+  display: grid;
+  place-items: center;
+  background-color: var(--neutral-100);
+  /* Figma's canvas grid, quietly */
+  background-image:
+    linear-gradient(to right,  var(--neutral-200) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--neutral-200) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* The specimen being converted */
+.spec {
+  position: relative;
+  width: min(380px, 100%);
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+.spec__row { display: flex; align-items: center; gap: var(--space-3); }
+.spec__av {
+  width: 40px; height: 40px; flex: none;
+  border-radius: var(--radius-full);
+  background: var(--brand-400);
+  display: grid; place-items: center;
+  color: #fff; font-weight: 600; font-size: var(--text-sm);
+}
+.spec__name { font-weight: 600; color: var(--fg-primary); font-size: var(--text-sm); }
+.spec__role { font-size: var(--text-xs); color: var(--fg-secondary); font-weight: 400; }
+.spec__bars { display: flex; flex-direction: column; gap: var(--space-2); }
+.spec__bar { height: 8px; border-radius: var(--radius-xs); background: var(--neutral-200); }
+.spec__bar:nth-child(2) { width: 82%; }
+.spec__bar:nth-child(3) { width: 56%; }
+.spec__cta {
+  padding: 8px var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--brand-600);
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Node outlines — present but invisible until converted, so toggling
+   costs no layout and never reflows the specimen. */
+[data-node] {
+  outline: 1.5px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color var(--dur-mid) var(--ease);
+}
+[data-node]::after {
+  content: attr(data-node);
+  position: absolute;
+  top: -8px;
+  left: -2px;
+  transform: translateY(-2px);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: var(--brand-600);
+  color: #fff;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-mid) var(--ease),
+              transform var(--dur-mid) var(--ease);
+}
+.spec [data-node] { position: relative; }
+
+.demo.is-converted [data-node] { outline-color: var(--brand-500); }
+
+/* Fan the badges out so no two share a band. */
+.spec__av[data-node]::after   { top: auto; bottom: -8px; left: -2px; }
+.spec__name[data-node]::after { top: 50%; left: auto; right: -2px;
+                                transform: translate(100%, -50%); }
+.demo.is-converted .spec__name[data-node]::after { transform: translate(calc(100% + 6px), -50%); }
+.demo.is-converted [data-node]::after {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* Layer tree — Figma's own idiom */
+.demo__panel {
+  border-top: 1px solid var(--border-subtle);
+  background: var(--neutral-0);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.demo__panel h4 {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--neutral-700);
+  margin-bottom: var(--space-3);
+}
+.tree { list-style: none; margin: 0; padding: 0; font-size: var(--text-xs); }
+.tree li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 5px var(--space-2);
+  border-radius: var(--radius-xs);
+  color: var(--fg-secondary);
+  opacity: 0.45;
+  transition: opacity var(--dur-mid) var(--ease),
+              background var(--dur-mid) var(--ease),
+              color var(--dur-mid) var(--ease);
+}
+.tree li i { font-size: 13px; color: var(--fg-muted); flex: none; }
+.tree .indent-1 { padding-left: var(--space-5); }
+.tree .indent-2 { padding-left: var(--space-8); }
+.demo.is-converted .tree li {
+  opacity: 1;
+  color: var(--fg-secondary);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+.demo.is-converted .tree li i { color: var(--brand-500); }
+.demo.is-converted .tree li.is-sel { background: var(--brand-tint); color: var(--neutral-950); }
+
+.demo__status {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--border-subtle);
+}
+
+@media (min-width: 900px) {
+  .demo__stage { grid-template-columns: 1fr 264px; }
+  .demo__panel { border-top: 0; border-left: 1px solid var(--border-subtle); }
+}
+
+/* ──────────────────────────── Steps ─────────────────────────────── */
+/* Numbered because this genuinely is a sequence — three ordered actions
+   a person performs. Not decoration. */
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-7); counter-reset: s; }
+@media (min-width: 800px) { .steps { grid-template-columns: repeat(3, 1fr); gap: var(--space-9); } }
+
+.steps li { counter-increment: s; display: flex; flex-direction: column; gap: var(--space-3); }
+.steps li::before {
+  content: counter(s, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+  color: var(--brand-500);
+  font-weight: 500;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.steps h3 { font-size: var(--text-lg); }
+
+/* ──────────────────────── Capability list ───────────────────────── */
+/* A definition list, not a card grid — the content is term→detail. */
+
+.defs { display: grid; gap: 0; margin: 0; }
+@media (min-width: 760px) { .defs { grid-template-columns: 1fr 1fr; column-gap: var(--space-10); } }
+
+.def {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: var(--space-4);
+  padding-block: var(--space-6);
+  border-top: 1px solid var(--border-subtle);
+  align-items: start;
+}
+.def i { font-size: 20px; color: var(--brand-500); line-height: 1.2; }
+.def dt { font-weight: 600; color: var(--fg-primary); font-size: var(--text-md); }
+.def dd { margin: var(--space-2) 0 0; font-size: var(--text-sm); color: var(--fg-secondary); }
+.def__body { min-width: 0; }
+
+/* ───────────────────────── Split / cards ────────────────────────── */
+
+.split { display: grid; gap: var(--space-7); }
+@media (min-width: 900px) { .split { grid-template-columns: 1fr 1fr; gap: var(--space-9); } }
+
+/* Syntropic: border OR shadow, never both. Border form. */
+.card {
+  background: var(--neutral-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-7);
+}
+.card h3 { margin-bottom: var(--space-3); }
+.card--target { display: flex; flex-direction: column; gap: var(--space-4); }
+.card__chip {
+  align-self: flex-start;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-tint);
+  color: var(--brand-800);
+  border: 1px solid var(--border-brand);
+}
+
+/* ───────────────────────────── Code ─────────────────────────────── */
+
+.code {
+  position: relative;
+  background: var(--neutral-950);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  overflow-x: auto;
+}
+.code pre { margin: 0; }
+.code code {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--neutral-300);
+  white-space: pre;
+}
+.code .c-dim { color: var(--neutral-500); }
+.code .c-fn  { color: var(--brand-400); }
+.code .c-str { color: #8fd4a8; }
+
+.copy {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: var(--neutral-300);
+  border-radius: var(--radius-sm);
+  padding: 4px 9px;
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.copy:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.copy[data-copied="true"] { background: var(--success-500); border-color: var(--success-500); color: #fff; }
+
+/* ───────────────────── Inverse band (install) ───────────────────── */
+/* Syntropic's documented dark-hero device: pure black, violet interior. */
+
+.inverse {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+  border-block: 0;
+}
+.inverse h2 { color: var(--neutral-0); }
+.inverse .lede { color: var(--neutral-400); }
+.inverse .caption { color: var(--neutral-500); }
+.inverse .card {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.12);
+}
+.inverse .card h3 { color: var(--neutral-0); }
+.inverse .code { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); }
+.inverse a:not(.btn) { color: var(--brand-400); }
+.inverse a:not(.btn):hover { color: var(--brand-300); }
+
+/* ──────────────────────────── Notice ────────────────────────────── */
+
+.notice {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--warning-100);
+  border: 1px solid #f0d29a;
+  color: #6b430c;
+}
+.notice i { color: var(--warning-700); font-size: 18px; }
+.notice strong { color: #58370a; }
+.notice p { color: #6b430c; font-size: var(--text-sm); }
+
+/* ──────────────────────────── Footer ────────────────────────────── */
+
+.foot {
+  border-top: 1px solid var(--border-subtle);
+  padding-block: var(--space-9);
+  background: var(--neutral-0);
+}
+.foot__in { display: flex; flex-wrap: wrap; gap: var(--space-7); align-items: flex-start; }
+.foot__links { display: flex; flex-wrap: wrap; gap: var(--space-7); margin-left: auto; }
+.foot__col { display: flex; flex-direction: column; gap: var(--space-2); }
+.foot__col h4 {
+  font-size: var(--text-2xs); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--neutral-700); margin-bottom: var(--space-1);
+}
+.foot__col a { font-size: var(--text-sm); color: var(--fg-secondary); text-decoration: none; }
+.foot__col a:hover { color: var(--fg-primary); text-decoration: underline; }
+.foot__legal { font-size: var(--text-xs); color: var(--fg-secondary); font-weight: 400; line-height:1.5; }
+
+/* ───────────────────────────── Docs ─────────────────────────────── */
+
+.docs { display: grid; gap: var(--space-9); align-items: start; }
+@media (min-width: 960px) { .docs { grid-template-columns: 216px 1fr; gap: var(--space-11); } }
+
+.toc { position: sticky; top: 84px; }
+.toc h4 {
+  font-size: var(--text-2xs); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--neutral-700); margin: 0 0 var(--space-3);
+}
+.toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.toc a {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--fg-secondary);
+  text-decoration: none;
+  padding: 6px var(--space-3);
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.toc a:hover { background: var(--neutral-100); color: var(--fg-primary); }
+.toc a.is-active { background: var(--brand-tint); color: var(--brand-800); font-weight: 600; }
+
+.prose { max-width: var(--measure); }
+.prose > * + * { margin-top: var(--space-5); }
+.prose h2 { margin-top: var(--space-11); scroll-margin-top: 84px; }
+.prose h2:first-child { margin-top: 0; }
+.prose h3 { margin-top: var(--space-8); scroll-margin-top: 84px; }
+.prose ul, .prose ol { margin: 0; padding-left: var(--space-6); }
+.prose li + li { margin-top: var(--space-2); }
+.prose .code { margin-top: var(--space-5); }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.tbl th, .tbl td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+.tbl th { font-weight: 600; color: var(--fg-primary); font-size: var(--text-xs); }
+.tbl td code { white-space: nowrap; }
+.tbl-scroll { overflow-x: auto; }
+
+/* ───────────────────── Reveal (enhancement only) ────────────────── */
+/* Sections are visible by default. JS adds .reveal-ready only when it
+   runs, so a headless render or a failed script still shows the page. */
+
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+}
+.reveal-ready [data-reveal].is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
+}

@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tofig — paste HTML, get editable Figma layers</title>
+<meta name="description" content="tofig converts self-contained HTML, including Claude designs, into native editable Figma layers. Frames in a Design file, slides in a Slides file. Runs entirely locally.">
+<link rel="canonical" href="https://tofig.aca.so/">
+<link rel="alternate" hreflang="en" href="https://tofig.aca.so/">
+<link rel="alternate" hreflang="pt-BR" href="https://tofig.aca.so/pt/">
+<link rel="alternate" hreflang="x-default" href="https://tofig.aca.so/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tofig.aca.so/">
+<meta property="og:title" content="tofig — paste HTML, get editable Figma layers">
+<meta property="og:description" content="Convert self-contained HTML into native, editable Figma layers. Frames or Slides. 100% local.">
+<meta property="og:image" content="https://tofig.aca.so/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FEFEFE">
+
+<link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" data-nav>
+  <div class="wrap nav__in">
+    <a class="brand" href="/" aria-label="tofig, by acaso">
+      <svg class="brand__mark" viewBox="0 0 250 250" aria-hidden="true" focusable="false">
+        <path fill="#6C03FA" d="M151.288,162.752c0,1.625-.059,3.249-.207,4.815-7.474,4.49-16.217,7.09-25.582,7.09-27.443,0-49.686-22.244-49.686-49.686,0-9.571,2.718-18.492,7.385-26.084,1.359-.089,2.718-.148,4.077-.148,35.389,0,64.013,28.683,64.013,64.013ZM210.9,125c0-24.016-8.271-44.192-24.843-60.557-16.572-16.336-36.748-24.518-60.557-24.518s-43.985,8.183-60.557,24.518c-16.572,16.336-24.843,36.511-24.843,60.557s8.271,44.221,24.843,60.557c16.542,16.336,36.748,24.518,60.557,24.518s43.985-8.183,60.557-24.518c16.572-16.365,24.843-36.541,24.843-60.557ZM61.546,125c0-17.96,6.174-33.173,18.522-45.61s27.472-18.669,45.462-18.669,33.114,6.233,45.462,18.669c12.348,12.436,18.522,27.649,18.522,45.61s-6.174,33.173-18.522,45.61c-12.348,12.436-27.502,18.669-45.462,18.669s-33.114-6.233-45.462-18.669c-12.348-12.436-18.522-27.649-18.522-45.61h0ZM135.366,76.318c-.916,2.924-1.418,6.026-1.418,9.216,0,16.897,13.707,30.603,30.603,30.603,3.338,0,6.528-.532,9.541-1.507h0c-4.077-19.319-19.378-34.444-38.727-38.313Z"/>
+      </svg>
+      <span class="brand__sep" aria-hidden="true"></span>
+      <span class="brand__word"><span>to</span><b>fig</b></span>
+    </a>
+
+    <ul class="nav__links">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#renderer">Renderer</a></li>
+      <li><a href="/docs.html">Docs</a></li>
+      <li><a href="https://github.com/aca-so/tofig">GitHub</a></li>
+      <li>
+        <nav class="lang" aria-label="Language">
+          <a href="/" aria-current="true" hreflang="en">EN</a>
+          <a href="/pt/" hreflang="pt-BR">PT</a>
+        </nav>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ───────────────────────── Hero ───────────────────────── -->
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div>
+        <h1 class="display">Paste&nbsp;HTML.<br>Get <em>Figma layers</em>.</h1>
+        <p class="lede">
+          tofig rebuilds self-contained HTML as native Figma nodes — real frames,
+          live text, editable vectors. Not a screenshot. Open it in a Design file
+          and you get frames; open it in Slides and you get slides.
+        </p>
+
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#install">
+            Install the plugin <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
+          </a>
+          <a class="btn btn--ghost" href="/docs.html">Read the docs</a>
+        </div>
+
+        <p class="hero__note caption">
+          <span><i class="ph-bold ph-shield-check" aria-hidden="true"></i> No network access</span>
+          <span><i class="ph-bold ph-scales" aria-hidden="true"></i> MIT licensed</span>
+          <span><i class="ph-bold ph-git-branch" aria-hidden="true"></i> Open source</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signature: the decomposition. Full content width — at hero-column
+       width it read as a thumbnail rather than the point of the page. -->
+  <div class="hero-demo">
+    <div class="wrap">
+      <figure class="demo" data-demo style="margin:0">
+        <div class="demo__bar">
+          <span class="demo__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="demo__file">profile-card.html</span>
+          <button class="btn btn--primary btn--sm demo__toggle"
+                  data-demo-toggle
+                  data-label-off="Convert"
+                  data-label-on="Show HTML"
+                  aria-pressed="false">Convert</button>
+        </div>
+
+        <div class="demo__stage">
+          <div class="demo__canvas">
+            <article class="spec" data-node="Frame · profile-card">
+              <div class="spec__row" data-node="Row">
+                <div class="spec__av" data-node="Ellipse" aria-hidden="true">AM</div>
+                <div>
+                  <div class="spec__name" data-node="Text">Ana Moreira</div>
+                  <div class="spec__role">Staff Product Designer</div>
+                </div>
+              </div>
+              <div class="spec__bars" data-node="Stack">
+                <div class="spec__bar"></div>
+                <div class="spec__bar"></div>
+                <div class="spec__bar"></div>
+              </div>
+              <div class="spec__cta" data-node="Button">View profile</div>
+            </article>
+          </div>
+
+          <aside class="demo__panel">
+            <h4>Layers</h4>
+            <ul class="tree">
+              <li class="is-sel"><i class="ph-bold ph-frame-corners" aria-hidden="true"></i> profile-card</li>
+              <li class="indent-1"><i class="ph-bold ph-rows" aria-hidden="true"></i> Row</li>
+              <li class="indent-2"><i class="ph-bold ph-circle" aria-hidden="true"></i> Ellipse</li>
+              <li class="indent-2"><i class="ph-bold ph-text-t" aria-hidden="true"></i> Ana Moreira</li>
+              <li class="indent-1"><i class="ph-bold ph-stack-simple" aria-hidden="true"></i> Stack</li>
+              <li class="indent-1"><i class="ph-bold ph-rectangle" aria-hidden="true"></i> Button</li>
+            </ul>
+            <p class="caption demo__status"
+               data-demo-status
+               data-note-off="Rendered HTML, before conversion."
+               data-note-on="6 nodes · text stays editable">Rendered HTML, before conversion.</p>
+          </aside>
+        </div>
+        <figcaption class="caption" style="padding: var(--space-3) var(--space-4); border-top:1px solid var(--border-subtle)">
+          An illustration of the output structure, not a live Figma session.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ─────────────────────── How it works ─────────────────────── -->
+  <section id="how" class="banded" data-reveal>
+    <div class="wrap">
+      <div class="head">
+        <h2>Three steps, no account</h2>
+        <p class="lede">The plugin UI is a real browser. It renders your HTML in a hidden
+        iframe, reads the computed styles and geometry, and rebuilds each element as a
+        native node.</p>
+      </div>
+
+      <ol class="steps">
+        <li>
+          <h3>Open tofig</h3>
+          <p>In a Figma Design file or a Figma Slides file. tofig reads
+          <code>figma.editorType</code> and targets the right output automatically.</p>
+        </li>
+        <li>
+          <h3>Paste or drop</h3>
+          <p>Paste markup straight in, or drop a single <code>.html</code> file.
+          Inline CSS, <code>data:</code> images and inline SVG all come along.</p>
+        </li>
+        <li>
+          <h3>Convert</h3>
+          <p>You get frames, text you can retype, vectors you can reshape, image
+          fills, gradients, strokes and corner radii.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ───────────────────── Design or Slides ───────────────────── -->
+  <section data-reveal>
+    <div class="wrap">
+      <div class="head">
+        <h2>One plugin, two destinations</h2>
+        <p class="lede">Where you run it decides what comes out. There's no mode to pick.</p>
+      </div>
+
+      <div class="split">
+        <div class="card card--target">
+          <span class="card__chip">Design file</span>
+          <h3>Frames on the canvas</h3>
+          <p>Each captured root becomes its own frame, clipped to its bounds so an
+          overflowing child stays inside the artboard instead of hanging behind it.
+          A multi-section deck arrives as one frame per section.</p>
+        </div>
+        <div class="card card--target">
+          <span class="card__chip">Slides file</span>
+          <h3>Real Figma slides</h3>
+          <p>tofig detects decks — including JavaScript-driven ones — and imports each
+          slide as its own Figma slide, sized and scaled to fit rather than clipped.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────── What it rebuilds ────────────────────── -->
+  <section class="banded" data-reveal>
+    <div class="wrap">
+      <div class="head">
+        <h2>What survives the trip</h2>
+        <p class="lede">And, just as importantly, what doesn't. These limits are real —
+        knowing them up front is cheaper than discovering them at 2am.</p>
+      </div>
+
+      <dl class="defs">
+        <div class="def">
+          <i class="ph-bold ph-text-aa" aria-hidden="true"></i>
+          <div class="def__body">
+            <dt>Text stays text</dt>
+            <dd>Retype it, restyle it, rewrap it. Typography maps to the nearest
+            available weight and style in your Figma fonts.</dd>
+          </div>
+        </div>
+        <div class="def">
+          <i class="ph-bold ph-bezier-curve" aria-hidden="true"></i>
+          <div class="def__body">
+            <dt>Inline SVG becomes vectors</dt>
+            <dd>Editable paths on the canvas, not a flattened raster.</dd>
+          </div>
+        </div>
+        <div class="def">
+          <i class="ph-bold ph-paint-bucket" aria-hidden="true"></i>
+          <div class="def__body">
+            <dt>Fills, gradients, strokes, radii</dt>
+            <dd>Rebuilt as native Figma paints and properties.</dd>
+          </div>
+        </div>
+        <div class="def">
+          <i class="ph-bold ph-warning-circle" aria-hidden="true"></i>
+          <div class="def__body">
+            <dt>Missing fonts are substituted</dt>
+            <dd>If a font isn't in your Figma, text falls back to the nearest match,
+            then Inter — and tofig reports exactly what changed.</dd>
+          </div>
+        </div>
+        <div class="def">
+          <i class="ph-bold ph-frame-corners" aria-hidden="true"></i>
+          <div class="def__body">
+            <dt>Layout is absolutely positioned</dt>
+            <dd>Chosen for visual fidelity. Auto-layout is on the roadmap; today you
+            get pixel-accurate placement, not responsive constraints.</dd>
+          </div>
+        </div>
+        <div class="def">
+          <i class="ph-bold ph-cloud-slash" aria-hidden="true"></i>
+          <div class="def__body">
+            <dt>External URLs are never fetched</dt>
+            <dd>The plugin declares <code>networkAccess: none</code>. Make your HTML
+            self-contained: inline styles, <code>data:</code> images, inline SVG.</dd>
+          </div>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ──────────────────── The external renderer ──────────────────── -->
+  <section id="renderer" data-reveal>
+    <div class="wrap">
+      <div class="head">
+        <h2>When an export won't render</h2>
+        <p class="lede">Some files called "HTML" are really live apps. They boot a React
+        runtime, pull React or Babel from a CDN, or reach for <code>localStorage</code>.
+        Figma's plugin sandbox blocks all of that, so they can't render inside the plugin.</p>
+      </div>
+
+      <div class="split">
+        <div class="stack gap-6">
+          <div class="notice">
+            <i class="ph-bold ph-plugs" aria-hidden="true"></i>
+            <div>
+              <strong>This is a sandbox limit, not a bug.</strong>
+              <p>No network and a <code>data:</code>-URL origin are exactly what make the
+              plugin safe to run on untrusted markup. The workaround keeps that property.</p>
+            </div>
+          </div>
+          <p>Render the file in a real, unrestricted Chrome on your own machine, then
+          import the result. Same extractor, same output — just a browser without the
+          sandbox. Drop the resulting <code>.tofig.json</code> into the plugin and it
+          imports directly.</p>
+          <p class="caption">Requires a local Google Chrome or Chromium. Still fully
+          local — nothing is uploaded.</p>
+        </div>
+
+        <div class="stack gap-4">
+          <div class="code">
+            <button class="copy" data-copy="cmd-render" data-copied-label="Copied">Copy</button>
+            <pre><code id="cmd-render"><span class="c-dim"># one-off, no install</span>
+npx --package=@aca-so/tofig <span class="c-fn">tofig-render</span> export.html
+
+<span class="c-dim"># or install it</span>
+npm install -g @aca-so/tofig
+<span class="c-fn">tofig-render</span> export.html --target slides</code></pre>
+          </div>
+          <p class="caption">Writes <code>export.tofig.json</code> next to the input.
+          <code>--package=</code> is needed because the binary is named differently
+          from the package.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── Install ─────────────────────────── -->
+  <section id="install" class="inverse roomy" data-reveal>
+    <div class="wrap">
+      <div class="head">
+        <h2>Install tofig</h2>
+        <p class="lede">The plugin is published to the acaso organization in Figma. The
+        renderer is a separate, optional CLI.</p>
+      </div>
+
+      <div class="split">
+        <div class="card">
+          <h3>Figma plugin</h3>
+          <p style="margin-top:var(--space-3); color:var(--neutral-400)">
+            Open any Design or Slides file, then find tofig under your organization's
+            plugins. Building from source works too — clone the repo, run
+            <code style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:var(--neutral-300)">npm&nbsp;run&nbsp;build</code>,
+            and import the manifest.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--onDark" href="https://github.com/aca-so/tofig">
+              <i class="ph-bold ph-github-logo" aria-hidden="true"></i> View the source
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Renderer CLI</h3>
+          <div class="code" style="margin-top:var(--space-4)">
+            <button class="copy" data-copy="cmd-install" data-copied-label="Copied">Copy</button>
+            <pre><code id="cmd-install">npm install -g @aca-so/tofig</code></pre>
+          </div>
+          <p class="caption" style="margin-top:var(--space-4)">
+            Published as
+            <a href="https://www.npmjs.com/package/@aca-so/tofig">@aca-so/tofig</a>.
+            Only needed for exports the plugin sandbox can't run.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div class="stack gap-3">
+      <a class="brand" href="/" aria-label="tofig, by acaso">
+        <svg class="brand__mark" viewBox="0 0 250 250" aria-hidden="true" focusable="false">
+          <path fill="#6C03FA" d="M151.288,162.752c0,1.625-.059,3.249-.207,4.815-7.474,4.49-16.217,7.09-25.582,7.09-27.443,0-49.686-22.244-49.686-49.686,0-9.571,2.718-18.492,7.385-26.084,1.359-.089,2.718-.148,4.077-.148,35.389,0,64.013,28.683,64.013,64.013ZM210.9,125c0-24.016-8.271-44.192-24.843-60.557-16.572-16.336-36.748-24.518-60.557-24.518s-43.985,8.183-60.557,24.518c-16.572,16.336-24.843,36.511-24.843,60.557s8.271,44.221,24.843,60.557c16.542,16.336,36.748,24.518,60.557,24.518s43.985-8.183,60.557-24.518c16.572-16.365,24.843-36.541,24.843-60.557ZM61.546,125c0-17.96,6.174-33.173,18.522-45.61s27.472-18.669,45.462-18.669,33.114,6.233,45.462,18.669c12.348,12.436,18.522,27.649,18.522,45.61s-6.174,33.173-18.522,45.61c-12.348,12.436-27.502,18.669-45.462,18.669s-33.114-6.233-45.462-18.669c-12.348-12.436-18.522-27.649-18.522-45.61h0ZM135.366,76.318c-.916,2.924-1.418,6.026-1.418,9.216,0,16.897,13.707,30.603,30.603,30.603,3.338,0,6.528-.532,9.541-1.507h0c-4.077-19.319-19.378-34.444-38.727-38.313Z"/>
+        </svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__word"><span>to</span><b>fig</b></span>
+      </a>
+      <p class="foot__legal">An open-source plugin by acaso.<br>MIT licensed. acaso® 2026</p>
+    </div>
+
+    <div class="foot__links">
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="#how">How it works</a>
+        <a href="#renderer">External renderer</a>
+        <a href="/docs.html">Documentation</a>
+      </div>
+      <div class="foot__col">
+        <h4>Source</h4>
+        <a href="https://github.com/aca-so/tofig">GitHub</a>
+        <a href="https://www.npmjs.com/package/@aca-so/tofig">npm</a>
+        <a href="https://github.com/aca-so/tofig/blob/main/CHANGELOG.md">Changelog</a>
+      </div>
+      <div class="foot__col">
+        <h4>acaso</h4>
+        <a href="https://aca.so">aca.so</a>
+        <a href="/pt/">Português</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

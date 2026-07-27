@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tofig.aca.so/sitemap.xml

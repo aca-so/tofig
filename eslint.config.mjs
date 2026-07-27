@@ -6,7 +6,8 @@ export default tseslint.config(
   {
     // Generated build output, vendored third-party bundles, and dependencies —
     // never lint these.
-    ignores: ['code.js', 'ui.html', 'dist/', 'out/', 'lib/', 'node_modules/', 'src/ui/vendor/'],
+    // `tmp/` is gitignored scratch space; flat config doesn't read .gitignore.
+    ignores: ['code.js', 'ui.html', 'dist/', 'out/', 'lib/', 'node_modules/', 'src/ui/vendor/', 'tmp/'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -41,6 +42,16 @@ export default tseslint.config(
     files: ['bin/**/*.mjs'],
     languageOptions: {
       globals: { ...globals.node, ...globals.browser },
+    },
+  },
+  {
+    // Marketing site (tofig.aca.so). Plain browser scripts, no bundler —
+    // the `**/*.js` block above would otherwise hand these Node globals and
+    // trip no-undef on document/window.
+    files: ['site/**/*.js'],
+    languageOptions: {
+      globals: globals.browser,
+      sourceType: 'script',
     },
   },
 );

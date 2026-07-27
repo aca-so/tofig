@@ -1,0 +1,153 @@
+/* ──────────────────────────────────────────────────────────────────
+   tofig.aca.so — token layer
+   Inherited from acaso's Syntropic design system (colors_and_type.css).
+   Values are copied verbatim; site-only additions are marked.
+   ────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ═══ Brand — Syntropic violet ═══ */
+  --brand-50:  #F3F3FF;
+  --brand-100: #EAE9FE;
+  --brand-200: #D7D7FD;
+  --brand-300: #BAB6FC;
+  --brand-400: #978DF8;
+  --brand-500: #745FF3;   /* PRIMARY BRAND */
+  --brand-600: #6A48EB;   /* default interactive fill */
+  --brand-700: #583ECB;   /* pressed */
+  --brand-800: #4635AC;
+  --brand-900: #332B8C;
+  --brand-950: #21216D;
+  --brand-tint: #EAE9FE;
+
+  /* Site-only: the acaso symbol ships filled at this value, which differs
+     from brand/500. Used for the mark and nothing else. */
+  --mark: #6C03FA;
+
+  /* ═══ Neutral — cool grey ═══ */
+  --neutral-0:    rgb(254, 254, 254);   /* paper — NOT #fff */
+  --neutral-50:   rgb(249, 250, 251);
+  --neutral-100:  rgb(246, 247, 249);
+  --neutral-200:  rgb(238, 240, 243);
+  --neutral-250:  rgb(235, 237, 241);
+  --neutral-300:  rgb(232, 234, 239);
+  --neutral-400:  rgb(209, 213, 219);
+  --neutral-500:  rgb(156, 163, 175);
+  --neutral-600:  rgb(107, 114, 128);
+  --neutral-700:  rgb( 74,  78,  84);
+  --neutral-800:  rgb( 41,  41,  41);
+  --neutral-850:  rgb( 31,  31,  31);
+  --neutral-900:  rgb( 25,  25,  25);
+  --neutral-950:  rgb( 18,  18,  18);
+  --neutral-1000: rgb(  0,   0,   0);
+
+  /* ═══ Semantic scales ═══ */
+  --danger-500:  rgb(221, 82, 76);
+  --danger-700:  #a8322c;
+  --warning-100: #fef2da;
+  --warning-500: #e89a2a;
+  --warning-700: #a26512;
+  --success-100: #dff4e4;
+  --success-500: #2f9f56;
+  --success-700: #1e6e3b;
+  --info-100:    #dfeafd;
+  --info-500:    #3172db;
+  --info-700:    #1e4a94;
+
+  --shadow-color: rgba(16, 24, 40, 0.05);
+
+  /* ═══ Surfaces & text ═══ */
+  --bg-page:       var(--neutral-0);
+  --bg-section:    var(--neutral-100);
+  --bg-raised:     var(--neutral-50);
+  --bg-sunken:     var(--neutral-200);
+  --bg-inverse:    var(--neutral-1000);
+  --bg-brand:      var(--brand-600);
+  --bg-brand-soft: var(--brand-tint);
+
+  --fg-primary:    var(--neutral-950);
+  --fg-secondary:  var(--neutral-700);
+  --fg-tertiary:   var(--neutral-600);
+  --fg-muted:      var(--neutral-500);
+  --fg-on-brand:   var(--neutral-0);
+  --fg-on-inverse: var(--neutral-300);
+  --fg-brand:      var(--brand-500);
+
+  --border-subtle:  var(--neutral-300);
+  --border-default: var(--neutral-400);
+  --border-brand:   var(--brand-300);
+  --border-focus:   var(--brand-400);
+
+  /* ═══ Radius — 16 is the signature card value ═══ */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-pill: 64px;
+  --radius-full: 9999px;
+
+  /* ═══ Spacing — 4px base grid ═══ */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  48px;
+  --space-10: 64px;
+  --space-11: 72px;
+  --space-12: 96px;
+  --space-13: 120px;
+
+  /* ═══ Elevation — single-layer, almost imperceptible ═══ */
+  --shadow-xs: 0 1px 2px 0 var(--shadow-color);
+  --shadow-sm: 0 1px 3px 0 var(--shadow-color), 0 1px 2px 0 var(--shadow-color);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px var(--shadow-color);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px var(--shadow-color);
+
+  /* ═══ Type ═══ */
+  --font-sans: "Sora", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --tracking: -0.030em;          /* universal on Sora */
+  --leading-heading: 1;
+  --leading-display: 1.1;
+  --leading-body:    1.4;
+
+  --text-2xs:  10px;
+  --text-xs:   12px;
+  --text-sm:   14px;
+  --text-md:   16px;
+  --text-lg:   18px;
+  --text-xl:   20px;
+  --text-2xl:  28px;
+  --text-3xl:  32px;
+  --text-4xl:  48px;
+
+  /* ═══ Motion — 150–200ms, linear-out, nothing overshoots ═══ */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 160ms;
+  --dur-mid:  220ms;
+  --dur-slow: 420ms;
+
+  /* ═══ Layout ═══ */
+  --measure: 68ch;
+  --content: 1120px;
+
+  /* ═══ z-index — semantic, never arbitrary ═══ */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-sticky:  100;
+  --z-overlay: 200;
+  --z-toast:   300;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-mid:  0ms;
+    --dur-slow: 0ms;
+  }
+}
