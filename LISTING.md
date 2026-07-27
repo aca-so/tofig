@@ -39,8 +39,8 @@ Convert self-contained HTML — including designs you generate with Claude — i
 native, fully editable Figma layers. Open it in a Design file to get frames, or in
 a Figma Slides file to get slides.
 
-Everything runs locally inside the plugin: your HTML never leaves Figma. No servers,
-no account, no upload.
+Everything runs locally: your HTML never leaves your machine. No servers, no account,
+no upload.
 
 HOW TO USE
 1. Open tofig in a Design or Slides file.
@@ -59,13 +59,25 @@ BEST WITH SELF-CONTAINED HTML
 Inline CSS, data:/base64 images, inline SVG, and web fonts that exist in Figma.
 External URLs and assets are not fetched — the plugin has no network access by design.
 
+WHEN AN EXPORT WON'T RENDER
+Some "HTML" files are really live apps — they boot a React runtime, pull React or
+Babel from a CDN, or touch localStorage. Figma's plugin sandbox blocks all of that,
+so those can't render inside the plugin. For them, render on your own machine with
+the companion CLI and import the result:
+
+  npx --package=github:aca-so/tofig tofig-render export.html
+
+That writes an export.tofig.json — drop it into the plugin and it imports directly.
+Still fully local (it drives your own Chrome); it just isn't sandbox-restricted.
+
 GOOD TO KNOW
 • Fonts must be available in Figma; otherwise text falls back to the nearest match
   (then Inter), and tofig reports exactly what was substituted.
 • Layout uses absolute positioning for visual fidelity (auto-layout is on the roadmap).
 
 An open-source plugin by acaso. MIT licensed.
-Code: github.com/<org>/tofig · Built on @builder.io/html-to-figma (MIT).
+Code: github.com/aca-so/tofig
+Built on @builder.io/html-to-figma (MIT); bundles React/ReactDOM (MIT).
 ```
 
 ---
@@ -79,8 +91,8 @@ Converta HTML self-contained — incluindo designs gerados com o Claude — em c
 nativas e totalmente editáveis no Figma. Abra num arquivo de Design para gerar frames,
 ou num arquivo de Slides para gerar slides.
 
-Tudo roda localmente dentro do plugin: seu HTML não sai do Figma. Sem servidores,
-sem conta, sem upload.
+Tudo roda localmente: seu HTML não sai da sua máquina. Sem servidores, sem conta,
+sem upload.
 
 COMO USAR
 1. Abra o tofig num arquivo de Design ou Slides.
@@ -99,12 +111,25 @@ MELHOR COM HTML SELF-CONTAINED
 CSS inline, imagens data:/base64, SVG inline e fontes que existam no Figma. URLs e
 assets externos não são baixados — o plugin não tem acesso à rede, por design.
 
+QUANDO UM EXPORT NÃO RENDERIZA
+Alguns arquivos "HTML" são, na verdade, apps: inicializam um runtime React, baixam
+React ou Babel de uma CDN, ou usam localStorage. O sandbox de plugins do Figma
+bloqueia tudo isso, então esses casos não renderizam dentro do plugin. Para eles,
+renderize na sua máquina com a CLI complementar e importe o resultado:
+
+  npx --package=github:aca-so/tofig tofig-render export.html
+
+Isso gera um export.tofig.json — arraste esse arquivo para o plugin e ele importa
+direto. Continua 100% local (usa o seu próprio Chrome), só não fica limitado pelo
+sandbox.
+
 BOM SABER
 • As fontes precisam existir no Figma; senão o texto cai na correspondência mais
   próxima (e depois Inter), e o tofig informa o que foi substituído.
 • O layout usa posicionamento absoluto para fidelidade visual (auto-layout no roadmap).
 
 Um plugin open-source da acaso. Licença MIT.
+Código: github.com/aca-so/tofig
 ```
 
 ---
