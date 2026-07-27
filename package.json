@@ -3,9 +3,34 @@
   "version": "0.3.0",
   "description": "Convert HTML (e.g. Claude designs) into native Figma designs or Slides",
   "license": "MIT",
+  "author": "acaso (https://aca.so)",
+  "homepage": "https://github.com/aca-so/tofig#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aca-so/tofig.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aca-so/tofig/issues"
+  },
+  "keywords": [
+    "figma",
+    "figma-plugin",
+    "html-to-figma",
+    "code-to-design",
+    "figma-slides"
+  ],
   "bin": {
     "tofig-render": "bin/tofig-render.mjs"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "esbuild.mjs",
+    "tsconfig.json",
+    "manifest.json",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
