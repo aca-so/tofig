@@ -91,12 +91,34 @@ check, and org-scoped ownership was the goal anyway. `publishConfig.access` is s
 
 ### Releasing a new version
 
+Pushing a `v*` tag triggers [`.github/workflows/release.yml`](./.github/workflows/release.yml),
+which lints, typechecks, builds, and publishes to npm:
+
 ```bash
-npm version <patch|minor|major>   # bumps package.json + tags
-npm publish                        # requires 2FA; npm prompts for browser auth
-git push --follow-tags
+npm version <patch|minor|major>   # bumps package.json and creates the tag
+git push --follow-tags            # the tag push publishes
 ```
 
-Consider moving this to **trusted publishing** (OIDC from GitHub Actions) so releases
-need no personal account and no token — npm disabled classic tokens in Nov 2025, and
-write-enabled granular tokens now expire in 90 days at most.
+The workflow refuses to publish if the tag and `package.json` version disagree —
+npm forbids reusing a version, so that mistake is unrecoverable.
+
+### One-time npm setup (trusted publishing)
+
+The release workflow authenticates with **OIDC**, not a token: npm verifies that the
+request came from this repository and this workflow. No `NPM_TOKEN` secret, nothing to
+rotate, no browser 2FA prompt, and published tarballs get **provenance** attestation
+automatically.
+
+This has to be enabled once, on npmjs.com:
+
+1. Go to the [@aca-so/tofig package settings](https://www.npmjs.com/package/@aca-so/tofig/access).
+2. Under **Trusted publisher**, choose **GitHub Actions**.
+3. Organization or user: `aca-so` · Repository: `tofig` · Workflow filename: `release.yml`.
+   Leave the environment blank unless you add one to the workflow.
+
+Until that's configured the workflow will fail at the publish step — the build and
+checks still run, so a failure there means "finish the npm setup", not "the code broke".
+
+Why bother: npm disabled classic token creation in November 2025, and write-enabled
+granular tokens now default to 7 days and cap at 90. Token-based release automation
+means rotating a shared credential every quarter, forever. OIDC has no credential.
