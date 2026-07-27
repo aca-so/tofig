@@ -41,7 +41,7 @@
   "dependencies": {
     "@builder.io/html-to-figma": "^0.0.3",
     "esbuild": "^0.25.0",
-    "puppeteer-core": "^23.11.1"
+    "puppeteer-core": "^25.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
