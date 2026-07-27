@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+# Trusted publishing (OIDC): npm authenticates *this repository*, not a person.
+# No NPM_TOKEN secret, nothing to rotate, and no browser 2FA prompt. npm disabled
+# classic token creation in Nov 2025 and capped write-enabled granular tokens at
+# 90 days, so token-based release automation is a treadmill; this isn't.
+#
+# Requires a one-time setup on npmjs.com: the @aca-so/tofig package settings must
+# name aca-so/tofig and this workflow file as a trusted publisher.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish @aca-so/tofig to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          # Trusted publishing requires Node >= 22.14.0.
+          node-version: 24
+          cache: npm
+
+      # Trusted publishing requires npm >= 11.5.1 — newer than what some Node
+      # releases bundle, so upgrade rather than assume.
+      - name: Ensure a recent npm
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # A tag that disagrees with package.json would publish the wrong version
+      # under the right name — irreversible, since npm forbids reusing a version.
+      - name: Verify the tag matches package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} does not match package.json version ${pkg}"
+            exit 1
+          fi
+          echo "publishing ${pkg}"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      # Publishes with provenance automatically, because the OIDC identity proves
+      # which repo and workflow produced the tarball.
+      - name: Publish to npm
+        run: npm publish
