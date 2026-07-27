@@ -16,51 +16,76 @@ permissions:
 
 jobs:
   build:
-    name: Lint, typecheck, test & build
+    name: Lint, typecheck & build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      # The toolchain isn't committed yet (specs are still being defined).
-      # This scaffold runs the standard Node checks as soon as a package.json
-      # lands, and is a friendly no-op until then. Each step is gated with
-      # `--if-present`, so missing scripts won't fail the build.
-      - name: Detect package.json
-        id: pkg
-        run: |
-          if [ -f package.json ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        if: steps.pkg.outputs.exists == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: lts/*
+          cache: npm
 
       - name: Install dependencies
-        if: steps.pkg.outputs.exists == 'true'
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Lint
-        if: steps.pkg.outputs.exists == 'true'
-        run: npm run lint --if-present
+        run: npm run lint
 
       - name: Typecheck
-        if: steps.pkg.outputs.exists == 'true'
-        run: npm run typecheck --if-present
-
-      - name: Test
-        if: steps.pkg.outputs.exists == 'true'
-        run: npm test --if-present
+        run: npm run typecheck
 
       - name: Build
-        if: steps.pkg.outputs.exists == 'true'
-        run: npm run build --if-present
+        run: npm run build
 
-      - name: No toolchain yet
-        if: steps.pkg.outputs.exists == 'false'
-        run: echo "No package.json found — CI scaffold is in place and will run automatically once the toolchain is added."
+      # The plugin is only publishable if both bundles land on disk — Figma
+      # uploads them from the working directory at publish time.
+      - name: Verify plugin bundles exist
+        run: |
+          test -s code.js || { echo "::error::code.js was not produced"; exit 1; }
+          test -s ui.html || { echo "::error::ui.html was not produced"; exit 1; }
+          echo "code.js  $(wc -c < code.js) bytes"
+          echo "ui.html  $(wc -c < ui.html) bytes"
+
+  renderer:
+    name: External renderer smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # puppeteer-core ships no browser; ubuntu-latest provides Chrome.
+      - name: Locate Chrome
+        id: chrome
+        run: echo "path=$(which google-chrome || which chromium-browser || which chromium)" >> "$GITHUB_OUTPUT"
+
+      - name: Render the bundled examples
+        env:
+          TOFIG_CHROME: ${{ steps.chrome.outputs.path }}
+        run: |
+          npm run render -- examples/sample-design.html --out /tmp/design.tofig.json
+          npm run render -- examples/sample-slides.html --target slides --out /tmp/slides.tofig.json
+
+      - name: Assert the payloads are sane
+        run: |
+          node -e '
+            const assert = require("node:assert");
+            const design = require("/tmp/design.tofig.json");
+            const slides = require("/tmp/slides.tofig.json");
+            assert.strictEqual(design.target, "design", "design target mismatch");
+            assert.strictEqual(design.roots.length, 1, "expected 1 design root");
+            assert.strictEqual(slides.target, "slides", "slides target mismatch");
+            assert.strictEqual(slides.roots.length, 2, "expected 2 slide roots");
+            console.log("payloads ok:", design.roots.length, "design root,", slides.roots.length, "slide roots");
+          '

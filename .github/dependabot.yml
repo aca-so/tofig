@@ -11,12 +11,20 @@ updates:
       - dependencies
       - ci
 
-  # Enable once a package.json/lockfile lands at the repo root.
-  # - package-ecosystem: npm
-  #   directory: "/"
-  #   schedule:
-  #     interval: weekly
-  #   commit-message:
-  #     prefix: chore(deps)
-  #   labels:
-  #     - dependencies
+  # npm dependencies (package.json + package-lock.json live at the repo root)
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(deps)
+    labels:
+      - dependencies
+    # Dev tooling churns often and can't affect the published plugin; batch it
+    # into one PR instead of one per bump.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
