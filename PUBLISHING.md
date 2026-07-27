@@ -74,14 +74,29 @@ Already done — the repo is public at **github.com/aca-so/tofig** and self-cont
 
 ## The external renderer (`tofig-render`)
 
-Teammates who install the *plugin* don't get the CLI — it isn't on npm. Until it is,
-`README.md` documents installing it straight from GitHub:
+Teammates who install the *plugin* don't get the CLI — it ships separately on npm as
+**[`@aca-so/tofig`](https://www.npmjs.com/package/@aca-so/tofig)**:
 
 ```bash
-npm install -g github:aca-so/tofig          # then: tofig-render export.html
-npx --package=github:aca-so/tofig tofig-render export.html   # one-off
+npm install -g @aca-so/tofig                          # then: tofig-render export.html
+npx --package=@aca-so/tofig tofig-render export.html  # one-off
 ```
 
-If you'd rather teammates just run `npx tofig-render`, publish the package to npm —
-the name **`tofig` is currently unclaimed**. `package.json` already carries the
-`repository`/`bugs`/`homepage`/`files` metadata needed for that.
+### Why the package is scoped
+
+The bare name `tofig` is unclaimed but **not publishable** — npm's typosquat filter
+rejects it as "too similar to existing packages twig, config". Scoped names bypass that
+check, and org-scoped ownership was the goal anyway. `publishConfig.access` is set to
+`public` in `package.json`, since scoped packages otherwise default to restricted.
+
+### Releasing a new version
+
+```bash
+npm version <patch|minor|major>   # bumps package.json + tags
+npm publish                        # requires 2FA; npm prompts for browser auth
+git push --follow-tags
+```
+
+Consider moving this to **trusted publishing** (OIDC from GitHub Actions) so releases
+need no personal account and no token — npm disabled classic tokens in Nov 2025, and
+write-enabled granular tokens now expire in 90 days at most.
