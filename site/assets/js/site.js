@@ -48,6 +48,22 @@
     const nodes = $$("[data-xn]");
     if (!nodes.length) return;
 
+    /* The panel docks beside the content at >=1100px, the same width
+       the stylesheet reserves a column at. Below that it is a sheet
+       over the page, so it opens collapsed: X-ray on a phone should
+       show you the annotated page, not a tray covering half of it.
+       Same number in both places, or the two disagree. */
+    const DOCKED = matchMedia("(min-width: 1100px)");
+    const barBtn = $("[data-lpanel-toggle]");
+    const setOpen = (open) => {
+      panel.classList.toggle("is-open", open);
+      barBtn?.setAttribute("aria-expanded", String(open));
+    };
+    setOpen(DOCKED.matches);
+    barBtn?.addEventListener("click", () => setOpen(!panel.classList.contains("is-open")));
+    DOCKED.addEventListener("change", (e) => setOpen(e.matches));
+
+
     /* Rows mirror document order; depth is real DOM containment, so
        the tree matches what tofig would actually emit. */
     const rows = new Map();
@@ -79,6 +95,9 @@
       btn.append(svg, document.createTextNode(name || type));
       btn.addEventListener("click", () => {
         el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+        /* On a sheet, get out of the way so the row you just picked is
+           actually visible when you arrive. */
+        if (!DOCKED.matches) setOpen(false);
       });
       btn.addEventListener("mouseenter", () => showProbe(el));
       btn.addEventListener("focus", () => showProbe(el));
@@ -95,9 +114,12 @@
     const foot = $(".lpanel__foot");
     if (foot) {
       const total = $("main") ? $("main").getElementsByTagName("*").length : 0;
+      /* "Hover" is meaningless on a touch screen, and this panel is a
+         bottom sheet there. */
+      const verb = matchMedia("(hover: hover)").matches ? "Hover" : "Tap";
       foot.innerHTML =
         `<b style="color:var(--v-300)">${total}</b> elements in this page.<br>` +
-        `${nodes.length} named for the tree. Hover a row to locate it.`;
+        `${nodes.length} named for the tree. ${verb} a row to locate it.`;
     }
 
     /* Which rows are on screen right now. */
@@ -136,20 +158,29 @@
       cancelAnimationFrame(raf);
     }
 
-    document.addEventListener("pointerover", (e) => {
-      if (!document.documentElement.classList.contains("xray")) return;
-      if (e.target.closest?.(".lpanel")) return;
-      const el = e.target.closest?.("[data-xn]");
-      if (el && el !== probed) showProbe(el);
-      else if (!el) hideProbe();
-    });
+    /* Hover-capable pointers only. A touch fires pointerover with no
+       matching pointerout, so on a phone the first tap pinned the
+       readout to that element and left the rAF loop running for the
+       rest of the session. */
+    if (matchMedia("(hover: hover)").matches) {
+      document.addEventListener("pointerover", (e) => {
+        if (!document.documentElement.classList.contains("xray")) return;
+        if (e.target.closest?.(".lpanel")) return;
+        const el = e.target.closest?.("[data-xn]");
+        if (el && el !== probed) showProbe(el);
+        else if (!el) hideProbe();
+      });
+    }
 
     const isOn = () => document.documentElement.classList.contains("xray");
     const apply = (on) => {
       document.documentElement.classList.toggle("xray", on);
       toggles.forEach((t) => t.setAttribute("aria-pressed", String(on)));
       panel.setAttribute("aria-hidden", String(!on));
-      if (!on) hideProbe();
+      /* Re-collapse on a narrow screen each time the mode is entered,
+         so it never reopens over the content unasked. */
+      if (on) setOpen(DOCKED.matches);
+      else hideProbe();
     };
 
     toggles.forEach((t) => t.addEventListener("click", () => apply(!isOn())));
@@ -175,20 +206,22 @@
      the loop entirely. JS only stops it when nobody is looking.
      ═══════════════════════════════════════════════════════════════ */
 
-  const xplodeInit = () => {
-    const root = $("[data-xplode]");
-    if (!root || reduced || !("IntersectionObserver" in window)) return;
+  const loopsInit = () => {
+    const loops = $$("[data-loop]");
+    if (!loops.length || reduced || !("IntersectionObserver" in window)) return;
 
     const io = new IntersectionObserver(
-      ([e]) => root.classList.toggle("is-paused", !e.isIntersecting),
+      (entries) => entries.forEach((e) => e.target.classList.toggle("is-paused", !e.isIntersecting)),
       { threshold: 0 }
     );
-    io.observe(root);
+    loops.forEach((el) => io.observe(el));
 
     /* A background tab should not burn frames either. */
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) root.classList.add("is-paused");
-      else if (root.getBoundingClientRect().bottom > 0) root.classList.remove("is-paused");
+      loops.forEach((el) => {
+        if (document.hidden) el.classList.add("is-paused");
+        else if (el.getBoundingClientRect().bottom > 0) el.classList.remove("is-paused");
+      });
     });
   };
 
@@ -334,16 +367,23 @@
     if (svg) {
       const path = $("[data-vpath]", svg);
       const vout = $("[data-toy-vec-out]");
+      /* Each handle is a <g>: a transparent hit circle sized for touch
+         plus the small visible dot. Both move together. */
       const pts  = $$("[data-vpt]", svg);
       const hair = $$("[data-vh]", svg);
-      const P = pts.map((p) => ({ x: +p.getAttribute("cx"), y: +p.getAttribute("cy") }));
+      const P = pts.map((g) => {
+        const dot = g.querySelector(".vpt");
+        return { x: +dot.getAttribute("cx"), y: +dot.getAttribute("cy") };
+      });
 
       const draw = () => {
         path.setAttribute("d",
           `M20,74 C${P[0].x.toFixed(1)},${P[0].y.toFixed(1)} ${P[1].x.toFixed(1)},${P[1].y.toFixed(1)} 228,74`);
-        pts.forEach((p, i) => {
-          p.setAttribute("cx", P[i].x); p.setAttribute("cy", P[i].y);
-          p.setAttribute("aria-valuenow", Math.round(P[i].x));
+        pts.forEach((g, i) => {
+          g.querySelectorAll("circle").forEach((c) => {
+            c.setAttribute("cx", P[i].x); c.setAttribute("cy", P[i].y);
+          });
+          g.setAttribute("aria-valuenow", Math.round(P[i].x));
         });
         hair[0].setAttribute("x2", P[0].x); hair[0].setAttribute("y2", P[0].y);
         hair[1].setAttribute("x2", P[1].x); hair[1].setAttribute("y2", P[1].y);
@@ -509,6 +549,21 @@
     const toc = $("[data-toc]");
     if (!toc || !("IntersectionObserver" in window)) return;
 
+    /* Below the two-column width the contents is a disclosure. It
+       ships open so a failed script leaves a usable list, and closes
+       here instead. Picking a link closes it too, so you land on the
+       section rather than back at the top of the menu. */
+    const disc = $(".toc__d", toc);
+    const NARROW = matchMedia("(max-width: 979px)");
+    if (disc) {
+      const fit = () => { disc.open = !NARROW.matches; };
+      fit();
+      NARROW.addEventListener("change", fit);
+      toc.addEventListener("click", (e) => {
+        if (NARROW.matches && e.target.closest("a")) disc.open = false;
+      });
+    }
+
     $$("a", toc).forEach((link) => {
       const h2 = document.getElementById(link.getAttribute("href").slice(1));
       if (!h2) return;
@@ -575,7 +630,7 @@
   };
 
   xrayInit();
-  xplodeInit();
+  loopsInit();
   starsInit();
   termInit();
   toysInit();

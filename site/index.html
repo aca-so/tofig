@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tofig | paste HTML, get editable Figma layers</title>
-<meta name="description" content="tofig rebuilds self-contained HTML, including Claude designs, as native editable Figma layers. Frames in a Design file, slides in a Slides file. Runs entirely locally. An open-source tool by acaso.">
+<meta name="description" content="Turn the design Claude just generated into native, editable Figma layers. Frames in a Design file, slides in a Slides file. Runs entirely locally. An open-source tool by acaso.">
 <link rel="canonical" href="https://tofig.aca.so/">
 
 <meta property="og:type" content="website">
@@ -68,6 +68,7 @@
     <a class="byline" href="https://aca.so" rel="noopener">by <b>acaso</b></a>
 
     <ul class="nav__links">
+      <li><a href="#claude">Claude to Figma</a></li>
       <li><a href="#how">How it works</a></li>
       <li><a href="#survives">What survives</a></li>
       <li><a href="#renderer">Renderer</a></li>
@@ -101,8 +102,9 @@
         <h1 class="display" data-xn="Text · h1">Paste&nbsp;HTML.<br>Get <em>Figma&nbsp;layers</em>.</h1>
 
         <p class="lede" data-xn="Text · lede">
-          tofig rebuilds self-contained HTML as native Figma nodes: real frames,
-          live text, editable vectors. <b>Not a screenshot.</b>
+          Built for the design <b>Claude</b> just generated. tofig rebuilds
+          self-contained HTML as native Figma nodes: real frames, live text,
+          editable vectors. <b>Not a screenshot.</b>
         </p>
 
         <div class="hero__actions" data-xn="Frame · actions">
@@ -129,7 +131,7 @@
            Built the way tofig emits: absolutely positioned layers, one
            per depth. Flat, it is a rendered card. Lifted, it is the
            layer stack. Same markup, one variable between them. -->
-      <figure class="xplode" data-xplode style="margin:0">
+      <figure class="xplode" data-xplode data-loop style="margin:0">
         <div class="xplode__scene" data-xplode-scene>
           <div class="lyr lyr--frame" style="--d:0">
             <span class="lyr__tag">Frame · profile-card</span>
@@ -201,6 +203,48 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════ Claude handoff ═══════════════════════
+       The main use case, given the fold right after the hero. Clay is
+       the Claude side, violet is the tofig side. -->
+  <section id="claude" class="chand" data-rise>
+    <div class="wrap chand__in">
+      <div>
+        <span class="chand__tag">
+          <i class="ph-bold ph-sparkle" aria-hidden="true"></i> The reason most people are here
+        </span>
+        <h2 data-xn="Text · h2">Claude designed it.<br><em>Now make it editable.</em></h2>
+        <p class="lede">Claude hands you a finished interface. Screenshot it into Figma and
+        you get a flat picture you cannot touch. tofig gives you the layer tree: every
+        frame, every string, every vector, exactly where Claude put it. Ask it for a
+        deck and each slide lands as a <b>real Figma slide</b>.</p>
+
+        <div class="chand__actions">
+          <a class="btn btn--claude btn--lg" href="/claude.html">
+            Claude to Figma, step by step <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="chand__flow" data-stagger>
+        <div class="chand__step chand__step--claude" data-xn="Frame · in-claude">
+          <span class="chand__where">In Claude</span>
+          <span class="chand__what">Ask for <b>one self-contained HTML file</b>, inline CSS,
+          no external assets. Copy the source.</span>
+        </div>
+        <div class="chand__step chand__step--tofig" data-xn="Frame · in-tofig">
+          <span class="chand__where">In tofig</span>
+          <span class="chand__what">Paste it, or drop the <b>.html</b>. Convert. It runs
+          locally, so nothing is uploaded.</span>
+        </div>
+        <div class="chand__step chand__step--tofig" data-xn="Frame · in-figma">
+          <span class="chand__where">In Figma</span>
+          <span class="chand__what">Named frames, <b>live text</b>, editable vectors.
+          Or <b>real slides</b>, if you opened a Slides file.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══════════════════════ How it works ═══════════════════════ -->
   <section id="how" data-rise>
     <div class="wrap">
@@ -265,7 +309,9 @@
             <span class="dest__chip">Slides file</span>
             <h3>Real Figma slides</h3>
             <p>tofig detects decks, including JavaScript-driven ones, and imports each
-            slide as its own Figma slide, sized and scaled to fit rather than clipped.</p>
+            slide as its own Figma slide, sized and scaled to fit rather than clipped.
+            This is where a <a href="/claude.html">Claude-generated deck</a> pays off
+            most: one HTML file in, a whole editable deck out.</p>
           </div>
         </article>
       </div>
@@ -317,12 +363,18 @@
               <path class="vpath" data-vpath d="M20,74 C72,18 176,18 228,74"/>
               <circle class="vanchor" cx="20" cy="74" r="3.5"/>
               <circle class="vanchor" cx="228" cy="74" r="3.5"/>
-              <circle class="vpt" data-vpt="0" cx="72" cy="18" r="5.5" tabindex="0"
-                      role="slider" aria-label="First control point"
-                      aria-valuemin="0" aria-valuemax="248" aria-valuenow="72"/>
-              <circle class="vpt" data-vpt="1" cx="176" cy="18" r="5.5" tabindex="0"
-                      role="slider" aria-label="Second control point"
-                      aria-valuemin="0" aria-valuemax="248" aria-valuenow="176"/>
+              <g class="vhandle" data-vpt="0" tabindex="0" role="slider"
+                 aria-label="First control point"
+                 aria-valuemin="0" aria-valuemax="248" aria-valuenow="72">
+                <circle class="vhit" cx="72" cy="18" r="18"/>
+                <circle class="vpt" cx="72" cy="18" r="5.5"/>
+              </g>
+              <g class="vhandle" data-vpt="1" tabindex="0" role="slider"
+                 aria-label="Second control point"
+                 aria-valuemin="0" aria-valuemax="248" aria-valuenow="176">
+                <circle class="vhit" cx="176" cy="18" r="18"/>
+                <circle class="vpt" cx="176" cy="18" r="5.5"/>
+              </g>
             </svg>
             <p class="toy__out" data-toy-vec-out></p>
           </div>
@@ -508,6 +560,7 @@
     <div class="foot__links">
       <div class="foot__col">
         <p class="collabel">Product</p>
+        <a href="/claude.html">Claude to Figma</a>
         <a href="#how">How it works</a>
         <a href="#survives">What survives</a>
         <a href="#renderer">External renderer</a>
@@ -531,13 +584,18 @@
 
 <!-- X-ray chrome. Inert until the mode is on. -->
 <aside class="lpanel" data-lpanel aria-hidden="true" aria-label="Layers">
-  <div class="lpanel__bar">
+  <button class="lpanel__bar" type="button" data-lpanel-toggle
+          aria-expanded="true" aria-controls="lpanel-body">
     <svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-group"/></svg>
     Layers <b data-lpanel-count>0</b>
-  </div>
-  <ul class="lpanel__list" data-lpanel-list></ul>
-  <div class="lpanel__foot">
-    Real geometry, read from this page.<br>Hover a row to locate it.
+    <svg class="lpanel__chev" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+         stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M3 7.5 6 4.5l3 3"/></svg>
+  </button>
+  <div class="lpanel__body" id="lpanel-body">
+    <ul class="lpanel__list" data-lpanel-list></ul>
+    <div class="lpanel__foot">
+      Real geometry, read from this page.<br>Select a row to jump to it.
+    </div>
   </div>
 </aside>
 

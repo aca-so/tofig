@@ -35,6 +35,24 @@
   --ink-4:     oklch(0.605 0.018 288);
   --ink-faint: oklch(0.420 0.020 288);
 
+  /* ═══ Component grounds ═════════════════════════════════════════
+     The grounds below the page plane. A code block, a terminal and
+     the little canvases inside the destination cards all sit *under*
+     --void rather than on it, and the nav wash sits level with it.
+
+     They are tokens rather than literals because a page may move its
+     whole neutral ramp to another hue — /claude.html rides clay's 44
+     instead of violet's 288 — and a component that hardcodes one hue
+     turns into a cold rectangle on a warm page. Every sunken surface
+     takes its ground from here; only the accent painted on top of it
+     carries meaning. Tint intensity is matched across hues by channel
+     spread, not by chroma: at these lightnesses a warm hue needs
+     roughly two thirds of violet's chroma to read as equally tinted. */
+  --sunken:     oklch(0.105 0.016 288);  /* code, terminal, prompt   */
+  --sunken-bar: oklch(0.145 0.018 288);  /* their title bars         */
+  --stage:      oklch(0.115 0.018 288);  /* the small canvases       */
+  --scrim:      oklch(0.135 0.018 288);  /* nav wash, page ground    */
+
   /* ═══ Violet — structure, nodes, measurement ════════════════════ */
   --v-200: oklch(0.900 0.060 284);
   --v-300: oklch(0.795 0.115 284);
@@ -47,6 +65,20 @@
 
   /* The acaso symbol ships filled at this value. Mark only. */
   --mark: #6C03FA;
+
+  /* ═══ Clay — the Claude side of the journey ═════════════════════
+     Claude's warm terracotta, #D97757. The site's rule is that colour
+     carries meaning: violet is the tofig/Figma side, clay is the
+     Claude side, and the handoff is where they meet. --c-500 on
+     --void measures 5.2:1, so it is safe for body text. */
+  --c-300: oklch(0.780 0.105 42);
+  --c-400: oklch(0.720 0.120 41);
+  --c-500: oklch(0.665 0.125 40);   /* #D97757 */
+  --c-600: oklch(0.600 0.130 38);
+  --c-700: oklch(0.545 0.135 37);   /* interactive fill: white on c-600
+                                       measures 4.17:1, under the floor */
+  --c-ghost: oklch(0.665 0.125 40 / 0.12);
+  --c-edge:  oklch(0.665 0.125 40 / 0.34);
 
   /* ═══ Amber — what does not survive ═════════════════════════════ */
   --a-300: oklch(0.870 0.115 82);

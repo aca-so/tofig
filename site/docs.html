@@ -48,6 +48,7 @@
     <a class="byline" href="https://aca.so" rel="noopener">by <b>acaso</b></a>
 
     <ul class="nav__links">
+      <li><a href="/claude.html">Claude to Figma</a></li>
       <li><a href="/#how">How it works</a></li>
       <li><a href="/#survives">What survives</a></li>
       <li><a href="/#renderer">Renderer</a></li>
@@ -76,10 +77,12 @@
     <div class="wrap">
       <div class="docs">
         <nav class="toc" data-toc data-xn="Frame · toc" aria-label="On this page">
-          <p class="collabel">On this page</p>
+          <details class="toc__d" open>
+            <summary class="collabel">On this page</summary>
           <ul>
             <li><a href="#install">Install</a></li>
             <li><a href="#quickstart">Quick start</a></li>
+            <li><a href="#claude">Coming from Claude</a></li>
             <li><a href="#input">What tofig accepts</a></li>
             <li><a href="#output">What you get back</a></li>
             <li><a href="#fonts">Fonts &amp; substitution</a></li>
@@ -88,6 +91,7 @@
             <li><a href="#trouble">Troubleshooting</a></li>
             <li><a href="#source">Build from source</a></li>
           </ul>
+          </details>
         </nav>
 
         <div class="prose">
@@ -130,6 +134,21 @@
           </ol>
           <p>tofig reads <code>figma.editorType</code> and picks the output for you:
           frames in a Design file, slides in a Slides file. There is no mode switch.</p>
+
+          <h2 id="claude" data-xn="Text · claude">Coming from Claude</h2>
+          <p>The most common route in. Claude generates a design as an artifact, and
+          you want it in Figma as layers rather than a flat screenshot. The
+          <a href="/claude.html">full walkthrough is on its own page</a>, including
+          the export prompt and what to do when the artifact turns out to be a live
+          app.</p>
+          <p>The short version: ask for the design as a single self-contained HTML
+          file, with inline CSS, no CDN links, nothing rendered by JavaScript at
+          runtime, images as <code>data:</code> URIs or inline SVG, and a font that
+          exists in your Figma. Then paste that into the plugin.</p>
+          <p><strong>Decks work the same way, and are one of the best cases.</strong>
+          A Claude slide deck is a single HTML file with one section per slide. Run
+          tofig in a Figma <strong>Slides</strong> file and each section arrives as
+          its own slide, sized and scaled to fit, with its text still editable.</p>
 
           <h2 id="input" data-xn="Text · input">What tofig accepts</h2>
           <p>Self-contained HTML. Concretely, that means everything the page needs is
@@ -296,6 +315,7 @@ npm run build        <span class="c-dim"># produces code.js + ui.html</span></co
     <div class="foot__links">
       <div class="foot__col">
         <p class="collabel">Product</p>
+        <a href="/claude.html">Claude to Figma</a>
         <a href="/#how">How it works</a>
         <a href="/#survives">What survives</a>
         <a href="/#renderer">External renderer</a>
@@ -319,13 +339,18 @@ npm run build        <span class="c-dim"># produces code.js + ui.html</span></co
 
 
 <aside class="lpanel" data-lpanel aria-hidden="true" aria-label="Layers">
-  <div class="lpanel__bar">
+  <button class="lpanel__bar" type="button" data-lpanel-toggle
+          aria-expanded="true" aria-controls="lpanel-body">
     <svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-group"/></svg>
     Layers <b data-lpanel-count>0</b>
-  </div>
-  <ul class="lpanel__list" data-lpanel-list></ul>
-  <div class="lpanel__foot">
-    Real geometry, read from this page.<br>Hover a row to locate it.
+    <svg class="lpanel__chev" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+         stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M3 7.5 6 4.5l3 3"/></svg>
+  </button>
+  <div class="lpanel__body" id="lpanel-body">
+    <ul class="lpanel__list" data-lpanel-list></ul>
+    <div class="lpanel__foot">
+      Real geometry, read from this page.<br>Select a row to jump to it.
+    </div>
   </div>
 </aside>
 
