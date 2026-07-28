@@ -64,6 +64,18 @@ same 284–288 band, so nothing on the page is an untinted grey.
 | Claude fill | `--c-700` | `oklch(0.545 0.135 37)` |
 | Paper (specimens) | `--paper` | `oklch(0.995 0 0)` |
 | acaso mark only | `--mark` | `#6C03FA` |
+| Code / terminal ground | `--sunken` | `oklch(0.105 0.016 288)` |
+| Their title bars | `--sunken-bar` | `oklch(0.145 0.018 288)` |
+| Small canvases | `--stage` | `oklch(0.115 0.018 288)` |
+| Nav wash | `--scrim` | `oklch(0.135 0.018 288)` |
+
+**The four grounds below the page plane are tokens, not literals.** A
+code block, a terminal, the little canvases inside the destination cards
+and the nav wash all used to hardcode the violet-black. That is fine
+until a page moves its neutral ramp to another hue, at which point every
+one of them becomes a cold rectangle punched into a warm page. They now
+take their ground from the page and only the accent painted on top of
+them carries meaning. `site.css` never names a ground colour again.
 
 **Clay is the third meaning.** tofig's biggest use case is a design Claude
 generated, and that journey has two halves. Violet is the tofig/Figma side,
@@ -71,6 +83,24 @@ clay is the Claude side, and the handoff is where they meet. It appears on the
 Claude section of the landing page and on `/claude.html`, and nowhere else.
 `--c-500` on `--void` measures 5.2:1. White on `--c-600` measures only 4.17:1,
 so the interactive fill is `--c-700`, the same correction violet needed.
+
+**On `/claude.html` the handoff runs at page scale.** The atmospheric field
+is a background layer on the body rather than a fixed overlay, so it is
+measured against the whole document: clay pools where the work starts,
+drains through the middle, and violet gathers where the file lands. The
+crossover sits at 60% of the page, which is where the handoff node falls
+at every width from 390 to 1920 — measured, not guessed. Scrolling
+performs the transformation the page is about, and because nothing is
+fixed there is no point where the light and the content disagree about
+where they are. The same idea carries down to one pixel: the section rule
+above the problem band is clay, the ones around the renderer band and the
+footer are violet.
+
+The field cannot be a negative-z-index pseudo-element. `html` carries an
+opaque colour, so the body's background is painted by the body box rather
+than propagated to the canvas, and anything behind it at `z-index: -2` is
+invisible. The first version of this page had both a field and a grain
+layer written that way and neither one ever painted.
 
 **Color strategy: committed.** Violet is not a 10% accent here; it carries the
 structural language of the entire page — outlines, node badges, the layers
@@ -86,6 +116,27 @@ panel.** `--ink-faint` is decoration and is never used for text.
 
 White on `--v-500` measures 4.49:1 — one step under AA. Interactive fills
 therefore sit on `--v-600` and move *up* to `--v-500` on hover.
+
+**Tint intensity is a share of the gamut, not a chroma number.**
+`/claude.html` shifts its whole neutral ramp to clay's side of the wheel,
+and the first version did it by copying violet's chroma figures across to
+hue 38. The page came out brown. The sRGB chroma ceiling is not the same
+at every hue: at L 0.20 it is 0.118 at 288 and only 0.063 at 40, so the
+same 0.036 spends 21% of the budget on one page and 50% on the other. A
+warm dark stops reading warm and starts reading brown at roughly 30% of
+ceiling, and that ramp ran at 39–50% at every step.
+
+The rule that replaced it: **take the home page's percentage of ceiling
+at each step and spend the same share of the other hue's budget.** The
+home page runs 14–23%; the warm ramp now matches it step for step, which
+comes out at roughly half violet's chroma. Both pages are tinted at one
+intensity and read as two rooms rather than two designs.
+
+Two riders. Hue carries a slight torsion, 38 at the ground opening to 58
+at the grid dots, because brown lives at hue 40–60 in the L 0.25–0.50
+band where hairlines and dots sit. And warmth is carried by *light*
+rather than pigment: the ground is a warm near-black and the ember is an
+atmospheric field lying on top of it.
 
 ## Typography
 
