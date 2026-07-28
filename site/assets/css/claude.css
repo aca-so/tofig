@@ -539,7 +539,11 @@
 .cl-symptom {
   display: flex; flex-direction: column; gap: var(--space-3);
   padding-top: var(--space-5);
-  border-top: 1px solid oklch(0.665 0.125 40 / 0.55);
+  /* Clay, because the cause is on the Claude side, but held back from
+     the 0.55 it used to run at: on the quieter ground these three
+     rules were reading as orange stripes rather than as a colour code
+     the page has already taught you. */
+  border-top: 1px solid oklch(0.665 0.125 40 / 0.40);
 }
 .cl-symptom h3 { font-size: var(--text-md); font-weight: 500; }
 .cl-symptom p { font-size: var(--text-sm); color: var(--ink-3); }
@@ -739,16 +743,20 @@ html:has(> body.p-claude) { background: oklch(0.122 0.013 38); }
     radial-gradient(58%  9% at 24% 27%, oklch(0.665 0.125 40 / 0.045), transparent 72%),
     radial-gradient(52%  7% at 90% 47%, oklch(0.665 0.125 40 / 0.032), transparent 72%),
     radial-gradient(56%  9% at  6% 78%, oklch(0.588 0.212 284 / 0.075), transparent 72%),
-    radial-gradient(84% 13% at 58% 99%, oklch(0.588 0.212 284 / 0.150), transparent 72%),
+    radial-gradient(120% 18% at 52% 93%, oklch(0.588 0.212 284 / 0.075), transparent 74%),
     linear-gradient(180deg,
       oklch(0.665 0.125 40 / 0.042)   0%,
       oklch(0.665 0.125 40 / 0.028)  24%,
       oklch(0.665 0.125 40 / 0.010)  44%,
       oklch(0.665 0.125 40 / 0)      54%,
       oklch(0.588 0.212 284 / 0)     58%,
-      oklch(0.588 0.212 284 / 0.028) 74%,
-      oklch(0.588 0.212 284 / 0.062) 88%,
-      oklch(0.588 0.212 284 / 0.100) 100%);
+      oklch(0.588 0.212 284 / 0.032) 74%,
+      oklch(0.588 0.212 284 / 0.085) 89%,
+      /* the install is the arrival, so the light peaks there and eases
+         back for the footer rather than running brightest off the
+         bottom edge of the document */
+      oklch(0.588 0.212 284 / 0.088) 94%,
+      oklch(0.588 0.212 284 / 0.048) 100%);
   background-blend-mode:
     soft-light, normal, normal, normal, normal, normal, normal, normal;
 }
@@ -790,6 +798,14 @@ html:has(> body.p-claude) { background: oklch(0.122 0.013 38); }
                     var(--band-rule) 78%, transparent) bottom center / 100% 1px no-repeat;
 }
 
+/* Even the section rules take a side. The problem band opens before
+   the handoff so its two rules are clay; the renderer band and the
+   footer sit after it, and a warm line drawn across a violet field is
+   the same mismatch at one pixel that the cold code blocks were at
+   full size. */
+.p-claude #renderer,
+.p-claude .foot { --band-rule: oklch(0.588 0.212 284 / 0.24); }
+
 /* The footer was the one opaque slab left: painted in --void it cut
    the field off at a hard edge just as the violet reached full
    strength. It is the end of the journey, so it should be the most
@@ -820,8 +836,16 @@ html:has(> body.p-claude) { background: oklch(0.122 0.013 38); }
 /* X-ray is the measurement mode and measurement is violet, so the
    page drops its clay skin when you press X. `html.xray body` already
    sets the whole background shorthand, which clears the field with
-   it; all that is left is to take the warm rules off the bands so the
-   inspection ground is one flat plane. */
+   it. The rest is the chrome: the nav wash and the sunken grounds go
+   back to the inspection hue, and the warm band rules come off, so
+   the whole surface under the wireframe is one temperature.
+
+   `unset` on a custom property means inherit, and these are declared
+   on :root, so each one lands back on the shared default without a
+   second copy of the value here to fall out of step. */
+html.xray .p-claude {
+  --scrim: unset; --sunken: unset; --sunken-bar: unset; --stage: unset;
+}
 html.xray .p-claude .band::before,
 html.xray .p-claude .foot::before { display: none; }
 
