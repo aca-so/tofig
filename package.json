@@ -38,7 +38,7 @@
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
     "render": "node bin/tofig-render.mjs",
-    "site": "python3 -m http.server 8777 --bind 127.0.0.1 --directory site",
+    "site": "node serve-site.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint ."
   },

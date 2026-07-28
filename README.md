@@ -19,7 +19,7 @@ No server, no browser extension, no account — just a Figma plugin.
 there. Then paste your HTML and hit **Convert**. Reopen it later with right-click →
 **Plugins** → **tofig**.
 
-Guides for using it, including the [Claude walkthrough](https://tofig.aca.so/claude.html),
+Guides for using it, including the [Claude walkthrough](https://tofig.aca.so/claude),
 are at [tofig.aca.so](https://tofig.aca.so). The rest of this README is about building
 and running it from source.
 

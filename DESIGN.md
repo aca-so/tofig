@@ -80,11 +80,11 @@ them carries meaning. `site.css` never names a ground colour again.
 **Clay is the third meaning.** tofig's biggest use case is a design Claude
 generated, and that journey has two halves. Violet is the tofig/Figma side,
 clay is the Claude side, and the handoff is where they meet. It appears on the
-Claude section of the landing page and on `/claude.html`, and nowhere else.
+Claude section of the landing page and on `/claude`, and nowhere else.
 `--c-500` on `--void` measures 5.2:1. White on `--c-600` measures only 4.17:1,
 so the interactive fill is `--c-700`, the same correction violet needed.
 
-**On `/claude.html` the handoff runs at page scale.** The atmospheric field
+**On `/claude` the handoff runs at page scale.** The atmospheric field
 is a background layer on the body rather than a fixed overlay, so it is
 measured against the whole document: clay pools where the work starts,
 drains through the middle, and violet gathers where the file lands. The
@@ -118,7 +118,7 @@ White on `--v-500` measures 4.49:1 — one step under AA. Interactive fills
 therefore sit on `--v-600` and move *up* to `--v-500` on hover.
 
 **Tint intensity is a share of the gamut, not a chroma number.**
-`/claude.html` shifts its whole neutral ramp to clay's side of the wheel,
+`/claude` shifts its whole neutral ramp to clay's side of the wheel,
 and the first version did it by copying violet's chroma figures across to
 hue 38. The page came out brown. The sRGB chroma ceiling is not the same
 at every hue: at L 0.20 it is 0.118 at 288 and only 0.063 at 40, so the
