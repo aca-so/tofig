@@ -1,0 +1,66 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/site.yml"
+  workflow_dispatch:
+
+# Pages deploys with an OIDC id-token, same trust model as npm publishing:
+# no secret, nothing to rotate.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One live site, so never let two deploys race. In-flight runs finish rather
+# than cancel — a half-applied deploy is worse than a slightly stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and publish tofig.aca.so
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # The site is hand-written static HTML — no build step, by design. It
+      # loads in a browser straight off disk, so what CI publishes is exactly
+      # what was reviewed.
+      - name: Check every internal link resolves
+        run: |
+          cd site
+          fail=0
+          # Local hrefs only: strip anchors and query, map "/" to index.html.
+          for f in $(find . -name '*.html'); do
+            grep -oE 'href="/[^"#?]*"' "$f" | sed 's/href="//;s/"//' | sort -u | while read -r href; do
+              target=".${href}"
+              case "$href" in */) target=".${href}index.html" ;; esac
+              if [ ! -e "$target" ]; then
+                echo "::error file=site/${f#./}::broken internal link -> $href"
+                exit 1
+              fi
+            done || fail=1
+          done
+          [ "$fail" -eq 0 ] || exit 1
+          echo "all internal links resolve"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
