@@ -539,7 +539,12 @@ html.xray .lyr__tag { opacity: 1; }
   100%    { --x: 0; }
 }
 .xplode__scene { animation: xplode-loop 9s infinite both; }
-.xplode.is-paused .xplode__scene { animation-play-state: paused; }
+
+/* Any looping decoration opts in with data-loop and stops when it
+   scrolls out of view or the tab is hidden. Generic, so a second
+   signature on another page does not need its own wiring. */
+[data-loop].is-paused,
+[data-loop].is-paused * { animation-play-state: paused; }
 
 @media (prefers-reduced-motion: reduce) {
   /* The information without the movement: held open, permanently. */
