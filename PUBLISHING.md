@@ -33,7 +33,8 @@ Caveats worth knowing before you pick the publishing account:
 - [ ] Build from a **clean tree** — the version stamp appends `-dirty` otherwise
       (check `git status` first; the banner prints e.g. `0.3.0+f0721e2`).
 - [ ] Smoke test in a Design file **and** a Slides file with `examples/`.
-- [ ] **Icon** — `assets/icon.png`, **128×128**. ✅ built
+- [ ] **Icon** — upload `assets/icon/icon-128.png`. ✅ built
+      (the set also ships 16/32/48/64/256/512; Figma's form only wants 128)
 - [ ] **Thumbnail / cover art** — `assets/marketing/01-thumbnail.png`, **1920×1080**
       (Figma's recommended size — *not* 1920×960). ✅ built
 - [ ] **Carousel** — `assets/marketing/02-…` through `05-…`, 1920×1080 each. ✅ built
