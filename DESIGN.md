@@ -60,8 +60,17 @@ same 284–288 band, so nothing on the page is an untinted grey.
 | Brand / structure | `--v-500` | `oklch(0.588 0.212 284)` = `#745FF3` |
 | Interactive fill | `--v-600` | `oklch(0.535 0.225 284)` |
 | Limits / caveats | `--a-400` | `oklch(0.805 0.145 76)` |
+| Claude side | `--c-500` | `oklch(0.665 0.125 40)` = `#D97757` |
+| Claude fill | `--c-700` | `oklch(0.545 0.135 37)` |
 | Paper (specimens) | `--paper` | `oklch(0.995 0 0)` |
 | acaso mark only | `--mark` | `#6C03FA` |
+
+**Clay is the third meaning.** tofig's biggest use case is a design Claude
+generated, and that journey has two halves. Violet is the tofig/Figma side,
+clay is the Claude side, and the handoff is where they meet. It appears on the
+Claude section of the landing page and on `/claude.html`, and nowhere else.
+`--c-500` on `--void` measures 5.2:1. White on `--c-600` measures only 4.17:1,
+so the interactive fill is `--c-700`, the same correction violet needed.
 
 **Color strategy: committed.** Violet is not a 10% accent here; it carries the
 structural language of the entire page — outlines, node badges, the layers
@@ -129,6 +138,38 @@ arrival. Uniform vertical padding is the tell of a templated page.
 not voice; the h2s carry their own weight. One section (`.head--split`) sets
 its heading against its lede in two columns rather than above it, so the page
 never settles into a single repeated head rhythm.
+
+## Responsive
+
+One number governs the X-ray layout: **1100px**. Above it the layers panel
+docks into its own column and `main` reserves 292px for it. Below it the panel
+is a sheet over the page. Both rules must name the same width; when they
+disagreed at 900 and 1100, everything from 901 to 1099 got a floating panel
+with no room made for it and it sat on top of the content.
+
+**The sheet opens collapsed.** On a phone the expanded panel covered 40% of
+the viewport and buried the hero's call to action, which made X-ray unusable
+on the device where the outlines are most useful. The bar is a button: 42px
+collapsed, expanding to at most `min(40vh, 320px)` when asked. It re-collapses
+each time X-ray is entered, so it never reappears over the content unasked.
+Above 1100px it opens by default, because there it costs nothing.
+
+**Nav collapses by priority, not by position.** The two mid-page anchors go
+first at 1080px, then Renderer at 940px, then all links at 820px. "Claude to
+Figma" leads the list and survives longest; it is the single most important
+destination on the site. Ordering the rule by `nth-child` rather than by
+importance is how the most valuable link ended up hidden on tablets.
+
+**The X-ray label never hides.** Collapsing it to an icon left a 20x14 violet
+blob with no glyph in it: unrecognisable, and under the target minimum. It
+fits at 320px with room to spare.
+
+The hero's minimum height is scoped. `60vh` was sized for the two-column
+desktop layout; stacked on a phone it reserved 280px of empty canvas around a
+226px specimen and pushed the next section off the fold.
+
+Verified at 320, 360, 390, 414, 430, 600, 768, 834, 1024, 1280, 1440, 1920 and
+2560, plus landscape phones at 844x390 and 932x430, in both modes.
 
 ## Motion
 

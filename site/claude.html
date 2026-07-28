@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude to Figma | tofig</title>
+<meta name="description" content="Take a design Claude generated and get it into Figma as editable layers. How to export the artifact's HTML, the prompt that makes it convert cleanly, and what to do when the artifact is a live app.">
+<link rel="canonical" href="https://tofig.aca.so/claude.html">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tofig.aca.so/claude.html">
+<meta property="og:title" content="Claude to Figma | tofig">
+<meta property="og:description" content="Get a Claude design into Figma as real frames, live text and editable vectors. The export, the prompt, and the escape hatch when the artifact is a live app.">
+<meta property="og:image" content="https://tofig.aca.so/assets/og.png">
+<meta property="og:site_name" content="tofig by acaso">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#100d18">
+<meta name="author" content="acaso">
+
+<link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..700&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/claude.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Claude to Figma: turn a generated design into editable layers",
+  "description": "How to export a Claude artifact as self-contained HTML and rebuild it in Figma as native, editable layers with tofig.",
+  "url": "https://tofig.aca.so/claude.html",
+  "inLanguage": "en",
+  "author": { "@type": "Organization", "name": "acaso", "url": "https://aca.so" },
+  "publisher": { "@type": "Organization", "name": "acaso", "url": "https://aca.so" },
+  "about": {
+    "@type": "SoftwareApplication",
+    "name": "tofig",
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Figma",
+    "url": "https://tofig.aca.so/",
+    "license": "https://opensource.org/licenses/MIT"
+  }
+}
+</script>
+</head>
+<body class="p-claude">
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- Node-type glyphs for the layers panel and the tree specimens. Inlined
+     so they draw instantly instead of waiting on an icon webfont. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="i-frame"><path d="M1 4h10M1 8h10M4 1v10M8 1v10"/></g>
+    <g id="i-text"><path d="M2.5 2.5h7M6 2.5v7"/></g>
+    <g id="i-rect"><rect x="2" y="2" width="8" height="8" rx="1.6"/></g>
+    <g id="i-ellipse"><circle cx="6" cy="6" r="4"/></g>
+    <g id="i-vector"><path d="M2 9.5c3.2-7 4.8-7 8 0"/><rect x="0.6" y="8.2" width="2.6" height="2.6"/><rect x="8.8" y="8.2" width="2.6" height="2.6"/></g>
+    <g id="i-group"><path d="M2 3.2h8M2 6h8M2 8.8h5"/></g>
+    <g id="i-image"><rect x="1.2" y="2.2" width="9.6" height="7.6" rx="1.2"/><path d="M1.6 8.2 4.4 5.6l2.2 2 1.6-1.3 2.2 1.9"/></g>
+  </defs>
+</svg>
+
+<header class="nav" data-nav data-xn="Frame · nav" data-xn-below>
+  <div class="wrap nav__in">
+    <a class="brand" href="/" aria-label="tofig, home">
+      <svg class="brand__mark" viewBox="0 0 250 250" aria-hidden="true" focusable="false">
+        <path fill="#6C03FA" d="M151.288,162.752c0,1.625-.059,3.249-.207,4.815-7.474,4.49-16.217,7.09-25.582,7.09-27.443,0-49.686-22.244-49.686-49.686,0-9.571,2.718-18.492,7.385-26.084,1.359-.089,2.718-.148,4.077-.148,35.389,0,64.013,28.683,64.013,64.013ZM210.9,125c0-24.016-8.271-44.192-24.843-60.557-16.572-16.336-36.748-24.518-60.557-24.518s-43.985,8.183-60.557,24.518c-16.572,16.336-24.843,36.511-24.843,60.557s8.271,44.221,24.843,60.557c16.542,16.336,36.748,24.518,60.557,24.518s43.985-8.183,60.557-24.518c16.572-16.365,24.843-36.541,24.843-60.557ZM61.546,125c0-17.96,6.174-33.173,18.522-45.61s27.472-18.669,45.462-18.669,33.114,6.233,45.462,18.669c12.348,12.436,18.522,27.649,18.522,45.61s-6.174,33.173-18.522,45.61c-12.348,12.436-27.502,18.669-45.462,18.669s-33.114-6.233-45.462-18.669c-12.348-12.436-18.522-27.649-18.522-45.61h0ZM135.366,76.318c-.916,2.924-1.418,6.026-1.418,9.216,0,16.897,13.707,30.603,30.603,30.603,3.338,0,6.528-.532,9.541-1.507h0c-4.077-19.319-19.378-34.444-38.727-38.313Z"/>
+      </svg>
+      <span class="brand__word"><span>to</span><b>fig</b></span>
+    </a>
+    <a class="byline" href="https://aca.so" rel="noopener">by <b>acaso</b></a>
+
+    <ul class="nav__links">
+      <li><a href="/#how">How it works</a></li>
+      <li><a href="/#survives">What survives</a></li>
+      <li><a href="/claude.html" aria-current="page">Claude</a></li>
+      <li><a href="/docs.html">Docs</a></li>
+    </ul>
+
+    <div class="nav__tools">
+      <button class="xswitch" data-xray-toggle aria-pressed="false"
+              title="Inspect this page the way tofig sees it">
+        <span class="xswitch__led" aria-hidden="true"></span>
+        <span>X-ray</span>
+        <kbd aria-hidden="true">X</kbd>
+      </button>
+
+      <a class="ghstar" href="https://github.com/aca-so/tofig" rel="noopener" data-ghstar
+         aria-label="Star tofig on GitHub">
+        <span class="ghstar__b"><i class="ph-bold ph-star" aria-hidden="true"></i><span>Star</span></span>
+        <span class="ghstar__n" data-ghstar-n></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ═══════════════════════ Hero ═══════════════════════ -->
+  <section class="hero cl-hero canvas-ground">
+    <div class="wrap">
+      <div class="cl-hero__copy">
+        <h1 class="display" data-xn="Text · h1">Claude drew it.<br>Now <em>edit it</em>.</h1>
+
+        <p class="lede" data-xn="Text · lede">
+          Screenshot a Claude design into Figma and you get <b>one flat image</b>.
+          tofig takes the same HTML and rebuilds it as frames, live text and
+          editable vectors.
+        </p>
+
+        <div class="cl-hero__actions" data-xn="Frame · actions">
+          <a class="btn btn--primary btn--lg" href="#install">
+            Install the plugin <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
+          </a>
+          <a class="btn btn--ghost btn--lg" href="#ask">Copy the export prompt</a>
+        </div>
+
+        <p class="hero__note">
+          <span><i class="ph-bold ph-shield-check" aria-hidden="true"></i> No network access</span>
+          <span><i class="ph-bold ph-scales" aria-hidden="true"></i> MIT licensed</span>
+          <span><i class="ph-bold ph-buildings" aria-hidden="true"></i> An open tool by <a href="https://aca.so" rel="noopener">acaso</a></span>
+        </p>
+      </div>
+
+      <!-- ═══ SIGNATURE ═══
+           One design, two readings of it. Left of the seam it is a single
+           flat export. Right of it, every element is its own named node.
+           The seam sweeps across on a slow loop, so the page performs the
+           transformation instead of captioning it. -->
+      <figure class="cl-spec" data-xn="Frame · specimen">
+        <div class="cl-field">
+
+          <!-- The design itself. Percentage geometry against a locked
+               aspect ratio, so the whole thing scales down intact. -->
+          <div class="cl-card">
+            <span class="cl-el cl-el--plan"><span class="cl-chip">Growth</span></span>
+            <span class="cl-el cl-el--price"><b>$24</b><i>/month</i></span>
+            <span class="cl-el cl-el--rule"></span>
+            <span class="cl-el cl-el--feats">
+              <span class="cl-feat"><span class="cl-dot"></span>Unlimited files</span>
+              <span class="cl-feat"><span class="cl-dot"></span>Five seats</span>
+              <span class="cl-feat"><span class="cl-dot"></span>Priority support</span>
+            </span>
+            <span class="cl-el cl-el--cta">Start free</span>
+          </div>
+
+          <!-- Claude side: one box around everything, one name for it. -->
+          <div class="cl-anno cl-anno--flat" aria-hidden="true">
+            <span class="cl-overlay cl-overlay--flat">
+              <span class="cl-btag cl-btag--clay cl-btag--above">Image · claude-artifact.png</span>
+            </span>
+          </div>
+
+          <!-- tofig side: a box and a name for each element. Geometry is
+               expressed against the card, so the boxes cannot drift away
+               from the elements they measure at any width. -->
+          <div class="cl-anno cl-anno--nodes" aria-hidden="true">
+            <span class="cl-overlay cl-overlay--nodes">
+              <span class="cl-btag cl-btag--violet cl-btag--below cl-btag--frame">Frame · plan-card</span>
+
+              <span class="cl-box cl-box--plan"></span>
+              <span class="cl-btag cl-btag--violet cl-btag--side cl-btag--inner cl-btag--plan">Text · plan</span>
+
+              <span class="cl-box cl-box--price"></span>
+              <span class="cl-btag cl-btag--violet cl-btag--side cl-btag--inner cl-btag--price">Text · price</span>
+
+              <span class="cl-box cl-box--feats"></span>
+              <span class="cl-btag cl-btag--violet cl-btag--side cl-btag--inner cl-btag--feats">Group · features</span>
+
+              <span class="cl-box cl-box--cta"></span>
+              <span class="cl-btag cl-btag--violet cl-btag--below cl-btag--inner cl-btag--cta">Rect · cta</span>
+            </span>
+          </div>
+
+          <span class="cl-seamline" aria-hidden="true"></span>
+        </div>
+
+        <figcaption class="cl-legend">
+          <span class="cl-key cl-key--clay">what Claude hands you</span>
+          <span class="cl-key cl-key--violet">what tofig hands you</span>
+          <i>an illustration, not a live session</i>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ The problem ═══════════════════════ -->
+  <section id="problem" class="band" data-rise data-xn="Frame · problem">
+    <div class="wrap">
+      <div class="head head--split">
+        <h2>A screenshot<br><b>is one layer.</b></h2>
+        <p class="lede">Claude gives you something worth keeping. Paste a picture of
+        it into Figma and every decision inside it, the type scale, the spacing, the
+        radii, the colour, stops being a decision and becomes pixels.</p>
+      </div>
+
+      <div class="split">
+        <article class="cl-panel cl-panel--flat" data-xn="Frame · flat">
+          <p class="cl-panel__bar">
+            <svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-group"/></svg>
+            Pasted screenshot <b>1</b>
+          </p>
+          <ul class="cl-tree">
+            <li><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-image"/></svg>Screenshot 2026-07-28 at 14.02.png</li>
+          </ul>
+          <p class="cl-empty">no other layers</p>
+          <p class="cl-panel__foot">Crop it, scale it, put it behind something.
+          That is the whole list.</p>
+        </article>
+
+        <article class="cl-panel cl-panel--nodes" data-xn="Frame · layers">
+          <p class="cl-panel__bar">
+            <svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-group"/></svg>
+            tofig import <b>9</b>
+          </p>
+          <ul class="cl-tree">
+            <li><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-frame"/></svg>plan-card</li>
+            <li style="--lvl:1"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-text"/></svg>plan</li>
+            <li style="--lvl:1"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-text"/></svg>price</li>
+            <li style="--lvl:1"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-rect"/></svg>divider</li>
+            <li style="--lvl:1"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-group"/></svg>features</li>
+            <li style="--lvl:2"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-vector"/></svg>check</li>
+            <li style="--lvl:2"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-text"/></svg>Unlimited files</li>
+            <li style="--lvl:1"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-rect"/></svg>cta</li>
+            <li style="--lvl:2"><svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-text"/></svg>Start free</li>
+          </ul>
+          <p class="cl-panel__foot">Retype the price. Restyle the button. Pull the
+          card into your own component library.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ The journey ═══════════════════════
+       One spine, two sides. Clay is what happens inside Claude,
+       violet is what happens inside tofig and Figma, and the rail
+       changes colour exactly where the file changes hands. -->
+  <section id="journey" data-xn="Frame · journey">
+    <div class="wrap">
+      <div class="head" data-rise>
+        <h2>Four steps<br><b>from artifact to canvas.</b></h2>
+        <p class="lede">Two of them happen in the conversation, two of them happen in
+        Figma. The first two are the ones that decide whether the last two work.</p>
+      </div>
+
+      <ol class="cl-rail">
+
+        <li class="cl-stage cl-stage--clay" data-rise data-xn="Frame · export">
+          <div class="cl-stage__body">
+            <h3>Get the source, not a picture</h3>
+            <p>Claude renders designs as Artifacts, and an Artifact is a real HTML
+            document. There are two ways to get at it.</p>
+            <ul class="cl-list">
+              <li><b>Copy or download the artifact's source.</b> The artifact panel
+              can hand you the file it is rendering. You want the raw HTML, not an
+              image and not a PDF.</li>
+              <li><b>Or ask for it in the conversation.</b> Slower by one message,
+              better by a mile, because you get to specify the shape of the file
+              while you are asking for it. That prompt is the next step.</li>
+            </ul>
+            <p class="caption">Save it with a <code>.html</code> extension. tofig
+            takes a pasted string or a dropped file, so either is fine.</p>
+          </div>
+        </li>
+
+        <li class="cl-stage cl-stage--clay" id="ask" data-rise data-xn="Frame · prompt">
+          <div class="cl-stage__body">
+            <h3>Ask for a file that converts</h3>
+            <p>This is the step that decides everything downstream. A Claude artifact
+            is built to run in a browser tab with the whole internet available to it.
+            tofig runs inside a Figma plugin that has none of that. Say so up front
+            and Claude will write the file the plugin can actually read.</p>
+
+            <div class="cl-prompt" data-xn="Frame · prompt-block">
+              <div class="cl-prompt__bar">
+                <span>export prompt</span>
+                <button class="copy" data-copy="claude-prompt" data-copied-label="Copied">Copy</button>
+              </div>
+              <div class="cl-prompt__body">
+              <pre><code id="claude-prompt">Give me this design as a single self-contained HTML file.
+
+- All CSS inline, in one &lt;style&gt; tag. No external stylesheets, no CDN links.
+- No JavaScript. The finished layout must exist in the HTML itself, not be
+  built at runtime.
+- Images as data: URIs, or drawn as inline SVG. No remote image URLs.
+- Use a font family that exists in Figma, or a plain system stack, and tell
+  me which one you used.
+- Set an explicit pixel width on the outermost element so the artboard has a
+  fixed size.
+- No iframes, no &lt;link&gt; tags, no icon fonts.</code></pre>
+              </div>
+            </div>
+            <p class="caption">Paste it into the conversation after the design is
+            already on screen. It works as a follow-up message, so you are not
+            regenerating the design, only re-emitting it.</p>
+
+            <p class="cl-lead-in">Every line in that prompt is there for a reason.</p>
+
+            <dl class="cl-rules" data-xn="Frame · rules">
+              <div class="cl-rule">
+                <dt>inline <code>&lt;style&gt;</code> only</dt>
+                <dd>The plugin declares <code>networkAccess: none</code>. A
+                <code>&lt;link&gt;</code> to a stylesheet resolves to nothing, so the
+                document renders unstyled and you convert a column of black text on
+                white.</dd>
+              </div>
+              <div class="cl-rule">
+                <dt>no CDN scripts</dt>
+                <dd>Same block, one layer deeper: the plugin UI runs from a
+                <code>data:</code> URL, which is an opaque origin. A script tag
+                pointing at unpkg or a Tailwind CDN build never resolves.</dd>
+              </div>
+              <div class="cl-rule">
+                <dt>no runtime rendering</dt>
+                <dd>tofig renders your document and reads the computed geometry back
+                out. If the markup is an empty root element that a framework fills in
+                later, there is nothing on screen to measure.</dd>
+              </div>
+              <div class="cl-rule">
+                <dt>fonts Figma has</dt>
+                <dd>A face that is not loaded in your document is substituted for the
+                nearest match, then Inter. tofig reports every substitution it makes,
+                but a face you did not choose is still a face you did not choose.</dd>
+              </div>
+              <div class="cl-rule">
+                <dt><code>data:</code> images, inline SVG</dt>
+                <dd>Remote images are never fetched, so
+                <code>&lt;img src="https://…"&gt;</code> arrives as an empty frame.
+                Inline SVG comes through as vector paths you can reshape.</dd>
+              </div>
+              <div class="cl-rule">
+                <dt>an explicit width</dt>
+                <dd>The artboard is measured, not guessed. A fixed outer width is the
+                difference between a 1440 frame you asked for and whatever the
+                renderer's default viewport happened to be.</dd>
+              </div>
+            </dl>
+          </div>
+        </li>
+
+        <li class="cl-stage cl-stage--seam" data-xn="Frame · handoff">
+          <p class="cl-handoff">
+            <span>handoff</span>
+            <i>the file leaves the conversation and lands on a canvas</i>
+          </p>
+        </li>
+
+        <li class="cl-stage cl-stage--violet" data-rise data-xn="Frame · import">
+          <div class="cl-stage__body">
+            <h3>Run tofig and convert</h3>
+            <p>Open a Figma <b>Design</b> file or a Figma <b>Slides</b> file, run tofig
+            from the plugins menu, then paste the markup into the window or drop the
+            <code>.html</code> file onto it. Press <b>Convert</b>.</p>
+            <p>There is no mode to pick. tofig reads <code>figma.editorType</code> and
+            targets the right output on its own: frames on the canvas in a Design file,
+            real slides in a Slides file. A multi-section page arrives as one frame per
+            section, each clipped to its own bounds.</p>
+            <p class="caption">Nothing leaves your machine. The render happens in a
+            hidden iframe inside the plugin window, on your computer, with the network
+            switched off.</p>
+          </div>
+        </li>
+
+        <li class="cl-stage cl-stage--violet" data-rise data-xn="Frame · output">
+          <div class="cl-stage__body">
+            <h3>What lands on the canvas</h3>
+            <p>Real Figma nodes, with real properties. Text you can retype and rewrap,
+            mapped to the nearest available weight. Inline SVG as editable vector
+            paths with their control points intact. Fills, linear gradients, strokes,
+            corner radii and opacity arrive as native paints and properties rather
+            than baked into the pixels.</p>
+            <div class="cl-props">
+              <span>Frame</span><span>Text</span><span>Vector</span><span>Image fill</span>
+              <span>Gradient</span><span>Stroke</span><span>Radius</span><span>Opacity</span>
+            </div>
+            <p>Layout is absolutely positioned. That is a deliberate trade for visual
+            fidelity: you get placement that matches the render to the pixel, not
+            auto-layout constraints. Auto-layout is on the roadmap, and until it lands
+            this is the honest description of what you get.</p>
+          </div>
+        </li>
+
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ The escape hatch ═══════════════════════ -->
+  <section id="renderer" class="band" data-rise data-xn="Frame · renderer">
+    <div class="wrap">
+      <div class="head">
+        <h2>Some artifacts are<br><b>live apps, not documents.</b></h2>
+        <p class="lede">This is the common case for Claude specifically, so it is worth
+        knowing before it happens rather than after. Claude often ships an artifact as
+        a component that assembles itself when the page loads. Wonderful in a browser
+        tab. Impossible inside the plugin.</p>
+      </div>
+
+      <div class="cl-symptoms" data-xn="Frame · symptoms">
+        <div class="cl-symptom">
+          <h3>A framework runtime</h3>
+          <p>The document is an empty root element plus a script that builds the
+          interface. There is nothing to measure until the script runs, and it cannot
+          run.</p>
+        </div>
+        <div class="cl-symptom">
+          <h3>CDN imports</h3>
+          <p>A <code>&lt;script src&gt;</code> pointing at unpkg or esm.sh, a Tailwind
+          CDN build, a Google Fonts stylesheet. Every one of those is a network request
+          that the plugin will not make.</p>
+        </div>
+        <div class="cl-symptom">
+          <h3><code>localStorage</code> and friends</h3>
+          <p>Browser storage on an opaque <code>data:</code> origin throws immediately.
+          The artifact fails before it paints its first pixel.</p>
+        </div>
+      </div>
+
+      <div class="split cl-fix">
+        <div class="stack gap-6">
+          <div class="notice" data-xn="Frame · notice">
+            <i class="ph-bold ph-plugs" aria-hidden="true"></i>
+            <div>
+              <strong>This is a sandbox limit, not a bug.</strong>
+              <p>No network and a <code>data:</code> URL origin are exactly what make
+              the plugin safe to point at markup you did not write. The workaround
+              keeps that property.</p>
+            </div>
+          </div>
+          <p><b>The quick fix is upstream.</b> Go back to the conversation and ask for
+          the same design as static HTML and CSS with no framework, using the prompt
+          above. It is one message, and it removes the problem at the source rather
+          than working around it.</p>
+          <p><b>The fix for a file you already have</b> is to render it in a real,
+          unrestricted Chrome on your own machine and import the result. Same
+          extractor, same output, just a browser without the sandbox. The command
+          writes a <code>.tofig.json</code> next to the input; drop that into the
+          plugin and it imports directly.</p>
+          <p class="caption">Requires Node and a local Google Chrome or Chromium.
+          Still entirely local: nothing is uploaded, by tofig or by acaso.</p>
+        </div>
+
+        <div class="stack gap-4">
+          <div class="term" data-term data-xn="Frame · terminal">
+            <div class="term__bar">
+              <span class="term__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="term__title">~/exports</span>
+              <button class="copy" data-copy="cmd-render" data-copied-label="Copied">Copy</button>
+            </div>
+            <div class="term__body">
+              <pre><code data-term-out><span class="c-dim">$ </span><span class="c-fn" id="cmd-render">npx --package=@aca-so/tofig tofig-render claude-export.html</span><span class="c-dim">
+  › launching local Chrome</span><span class="c-dim">
+  › rendering claude-export.html</span><span class="c-dim">
+  › extracting 312 nodes</span><span class="c-ok">
+  ✓ wrote claude-export.tofig.json · 104 KB</span></code><span class="term__caret" aria-hidden="true"></span></pre>
+            </div>
+          </div>
+          <p class="caption"><code>--package=</code> is needed because the binary is
+          named differently from the package. In the plugin, drop the
+          <code>.tofig.json</code> exactly the way you would drop an
+          <code>.html</code> file.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ Install ═══════════════════════ -->
+  <section id="install" class="install roomy canvas-ground" data-xn="Frame · install">
+    <div class="wrap install__in">
+      <h2 class="display" data-rise>Ship the design,<br>not a <em>picture</em> of it.</h2>
+      <p class="lede" data-rise>The plugin is published to the
+      <a href="https://aca.so" rel="noopener">acaso</a> organization in Figma. The
+      renderer is a separate, optional CLI, and you only need it for the artifacts
+      that will not sit still.</p>
+
+      <div class="install__actions" data-rise>
+        <a class="btn btn--primary btn--lg" href="https://github.com/aca-so/tofig" rel="noopener">
+          <i class="ph-bold ph-github-logo" aria-hidden="true"></i> Get it on GitHub
+        </a>
+        <a class="btn btn--ghost btn--lg" href="/docs.html">Read the docs</a>
+      </div>
+
+      <div class="install__alt" data-stagger>
+        <div class="card" data-xn="Frame · prompt-again">
+          <h3>The export prompt</h3>
+          <p style="margin-top:var(--space-3)">Keep it somewhere you can reach it. It
+          is the difference between an artifact that converts on the first try and one
+          that arrives as unstyled text.</p>
+          <div class="cl-again">
+            <button class="copy copy--static" data-copy="claude-prompt" data-copied-label="Copied to clipboard">Copy the prompt</button>
+          </div>
+        </div>
+        <div class="card" data-xn="Frame · cli">
+          <h3>Renderer CLI</h3>
+          <div class="code" style="margin-top:var(--space-4)">
+            <button class="copy" data-copy="cmd-install" data-copied-label="Copied">Copy</button>
+            <pre><code id="cmd-install">npm install -g @aca-so/tofig</code></pre>
+          </div>
+          <p class="caption" style="margin-top:var(--space-4)">Published as
+          <a href="https://www.npmjs.com/package/@aca-so/tofig" rel="noopener">@aca-so/tofig</a>.
+          Only needed for exports the plugin sandbox cannot run.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot" data-xn="Frame · footer">
+  <div class="wrap foot__in">
+    <div class="stack gap-4">
+      <a class="brand" href="/" aria-label="tofig, home">
+        <svg class="brand__mark" viewBox="0 0 250 250" aria-hidden="true" focusable="false">
+          <path fill="#6C03FA" d="M151.288,162.752c0,1.625-.059,3.249-.207,4.815-7.474,4.49-16.217,7.09-25.582,7.09-27.443,0-49.686-22.244-49.686-49.686,0-9.571,2.718-18.492,7.385-26.084,1.359-.089,2.718-.148,4.077-.148,35.389,0,64.013,28.683,64.013,64.013ZM210.9,125c0-24.016-8.271-44.192-24.843-60.557-16.572-16.336-36.748-24.518-60.557-24.518s-43.985,8.183-60.557,24.518c-16.572,16.336-24.843,36.511-24.843,60.557s8.271,44.221,24.843,60.557c16.542,16.336,36.748,24.518,60.557,24.518s43.985-8.183,60.557-24.518c16.572-16.365,24.843-36.541,24.843-60.557ZM61.546,125c0-17.96,6.174-33.173,18.522-45.61s27.472-18.669,45.462-18.669,33.114,6.233,45.462,18.669c12.348,12.436,18.522,27.649,18.522,45.61s-6.174,33.173-18.522,45.61c-12.348,12.436-27.502,18.669-45.462,18.669s-33.114-6.233-45.462-18.669c-12.348-12.436-18.522-27.649-18.522-45.61h0ZM135.366,76.318c-.916,2.924-1.418,6.026-1.418,9.216,0,16.897,13.707,30.603,30.603,30.603,3.338,0,6.528-.532,9.541-1.507h0c-4.077-19.319-19.378-34.444-38.727-38.313Z"/>
+        </svg>
+        <span class="brand__word"><span>to</span><b>fig</b></span>
+      </a>
+      <p class="foot__legal">
+        An open-source plugin built and maintained by
+        <a href="https://aca.so" rel="noopener">acaso</a>.<br>
+        MIT licensed. acaso® 2026
+      </p>
+    </div>
+
+    <div class="foot__links">
+      <div class="foot__col">
+        <p class="collabel">Product</p>
+        <a href="/#how">How it works</a>
+        <a href="/#survives">What survives</a>
+        <a href="/claude.html">Claude to Figma</a>
+        <a href="/docs.html">Documentation</a>
+      </div>
+      <div class="foot__col">
+        <p class="collabel">Source</p>
+        <a href="https://github.com/aca-so/tofig" rel="noopener">GitHub</a>
+        <a href="https://www.npmjs.com/package/@aca-so/tofig" rel="noopener">npm</a>
+        <a href="https://github.com/aca-so/tofig/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
+        <a href="https://github.com/aca-so/tofig/issues" rel="noopener">Report an issue</a>
+      </div>
+      <div class="foot__col">
+        <p class="collabel">acaso</p>
+        <a href="https://aca.so" rel="noopener">aca.so</a>
+        <a href="https://github.com/aca-so" rel="noopener">github.com/aca-so</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- X-ray chrome. Inert until the mode is on. -->
+<aside class="lpanel is-open" data-lpanel aria-hidden="true" aria-label="Layers">
+  <button class="lpanel__bar" type="button" data-lpanel-toggle
+          aria-expanded="true" aria-controls="lpanel-body">
+    <svg class="lico" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><use href="#i-group"/></svg>
+    Layers <b data-lpanel-count>0</b>
+    <svg class="lpanel__chev" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+         stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M3 7.5 6 4.5l3 3"/></svg>
+  </button>
+  <div class="lpanel__body" id="lpanel-body">
+    <ul class="lpanel__list" data-lpanel-list></ul>
+    <div class="lpanel__foot">
+      Real geometry, read from this page.<br>Select a row to jump to it.
+    </div>
+  </div>
+</aside>
+
+<div class="xprobe" data-xprobe aria-hidden="true">
+  <span class="xprobe__h"></span><span class="xprobe__v"></span>
+  <span class="xprobe__dim" data-xprobe-dim></span>
+</div>
+
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>
