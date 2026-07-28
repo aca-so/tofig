@@ -70,6 +70,11 @@
         <span class="ghstar__b"><i class="ph-bold ph-star" aria-hidden="true"></i><span>Star</span></span>
         <span class="ghstar__n" data-ghstar-n></span>
       </a>
+
+      <a class="btn btn--primary btn--sm navcta"
+         href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">
+        <i class="ph-bold ph-figma-logo" aria-hidden="true"></i> Get the plugin
+      </a>
     </div>
   </div>
 </header>
@@ -105,6 +110,7 @@
               <span class="doc-ver" data-npm-version>
                 <i class="ph-bold ph-package" aria-hidden="true"></i><span data-npm-version-n></span>
               </span>
+              <a href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">Figma Community</a>
               <a href="https://github.com/aca-so/tofig/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
               <a href="https://github.com/aca-so/tofig/issues" rel="noopener">Report an issue</a>
             </p>
@@ -113,9 +119,18 @@
           <h2 id="install" data-xn="Text · install">Install</h2>
           <p>There are two pieces. Most people only need the first.</p>
           <h3>The Figma plugin</h3>
-          <p>Published to the acaso organization. Open any Design or Slides file and
-          find <strong>tofig</strong> in your organization's plugins. Nothing else to
-          configure: there's no account and no API key.</p>
+          <p>tofig is free on the
+          <a href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">Figma
+          Community</a>. On the plugin page, click <strong>Open in…</strong> and pick the
+          file you want to use it in: Figma installs it and runs it there. There's no
+          account, no API key and nothing to configure.</p>
+          <p>Already in a file? Right-click the canvas and choose
+          <strong>Plugins</strong>, or click <strong>Actions</strong> in the toolbar,
+          then search for <strong>tofig</strong>. Pressing <strong>Save</strong> on the
+          Community page keeps it at the top of that list.</p>
+          <p class="caption">Works in the browser and in the desktop app, on any Figma
+          plan. To run your own build instead, see
+          <a href="#source">Build from source</a>.</p>
 
           <h3>The renderer CLI (optional)</h3>
           <p>Only needed for exports the plugin sandbox can't run. See
@@ -130,7 +145,7 @@
           <h2 id="quickstart" data-xn="Text · quickstart">Quick start</h2>
           <ol>
             <li>Open a Figma <strong>Design</strong> file, or a Figma <strong>Slides</strong> file.</li>
-            <li>Run tofig from the plugins menu.</li>
+            <li>Run tofig: right-click the canvas → <strong>Plugins</strong> → <strong>tofig</strong>.</li>
             <li>Paste your HTML, or drop a single <code>.html</code> file onto the window.</li>
             <li>Click <strong>Convert</strong>.</li>
           </ol>
@@ -317,6 +332,7 @@ npm run build        <span class="c-dim"># produces code.js + ui.html</span></co
     <div class="foot__links">
       <div class="foot__col">
         <p class="collabel">Product</p>
+        <a href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">Get it on Figma</a>
         <a href="/claude.html">Claude to Figma</a>
         <a href="/#how">How it works</a>
         <a href="/#survives">What survives</a>

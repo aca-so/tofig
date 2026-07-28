@@ -44,6 +44,7 @@
     "applicationCategory": "DesignApplication",
     "operatingSystem": "Figma",
     "url": "https://tofig.aca.so/",
+    "installUrl": "https://www.figma.com/community/plugin/1652349254564019815",
     "license": "https://opensource.org/licenses/MIT"
   }
 }
@@ -97,6 +98,11 @@
         <span class="ghstar__b"><i class="ph-bold ph-star" aria-hidden="true"></i><span>Star</span></span>
         <span class="ghstar__n" data-ghstar-n></span>
       </a>
+
+      <a class="btn btn--primary btn--sm navcta"
+         href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">
+        <i class="ph-bold ph-figma-logo" aria-hidden="true"></i> Get the plugin
+      </a>
     </div>
   </div>
 </header>
@@ -123,15 +129,17 @@
         </p>
 
         <div class="cl-hero__actions" data-xn="Frame · actions">
-          <a class="btn btn--primary btn--lg" href="#install">
-            Install the plugin <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
+          <a class="btn btn--primary btn--lg"
+             href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">
+            <i class="ph-bold ph-figma-logo" aria-hidden="true"></i>
+            Get it on Figma Community
           </a>
           <a class="btn btn--ghost btn--lg" href="#ask">Copy the export prompt</a>
         </div>
 
         <p class="hero__note">
+          <span><i class="ph-bold ph-hand-pointing" aria-hidden="true"></i> One click, no account</span>
           <span><i class="ph-bold ph-shield-check" aria-hidden="true"></i> No network access</span>
-          <span><i class="ph-bold ph-scales" aria-hidden="true"></i> MIT licensed</span>
           <span><i class="ph-bold ph-buildings" aria-hidden="true"></i> An open tool by <a href="https://aca.so" rel="noopener">acaso</a></span>
         </p>
       </div>
@@ -406,6 +414,10 @@
             <h3>Run tofig and convert</h3>
             <p>Open a <b>Design</b> or <b>Slides</b> file, run tofig, paste the markup
             or drop the <code>.html</code>, press <b>Convert</b>.</p>
+            <p>Not installed yet? It is one click from the
+            <a href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">Figma
+            Community page</a>: <b>Open in…</b>, pick your file, and it runs there. No
+            account, nothing to download.</p>
             <p>No mode to pick: tofig reads <code>figma.editorType</code> and targets
             the right output. Frames in a Design file, real slides in a Slides file,
             one frame per section for a multi-section page.</p>
@@ -510,17 +522,43 @@
   <section id="install" class="install roomy canvas-ground" data-xn="Frame · install">
     <div class="wrap install__in">
       <h2 class="display" data-rise>Ship the design,<br>not a <em>picture</em> of it.</h2>
-      <p class="lede" data-rise>The plugin is published to the
-      <a href="https://aca.so" rel="noopener">acaso</a> organization in Figma. The
-      renderer is a separate, optional CLI, and you only need it for the artifacts
-      that will not sit still.</p>
+      <p class="lede" data-rise>tofig is free on the
+      <a href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">Figma
+      Community</a>. Installing it is one click from the plugin page: no account, no
+      download, no API key, nothing to configure.</p>
 
       <div class="install__actions" data-rise>
-        <a class="btn btn--primary btn--lg" href="https://github.com/aca-so/tofig" rel="noopener">
-          <i class="ph-bold ph-github-logo" aria-hidden="true"></i> Get it on GitHub
+        <a class="btn btn--primary btn--lg"
+           href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">
+          <i class="ph-bold ph-figma-logo" aria-hidden="true"></i> Get it on Figma Community
         </a>
         <a class="btn btn--ghost btn--lg" href="/docs.html">Read the docs</a>
       </div>
+
+      <p class="caption install__meta" data-rise>
+        <span><i class="ph-bold ph-check-circle" aria-hidden="true"></i> Free and open source</span>
+        <span><i class="ph-bold ph-frame-corners" aria-hidden="true"></i> Design files and Figma Slides</span>
+        <span><i class="ph-bold ph-lightning" aria-hidden="true"></i> Installs in seconds</span>
+      </p>
+
+      <ol class="steps install__steps" data-stagger>
+        <li data-xn="Frame · install-step">
+          <h3>Open the plugin page</h3>
+          <p>On tofig's page in Figma Community, click <b>Open in…</b> and choose the
+          file you want your design to land in. Figma installs it and runs it there.</p>
+        </li>
+        <li data-xn="Frame · install-step">
+          <h3>Design file or Slides file</h3>
+          <p>A <b>Design</b> file for an interface, a <b>Slides</b> file for a deck.
+          That is the only decision: tofig reads which one you opened.</p>
+        </li>
+        <li data-xn="Frame · install-step">
+          <h3>Reopen it for the next one</h3>
+          <p>Right-click the canvas → <b>Plugins</b> → <b>tofig</b>, or click
+          <b>Actions</b> in the toolbar and type <b>tofig</b>. Pressing <b>Save</b> on
+          the Community page keeps it at the top of that list.</p>
+        </li>
+      </ol>
 
       <div class="install__alt" data-stagger>
         <div class="card" data-xn="Frame · prompt-again">
@@ -566,6 +604,7 @@
     <div class="foot__links">
       <div class="foot__col">
         <p class="collabel">Product</p>
+        <a href="https://www.figma.com/community/plugin/1652349254564019815" rel="noopener">Get it on Figma</a>
         <a href="/claude.html">Claude to Figma</a>
         <a href="/#how">How it works</a>
         <a href="/#survives">What survives</a>
