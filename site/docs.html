@@ -82,6 +82,7 @@
           <ul>
             <li><a href="#install">Install</a></li>
             <li><a href="#quickstart">Quick start</a></li>
+            <li><a href="#claude">Coming from Claude</a></li>
             <li><a href="#input">What tofig accepts</a></li>
             <li><a href="#output">What you get back</a></li>
             <li><a href="#fonts">Fonts &amp; substitution</a></li>
@@ -133,6 +134,21 @@
           </ol>
           <p>tofig reads <code>figma.editorType</code> and picks the output for you:
           frames in a Design file, slides in a Slides file. There is no mode switch.</p>
+
+          <h2 id="claude" data-xn="Text · claude">Coming from Claude</h2>
+          <p>The most common route in. Claude generates a design as an artifact, and
+          you want it in Figma as layers rather than a flat screenshot. The
+          <a href="/claude.html">full walkthrough is on its own page</a>, including
+          the export prompt and what to do when the artifact turns out to be a live
+          app.</p>
+          <p>The short version: ask for the design as a single self-contained HTML
+          file, with inline CSS, no CDN links, nothing rendered by JavaScript at
+          runtime, images as <code>data:</code> URIs or inline SVG, and a font that
+          exists in your Figma. Then paste that into the plugin.</p>
+          <p><strong>Decks work the same way, and are one of the best cases.</strong>
+          A Claude slide deck is a single HTML file with one section per slide. Run
+          tofig in a Figma <strong>Slides</strong> file and each section arrives as
+          its own slide, sized and scaled to fit, with its text still editable.</p>
 
           <h2 id="input" data-xn="Text · input">What tofig accepts</h2>
           <p>Self-contained HTML. Concretely, that means everything the page needs is
