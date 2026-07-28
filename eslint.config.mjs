@@ -7,7 +7,12 @@ export default tseslint.config(
     // Generated build output, vendored third-party bundles, and dependencies —
     // never lint these.
     // `tmp/` is gitignored scratch space; flat config doesn't read .gitignore.
-    ignores: ['code.js', 'ui.html', 'dist/', 'out/', 'lib/', 'node_modules/', 'src/ui/vendor/', 'tmp/'],
+    // `.claude/` holds installed agent-skill scripts: third-party, not our
+    // source, and 143 errors of it. Linting them only ever breaks CI.
+    ignores: [
+      'code.js', 'ui.html', 'dist/', 'out/', 'lib/',
+      'node_modules/', 'src/ui/vendor/', 'tmp/', '.claude/',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
