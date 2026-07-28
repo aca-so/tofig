@@ -62,6 +62,17 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
+# Installed agent skills. Third-party tooling, not project source: none of
+# it mentions tofig, six of the seven bundled skills ship no license file,
+# and vendoring unlicensed work into an MIT repo would relicense code we
+# don't own. Personal tooling belongs in ~/.claude/.
+#
+# A skill written *for* tofig is project knowledge and should be committed.
+# When that happens, narrow this to:
+#   .claude/*
+#   !.claude/skills/tofig-*/
+.claude/
+
 # Misc
 tmp/
 temp/
