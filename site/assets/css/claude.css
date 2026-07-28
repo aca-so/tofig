@@ -593,12 +593,15 @@ html.xray .p-claude .cl-prompt__bar { background: transparent; }
    below, and the annotation drops to the two names that carry the
    argument: one image on the left, a frame on the right. The five
    boxes stay, so "one box" against "a box per element" still reads. */
-@media (max-width: 700px) {
+@media (max-width: 560px) {
   .cl-field { aspect-ratio: 500 / 450; }
   .cl-card, .cl-overlay { left: 4%; top: 12%; width: 92%; height: 70%; }
   .cl-btag--inner { display: none; }
   .cl-btag { font-size: max(9px, 2.4cqw); }
   .cl-seamline { bottom: -2%; }
+  /* The outlines carry more of the comparison now that four of the six
+     names are gone, so give them a little more presence. */
+  .cl-anno--nodes .cl-box { outline-width: 1.5px; }
 }
 
 @media (max-width: 620px) {
@@ -610,20 +613,3 @@ html.xray .p-claude .cl-prompt__bar { background: transparent; }
   .cl-prompt code { font-size: 11.5px; line-height: 1.8; }
 }
 
-/* ── Narrow-screen hero comparison ──────────────────────────────────
-   The node labels are positioned by percentage inside the card, so
-   below roughly 760px they land on top of the card's own text: the
-   price, the feature list, the CTA. Nothing about their placement can
-   be tuned out of that, because the card's content and the labels are
-   competing for the same shrinking box.
-
-   So the labels go and the diagram stays. The wipe still reads
-   exactly as intended: a flat washed image on one side, outlined
-   nodes on the other, with the legend below naming both. The tags are
-   the one part that is redundant with the legend. */
-@media (max-width: 759px) {
-  .cl-btag { display: none; }
-  /* Give the outlines a little more presence now that they carry the
-     comparison on their own. */
-  .cl-anno--nodes .cl-box { border-width: 1.5px; }
-}
