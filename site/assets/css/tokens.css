@@ -48,6 +48,20 @@
   /* The acaso symbol ships filled at this value. Mark only. */
   --mark: #6C03FA;
 
+  /* ═══ Clay — the Claude side of the journey ═════════════════════
+     Claude's warm terracotta, #D97757. The site's rule is that colour
+     carries meaning: violet is the tofig/Figma side, clay is the
+     Claude side, and the handoff is where they meet. --c-500 on
+     --void measures 5.2:1, so it is safe for body text. */
+  --c-300: oklch(0.780 0.105 42);
+  --c-400: oklch(0.720 0.120 41);
+  --c-500: oklch(0.665 0.125 40);   /* #D97757 */
+  --c-600: oklch(0.600 0.130 38);
+  --c-700: oklch(0.545 0.135 37);   /* interactive fill: white on c-600
+                                       measures 4.17:1, under the floor */
+  --c-ghost: oklch(0.665 0.125 40 / 0.12);
+  --c-edge:  oklch(0.665 0.125 40 / 0.34);
+
   /* ═══ Amber — what does not survive ═════════════════════════════ */
   --a-300: oklch(0.870 0.115 82);
   --a-400: oklch(0.805 0.145 76);

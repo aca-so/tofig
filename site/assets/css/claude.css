@@ -1,0 +1,629 @@
+/* ──────────────────────────────────────────────────────────────────
+   tofig.aca.so/claude.html — Claude to Figma
+
+   Page-scoped layer on top of tokens.css + site.css. Everything here
+   is prefixed `cl-` or scoped under `.p-claude`, so nothing leaks
+   into the home page or the docs.
+
+   THE COLOUR CODE
+   The site's rule is "violet means structure, amber means a limit."
+   This page extends it along the journey rather than sideways:
+
+     clay   = the Claude side. The conversation, the export, the ask.
+     violet = the tofig and Figma side. Nodes, bounds, measurement.
+     amber  = still, and only, a limit. It appears once, on the
+              sandbox notice, exactly as it does on the home page.
+
+   So the hero specimen is clay on the left of the seam and violet on
+   the right, the rail down the journey changes colour at the handoff,
+   and the export prompt (a thing you hand to Claude) is bordered clay
+   while everything tofig produces is bordered violet. The mix carries
+   information; it is not a second accent sprinkled for warmth.
+
+   The clay ramp itself lives in tokens.css (--c-300 … --c-700, plus
+   --c-ghost and --c-edge), because the home page uses it too and two
+   copies of a ramp is one copy too many. Measured on --void:
+   c-300 9.67, c-400 7.74, c-500 6.26, c-600 4.80, c-700 3.81, and
+   white on --c-700 measures 5.27. Nothing lighter than --c-600 is
+   used as a background for white text, and --c-600 itself is never
+   used for text on a panel ground.
+   ────────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════ Hero ═════════════════════════════════════
+   One column of copy over a full-width specimen, rather than the home
+   page's 46/54 split. Same system, different composition, so the two
+   pages read as siblings instead of as one template used twice. */
+
+.p-claude .cl-hero {
+  padding-block: clamp(var(--space-11), 9vh, var(--space-12)) var(--space-12);
+}
+
+/* Two light sources under the specimen, one per side of the seam.
+   The canvas is lit by the object sitting on it. */
+.p-claude .hero::before {
+  background:
+    radial-gradient(38% 32% at 31% 78%, oklch(0.665 0.125 40 / 0.15), transparent 70%),
+    radial-gradient(44% 38% at 69% 78%, oklch(0.588 0.212 284 / 0.18), transparent 70%);
+}
+
+.cl-hero__copy { position: relative; max-width: 48rem; }
+.cl-hero .display { margin-bottom: var(--space-6); }
+.cl-hero .lede { max-width: 50ch; }
+.cl-hero__actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+/* ══════════ SIGNATURE — the seam ══════════════════════════════════
+   One design, read two ways. Left of the seam it is a single flat
+   export with one box around the whole thing. Right of it, every
+   element carries its own bounds and its own name. The seam sweeps
+   across on an 11s loop, so the page performs the transformation
+   rather than captioning it.
+
+   Geometry is percentage-based against a locked aspect ratio and type
+   is sized in container units, so the whole specimen scales down
+   intact on a phone instead of spilling out of the plate. */
+
+.cl-spec { width: 100%; max-width: 680px; margin: var(--space-11) auto 0; }
+
+.cl-field {
+  position: relative;
+  aspect-ratio: 580 / 400;
+  container-type: inline-size;
+}
+
+/* The card and both annotation overlays share one geometry rule, so
+   the narrow-width layout is a single override and the boxes drawn on
+   top of the design can never drift away from the design. Everything
+   inside them is expressed against the card, not against the field. */
+.cl-card, .cl-overlay {
+  position: absolute;
+  left: 5.17%; top: 7.5%; width: 89.66%; height: 85%;
+}
+.cl-card {
+  background: var(--paper);
+  border-radius: 2.6cqw;
+  box-shadow: var(--lift-3);
+}
+
+.cl-el, .cl-box { position: absolute; display: block; }
+
+.cl-el--plan, .cl-box--plan { left: 5%; top: 7.65%; width: 17.7%; height: 8.24%; }
+.cl-chip {
+  display: grid; place-items: center; width: 100%; height: 100%;
+  border-radius: var(--radius-full);
+  background: oklch(0.588 0.212 284 / 0.13);
+  color: oklch(0.44 0.20 284);
+  font-size: max(9px, 1.9cqw); font-weight: 600; letter-spacing: 0.02em;
+}
+
+.cl-el--price, .cl-box--price { left: 5%; top: 20.6%; width: 48.1%; height: 15.3%; }
+.cl-el--price {
+  display: flex; align-items: baseline; gap: 1.5cqw;
+}
+.cl-el--price b {
+  font-size: max(22px, 7.2cqw); font-weight: 600; line-height: 1;
+  letter-spacing: -0.045em; color: var(--paper-ink);
+}
+.cl-el--price i {
+  font-style: normal; font-size: max(10px, 2.2cqw); color: var(--paper-ink-2);
+}
+
+.cl-el--rule { left: 5%; top: 42.9%; width: 90%; height: 1px; background: var(--paper-line); }
+
+.cl-el--feats, .cl-box--feats { left: 5%; top: 49.4%; width: 57.7%; height: 24.7%; }
+.cl-el--feats {
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.cl-feat {
+  display: flex; align-items: center; gap: 1.7cqw;
+  font-size: max(9.5px, 2.1cqw); line-height: 1.15;
+  letter-spacing: -0.025em; color: var(--paper-ink);
+}
+.cl-dot {
+  flex: none; width: max(5px, 1.5cqw); height: max(5px, 1.5cqw);
+  border-radius: 50%; background: oklch(0.588 0.212 284 / 0.6);
+}
+
+.cl-el--cta, .cl-box--cta { left: 5%; top: 79.4%; width: 90%; height: 12.9%; }
+.cl-el--cta {
+  display: grid; place-items: center;
+  border-radius: 1.8cqw;
+  background: var(--paper-ink); color: var(--paper);
+  font-size: max(11px, 2.4cqw); font-weight: 500; letter-spacing: -0.03em;
+}
+
+/* ── The two readings ─────────────────────────────────────────────── */
+
+.cl-anno { position: absolute; inset: 0; pointer-events: none; }
+.cl-anno--flat  { clip-path: inset(0 4% 0 0);  will-change: clip-path; }
+.cl-anno--nodes { clip-path: inset(0 0 0 96%); will-change: clip-path; }
+
+/* Left of the seam: one dashed box round the whole thing and a warm
+   cast over it, so it reads as one baked image. */
+.cl-overlay--flat {
+  border-radius: 2.6cqw;
+  background: oklch(0.665 0.125 40 / 0.15);
+  outline: 1.5px dashed var(--c-500);
+  outline-offset: 5px;
+}
+/* Right of it: the frame's own bounds, then a box per element. */
+.cl-overlay--nodes {
+  border-radius: 2.6cqw;
+  outline: 1px solid oklch(0.588 0.212 284 / 0.85);
+  outline-offset: 2px;
+}
+.cl-box {
+  outline: 1px solid oklch(0.588 0.212 284 / 0.85);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.cl-btag {
+  position: absolute;
+  font-family: var(--font-mono); font-size: max(8.5px, 1.75cqw); font-weight: 500;
+  line-height: 1; white-space: nowrap;
+  padding: 0.55em 0.7em;
+  border-radius: var(--radius-xs);
+  color: #fff;
+  transform: translateY(-100%) translateY(-5px);
+}
+.cl-btag--violet { background: var(--v-700); }
+.cl-btag--clay   { background: var(--c-700); }
+.cl-btag--below  { transform: translateY(5px); }
+.cl-btag--side   { transform: translateX(6px); }
+
+/* Two tags sit in the gutter above and below the card, where they can
+   never land on the design's own text. The four inner ones ride
+   beside the element they name and are dropped on narrow screens. */
+.cl-btag--above { left: 0; top: 0; }
+.cl-btag--frame { left: 0; top: 100%; }
+.cl-btag--plan  { left: 24.5%; top: 7.65%; }
+.cl-btag--price { left: 54.8%; top: 20.6%; }
+.cl-btag--feats { left: 64.5%; top: 49.4%; }
+.cl-btag--cta   { left: 5%;    top: 92.3%; }
+
+.cl-seamline {
+  position: absolute; top: 0; bottom: -3%; left: 96%;
+  width: 2px; margin-left: -1px;
+  background: linear-gradient(to bottom, var(--c-500), var(--v-500));
+}
+/* The same diamond that marks the handoff on the journey rail below,
+   so the two devices are visibly one idea. It rides the top gutter,
+   clear of the design underneath. */
+.cl-seamline::before {
+  content: "";
+  position: absolute; left: 50%; top: 0;
+  width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
+  border-radius: 1.5px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, var(--c-500), var(--v-500));
+}
+
+/* The loop. Timing lives per keyframe so the sweep, the hold and the
+   return each get their own curve. The two holds are what make it
+   readable rather than restless. All three animations share one
+   duration and one set of keyframe stops, so they stay locked. */
+@keyframes cl-nodes {
+  0%,  8%   { clip-path: inset(0 0 0 96%); animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1); }
+  36%       { clip-path: inset(0 0 0 2%);  animation-timing-function: linear; }
+  64%       { clip-path: inset(0 0 0 2%);  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  82%, 100% { clip-path: inset(0 0 0 96%); }
+}
+@keyframes cl-flat {
+  0%,  8%   { clip-path: inset(0 4% 0 0);  animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1); }
+  36%       { clip-path: inset(0 98% 0 0); animation-timing-function: linear; }
+  64%       { clip-path: inset(0 98% 0 0); animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  82%, 100% { clip-path: inset(0 4% 0 0); }
+}
+@keyframes cl-seam {
+  0%,  8%   { left: 96%; animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1); }
+  36%       { left: 2%;  animation-timing-function: linear; }
+  64%       { left: 2%;  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  82%, 100% { left: 96%; }
+}
+.cl-anno--flat  { animation: cl-flat  11s infinite both; }
+.cl-anno--nodes { animation: cl-nodes 11s infinite both; }
+.cl-seamline    { animation: cl-seam  11s infinite both; }
+
+/* Held open at the midpoint: the information survives, the movement
+   does not. Both readings are on screen at once. */
+@media (prefers-reduced-motion: reduce) {
+  .cl-anno--flat  { animation: none; clip-path: inset(0 50% 0 0); }
+  .cl-anno--nodes { animation: none; clip-path: inset(0 0 0 50%); }
+  .cl-seamline    { animation: none; left: 50%; }
+}
+
+/* The legend teaches the page's colour code once, under the object it
+   describes, and never repeats it. */
+.cl-legend {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-6);
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--ink-3); text-align: center;
+}
+.cl-key { display: inline-flex; align-items: center; gap: 7px; }
+.cl-key::before { content: ""; width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.cl-key--clay::before   { background: var(--c-500); }
+.cl-key--violet::before { background: var(--v-500); }
+.cl-legend i { font-style: normal; color: var(--ink-4); }
+
+/* ═══════════════════ The layers-panel comparison ══════════════════
+   Two real panels, one row against nine. The emptiness on the left is
+   the argument, so it is drawn rather than described. */
+
+.cl-panel {
+  display: flex; flex-direction: column;
+  background: oklch(0.168 0.021 288);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.cl-panel--flat  { border-color: var(--c-edge); }
+.cl-panel--nodes { border-color: var(--v-edge); }
+
+.cl-panel__bar {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3);
+}
+.cl-panel__bar b {
+  margin-left: auto; font-weight: 500;
+  text-transform: none; letter-spacing: 0.01em;
+}
+.cl-panel--flat  .cl-panel__bar b    { color: var(--c-300); }
+.cl-panel--nodes .cl-panel__bar b    { color: var(--v-300); }
+.cl-panel--flat  .cl-panel__bar .lico { color: var(--c-400); }
+.cl-panel--nodes .cl-panel__bar .lico { color: var(--v-400); }
+
+.cl-tree {
+  list-style: none; margin: 0; padding: var(--space-3) var(--space-2);
+  display: flex; flex-direction: column; gap: 1px;
+}
+.cl-tree li {
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: 24px;
+  padding: 4px var(--space-2);
+  padding-left: calc(var(--space-2) + var(--lvl, 0) * 14px);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.01em;
+  color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cl-panel--flat  .cl-tree .lico { color: var(--c-400); }
+.cl-panel--nodes .cl-tree .lico { color: var(--v-400); }
+
+.cl-empty {
+  flex: 1;
+  display: grid; place-items: center;
+  min-height: 96px; padding: var(--space-6);
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  color: var(--ink-3);
+  border-top: 1px dashed var(--line);
+  margin: 0 var(--space-2) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.cl-panel__foot {
+  margin-top: auto;
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--line);
+  font-size: var(--text-sm); color: var(--ink-3);
+}
+
+/* ═══════════════════ The journey rail ═════════════════════════════
+   A genuine ordered sequence, so it is numbered and connected. The
+   rail is clay while the work happens in Claude, violet once it
+   happens in Figma, and it crossfades across the one node where the
+   file changes hands. That node is the whole point of the page. */
+
+.cl-rail {
+  list-style: none; margin: 0; padding: 0;
+  counter-reset: st;
+}
+
+.cl-stage {
+  position: relative;
+  padding-left: 60px;
+  padding-bottom: var(--space-12);
+  /* The rail rides a background-image rather than ::before. Each stage
+     carries data-xn, X-ray paints its node badge on ::after, and the
+     number marker owns ::before, so the line needs the third slot. */
+  background-repeat: no-repeat;
+  background-position: 15px 36px;
+  background-size: 2px calc(100% - 36px);
+}
+.cl-stage:last-child { padding-bottom: 0; }
+
+.cl-stage--clay   { background-image: linear-gradient(var(--c-edge), var(--c-edge)); }
+.cl-stage--violet { background-image: linear-gradient(var(--v-edge), var(--v-edge)); }
+.cl-stage--violet:last-child {
+  background-image: linear-gradient(var(--v-edge), transparent);
+}
+
+.cl-stage--clay::before, .cl-stage--violet::before {
+  content: counter(st, decimal-leading-zero);
+  position: absolute; left: 0; top: 0;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  font-weight: 500; line-height: 1;
+}
+.cl-stage--clay   { counter-increment: st; }
+.cl-stage--violet { counter-increment: st; }
+.cl-stage--clay::before {
+  color: var(--c-300); background: var(--c-ghost);
+  box-shadow: inset 0 0 0 1px var(--c-edge);
+}
+.cl-stage--violet::before {
+  color: var(--v-200); background: var(--v-ghost);
+  box-shadow: inset 0 0 0 1px var(--v-edge);
+}
+
+/* The handoff. The only place on the site where two accents touch. */
+.cl-stage--seam {
+  padding-bottom: var(--space-11);
+  background-position: 15px 0;
+  background-size: 2px 100%;
+  background-image: linear-gradient(var(--c-500), var(--v-500) 62px, var(--v-edge) 62px);
+}
+.cl-stage--seam::before {
+  content: "";
+  position: absolute; left: 10px; top: 12px;
+  width: 12px; height: 12px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, var(--c-500), var(--v-500));
+}
+.cl-handoff {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);
+  min-height: 32px;
+}
+.cl-handoff span {
+  font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  padding: 6px var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--line-2);
+  background: linear-gradient(90deg, var(--c-ghost), var(--v-ghost));
+  color: var(--ink-2);
+}
+.cl-handoff i {
+  font-style: normal; font-size: var(--text-sm); color: var(--ink-3);
+}
+
+.cl-stage__body {
+  display: flex; flex-direction: column; gap: var(--space-4);
+  max-width: 58rem;
+}
+.cl-stage__body h3 {
+  font-size: clamp(1.25rem, 2.1vw, 1.625rem);
+  font-weight: 400; line-height: 1.15;
+  letter-spacing: -0.038em;
+}
+.cl-stage__body > p { color: var(--ink-3); max-width: var(--measure); }
+.cl-stage__body > p b { color: var(--ink-2); font-weight: 500; }
+.cl-stage__body > .caption { max-width: var(--measure); }
+.cl-stage__body > * + * { margin-top: 0; }
+
+.cl-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: var(--space-4);
+  max-width: var(--measure);
+}
+.cl-list li {
+  position: relative; padding-left: var(--space-6);
+  font-size: var(--text-sm); color: var(--ink-3);
+}
+.cl-list li::before {
+  content: ""; position: absolute; left: 2px; top: 0.55em;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c-400);
+}
+.cl-list b { color: var(--ink-2); font-weight: 500; }
+
+.cl-lead-in {
+  margin-top: var(--space-4);
+  color: var(--ink-2); font-weight: 400;
+}
+
+/* ── The export prompt ────────────────────────────────────────────
+   Bordered clay, because it is a thing you hand to Claude. Wrapped
+   rather than scrolled: a prompt you cannot read in one glance is a
+   prompt nobody checks before pasting. */
+
+.cl-prompt {
+  position: relative;
+  background: oklch(0.105 0.016 288);
+  border: 1px solid var(--c-edge);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 0 44px -20px oklch(0.665 0.125 40 / 0.55);
+}
+.cl-prompt__bar {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  background: oklch(0.185 0.030 40 / 0.55);
+  font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--c-300);
+}
+.cl-prompt__bar .copy { position: static; margin-left: auto; }
+.cl-prompt__body { padding: var(--space-5) var(--space-6); }
+.cl-prompt pre { margin: 0; }
+.cl-prompt code {
+  display: block;
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9;
+  letter-spacing: var(--tracking-mono);
+  color: var(--ink-2);
+  white-space: pre-wrap; overflow-wrap: break-word;
+}
+
+/* ── Why each constraint is in there ─────────────────────────────── */
+
+.cl-rules { margin: 0; border-top: 1px solid var(--line); }
+.cl-rule {
+  display: grid; gap: var(--space-2) var(--space-8);
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--line);
+}
+@media (min-width: 760px) {
+  .cl-rule { grid-template-columns: 14rem 1fr; align-items: start; }
+}
+.cl-rule dt {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  letter-spacing: var(--tracking-mono); line-height: 1.6;
+  color: var(--c-300);
+}
+.p-claude .cl-rule dt code {
+  background: var(--c-ghost);
+  border-color: var(--c-edge);
+  color: var(--c-300);
+}
+.cl-rule dd {
+  margin: 0; font-size: var(--text-sm); line-height: 1.6;
+  color: var(--ink-3); max-width: 52ch;
+}
+
+/* ── What arrives, as a property readout ──────────────────────────── */
+
+.cl-props { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.cl-props span {
+  display: inline-flex; align-items: center; min-height: 26px;
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--v-edge);
+  background: oklch(0.588 0.212 284 / 0.1);
+  color: var(--v-200);
+  font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 500;
+}
+
+/* ═══════════════════ Why it sometimes will not render ═════════════
+   The causes sit on the Claude side, so they are ruled in clay. The
+   limit itself is the sandbox, so the notice below stays amber, the
+   way every limit on this site is amber. */
+
+.cl-symptoms {
+  display: grid; gap: var(--space-7);
+  margin-bottom: var(--space-10);
+}
+@media (min-width: 880px) {
+  .cl-symptoms { grid-template-columns: 1.05fr 1.15fr 1fr; gap: var(--space-8); }
+}
+.cl-symptoms > * { min-width: 0; }
+.cl-symptom {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid oklch(0.665 0.125 40 / 0.55);
+}
+.cl-symptom h3 { font-size: var(--text-md); font-weight: 500; }
+.cl-symptom p { font-size: var(--text-sm); color: var(--ink-3); }
+
+.cl-fix p { font-size: var(--text-md); color: var(--ink-3); }
+.cl-fix p b { color: var(--ink-2); font-weight: 500; }
+.cl-fix .caption { font-size: var(--text-xs); color: var(--ink-4); }
+
+/* ═══════════════════ Install ══════════════════════════════════════ */
+
+/* The prompt is a Claude-side object, so its button is clay rather
+   than the violet used for everything tofig does. */
+.cl-again { margin-top: var(--space-5); }
+.p-claude .copy--static {
+  position: static;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-2);
+  width: 100%; min-height: 40px;
+  padding: 10px var(--space-4);
+  font-size: var(--text-xs);
+  background: var(--c-ghost);
+  border-color: var(--c-edge);
+  color: var(--c-300);
+}
+.p-claude .copy--static:hover {
+  background: oklch(0.665 0.125 40 / 0.22);
+  border-color: var(--c-500);
+  color: #fff;
+}
+/* White clears AA on c-700 at 6.39:1; on c-600 it lands at 4.41 and
+   would miss it, so the confirmed state uses the darker step. */
+.p-claude .copy--static[data-copied="true"] {
+  background: var(--c-700); border-color: var(--c-500); color: #fff;
+}
+
+/* ═══════════════════ X-ray ════════════════════════════════════════
+   The page strips its own render the same way the home page does:
+   paper to wireframe, fills to violet ghost, text left readable. */
+
+html.xray .p-claude .cl-card,
+html.xray .p-claude .cl-panel,
+html.xray .p-claude .cl-prompt {
+  background: oklch(0.588 0.212 284 / 0.05) !important;
+  border-color: oklch(0.588 0.212 284 / 0.4) !important;
+  box-shadow: none !important;
+}
+html.xray .p-claude .cl-wash { display: none; }
+html.xray .p-claude .cl-chip,
+html.xray .p-claude .cl-el--cta,
+html.xray .p-claude .cl-el--rule,
+html.xray .p-claude .cl-dot {
+  background: oklch(0.588 0.212 284 / 0.18) !important;
+  color: var(--v-200) !important;
+}
+html.xray .p-claude .cl-el--price b,
+html.xray .p-claude .cl-el--price i,
+html.xray .p-claude .cl-feat { color: var(--ink-2) !important; }
+html.xray .p-claude .cl-prompt__bar { background: transparent; }
+
+/* ═══════════════════ Responsive ═══════════════════════════════════ */
+
+@media (max-width: 820px) {
+  .p-claude .cl-hero { padding-block: var(--space-10) var(--space-11); }
+  .cl-spec { margin-top: var(--space-9); }
+}
+
+/* Below this width there is no room beside the design for four node
+   names, and crowding them in put mono labels on top of the card's own
+   type. The plate goes taller, the card takes a real gutter above and
+   below, and the annotation drops to the two names that carry the
+   argument: one image on the left, a frame on the right. The five
+   boxes stay, so "one box" against "a box per element" still reads. */
+@media (max-width: 700px) {
+  .cl-field { aspect-ratio: 500 / 450; }
+  .cl-card, .cl-overlay { left: 4%; top: 12%; width: 92%; height: 70%; }
+  .cl-btag--inner { display: none; }
+  .cl-btag { font-size: max(9px, 2.4cqw); }
+  .cl-seamline { bottom: -2%; }
+}
+
+@media (max-width: 620px) {
+  .cl-stage { padding-left: 44px; background-position: 13px 32px; }
+  .cl-stage--clay::before, .cl-stage--violet::before { width: 28px; height: 28px; }
+  .cl-stage--seam { background-position: 13px 0; }
+  .cl-stage--seam::before { left: 8px; top: 10px; width: 11px; height: 11px; }
+  .cl-prompt__body { padding: var(--space-4); }
+  .cl-prompt code { font-size: 11.5px; line-height: 1.8; }
+}
+
+/* ── Narrow-screen hero comparison ──────────────────────────────────
+   The node labels are positioned by percentage inside the card, so
+   below roughly 760px they land on top of the card's own text: the
+   price, the feature list, the CTA. Nothing about their placement can
+   be tuned out of that, because the card's content and the labels are
+   competing for the same shrinking box.
+
+   So the labels go and the diagram stays. The wipe still reads
+   exactly as intended: a flat washed image on one side, outlined
+   nodes on the other, with the legend below naming both. The tags are
+   the one part that is redundant with the legend. */
+@media (max-width: 759px) {
+  .cl-btag { display: none; }
+  /* Give the outlines a little more presence now that they carry the
+     comparison on their own. */
+  .cl-anno--nodes .cl-box { border-width: 1.5px; }
+}
