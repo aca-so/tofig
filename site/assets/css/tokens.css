@@ -35,6 +35,24 @@
   --ink-4:     oklch(0.605 0.018 288);
   --ink-faint: oklch(0.420 0.020 288);
 
+  /* ═══ Component grounds ═════════════════════════════════════════
+     The grounds below the page plane. A code block, a terminal and
+     the little canvases inside the destination cards all sit *under*
+     --void rather than on it, and the nav wash sits level with it.
+
+     They are tokens rather than literals because a page may move its
+     whole neutral ramp to another hue — /claude.html rides clay's 44
+     instead of violet's 288 — and a component that hardcodes one hue
+     turns into a cold rectangle on a warm page. Every sunken surface
+     takes its ground from here; only the accent painted on top of it
+     carries meaning. Tint intensity is matched across hues by channel
+     spread, not by chroma: at these lightnesses a warm hue needs
+     roughly two thirds of violet's chroma to read as equally tinted. */
+  --sunken:     oklch(0.105 0.016 288);  /* code, terminal, prompt   */
+  --sunken-bar: oklch(0.145 0.018 288);  /* their title bars         */
+  --stage:      oklch(0.115 0.018 288);  /* the small canvases       */
+  --scrim:      oklch(0.135 0.018 288);  /* nav wash, page ground    */
+
   /* ═══ Violet — structure, nodes, measurement ════════════════════ */
   --v-200: oklch(0.900 0.060 284);
   --v-300: oklch(0.795 0.115 284);

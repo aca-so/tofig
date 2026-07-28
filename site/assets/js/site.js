@@ -206,20 +206,22 @@
      the loop entirely. JS only stops it when nobody is looking.
      ═══════════════════════════════════════════════════════════════ */
 
-  const xplodeInit = () => {
-    const root = $("[data-xplode]");
-    if (!root || reduced || !("IntersectionObserver" in window)) return;
+  const loopsInit = () => {
+    const loops = $$("[data-loop]");
+    if (!loops.length || reduced || !("IntersectionObserver" in window)) return;
 
     const io = new IntersectionObserver(
-      ([e]) => root.classList.toggle("is-paused", !e.isIntersecting),
+      (entries) => entries.forEach((e) => e.target.classList.toggle("is-paused", !e.isIntersecting)),
       { threshold: 0 }
     );
-    io.observe(root);
+    loops.forEach((el) => io.observe(el));
 
     /* A background tab should not burn frames either. */
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) root.classList.add("is-paused");
-      else if (root.getBoundingClientRect().bottom > 0) root.classList.remove("is-paused");
+      loops.forEach((el) => {
+        if (document.hidden) el.classList.add("is-paused");
+        else if (el.getBoundingClientRect().bottom > 0) el.classList.remove("is-paused");
+      });
     });
   };
 
@@ -628,7 +630,7 @@
   };
 
   xrayInit();
-  xplodeInit();
+  loopsInit();
   starsInit();
   termInit();
   toysInit();

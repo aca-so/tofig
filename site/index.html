@@ -131,7 +131,7 @@
            Built the way tofig emits: absolutely positioned layers, one
            per depth. Flat, it is a rendered card. Lifted, it is the
            layer stack. Same markup, one variable between them. -->
-      <figure class="xplode" data-xplode style="margin:0">
+      <figure class="xplode" data-xplode data-loop style="margin:0">
         <div class="xplode__scene" data-xplode-scene>
           <div class="lyr lyr--frame" style="--d:0">
             <span class="lyr__tag">Frame · profile-card</span>
@@ -215,7 +215,8 @@
         <h2 data-xn="Text · h2">Claude designed it.<br><em>Now make it editable.</em></h2>
         <p class="lede">Claude hands you a finished interface. Screenshot it into Figma and
         you get a flat picture you cannot touch. tofig gives you the layer tree: every
-        frame, every string, every vector, exactly where Claude put it.</p>
+        frame, every string, every vector, exactly where Claude put it. Ask it for a
+        deck and each slide lands as a <b>real Figma slide</b>.</p>
 
         <div class="chand__actions">
           <a class="btn btn--claude btn--lg" href="/claude.html">
@@ -237,8 +238,8 @@
         </div>
         <div class="chand__step chand__step--tofig" data-xn="Frame · in-figma">
           <span class="chand__where">In Figma</span>
-          <span class="chand__what">Named frames, <b>live text</b>, editable vectors,
-          on the canvas and ready to change.</span>
+          <span class="chand__what">Named frames, <b>live text</b>, editable vectors.
+          Or <b>real slides</b>, if you opened a Slides file.</span>
         </div>
       </div>
     </div>
@@ -308,7 +309,9 @@
             <span class="dest__chip">Slides file</span>
             <h3>Real Figma slides</h3>
             <p>tofig detects decks, including JavaScript-driven ones, and imports each
-            slide as its own Figma slide, sized and scaled to fit rather than clipped.</p>
+            slide as its own Figma slide, sized and scaled to fit rather than clipped.
+            This is where a <a href="/claude.html">Claude-generated deck</a> pays off
+            most: one HTML file in, a whole editable deck out.</p>
           </div>
         </article>
       </div>

@@ -183,7 +183,7 @@ section.roomy { padding-block: var(--space-13); }
 
 .nav {
   position: sticky; top: 0; z-index: var(--z-sticky);
-  background: oklch(0.135 0.018 288 / 0.72);
+  background: color-mix(in oklab, var(--scrim) 72%, transparent);
   border-bottom: 1px solid transparent;
   transition: border-color var(--t-fast) var(--e-out-q),
               background var(--t-fast) var(--e-out-q);
@@ -191,7 +191,7 @@ section.roomy { padding-block: var(--space-13); }
 @supports (backdrop-filter: blur(8px)) {
   .nav { backdrop-filter: blur(16px) saturate(1.5); }
 }
-.nav.is-stuck { border-bottom-color: var(--line); background: oklch(0.135 0.018 288 / 0.88); }
+.nav.is-stuck { border-bottom-color: var(--line); background: color-mix(in oklab, var(--scrim) 88%, transparent); }
 
 .nav__in {
   display: flex; align-items: center; gap: var(--space-5);
@@ -539,7 +539,12 @@ html.xray .lyr__tag { opacity: 1; }
   100%    { --x: 0; }
 }
 .xplode__scene { animation: xplode-loop 9s infinite both; }
-.xplode.is-paused .xplode__scene { animation-play-state: paused; }
+
+/* Any looping decoration opts in with data-loop and stops when it
+   scrolls out of view or the tab is hidden. Generic, so a second
+   signature on another page does not need its own wiring. */
+[data-loop].is-paused,
+[data-loop].is-paused * { animation-play-state: paused; }
 
 @media (prefers-reduced-motion: reduce) {
   /* The information without the movement: held open, permanently. */
@@ -935,7 +940,7 @@ html.xray .lpanel {
 .dest__stage {
   position: relative; height: 188px;
   border-bottom: 1px solid var(--line);
-  background-color: oklch(0.115 0.018 288);
+  background-color: var(--stage);
   background-image: radial-gradient(circle at 1px 1px, var(--line) 1px, transparent 0);
   background-size: 20px 20px;
   overflow: hidden;
@@ -1152,7 +1157,7 @@ input[type="range"]::-moz-range-thumb {
 
 .term {
   position: relative;
-  background: oklch(0.105 0.016 288);
+  background: var(--sunken);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -1161,7 +1166,7 @@ input[type="range"]::-moz-range-thumb {
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--line);
-  background: oklch(0.145 0.018 288);
+  background: var(--sunken-bar);
 }
 .term__dots { display: flex; gap: 6px; }
 .term__dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); }
@@ -1206,7 +1211,7 @@ input[type="range"]::-moz-range-thumb {
 
 .code {
   position: relative;
-  background: oklch(0.105 0.016 288);
+  background: var(--sunken);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: var(--space-5) var(--space-6);
@@ -1219,7 +1224,7 @@ input[type="range"]::-moz-range-thumb {
    only shows where there is genuinely more to see. Pure CSS: nothing
    to measure, nothing to keep in sync. */
 .code pre, .term pre {
-  --cbg: oklch(0.105 0.016 288);
+  --cbg: var(--sunken);
   background:
     linear-gradient(to right, var(--cbg) 60%, transparent) left center / 36px 100% no-repeat local,
     linear-gradient(to left,  var(--cbg) 60%, transparent) right center / 36px 100% no-repeat local,
