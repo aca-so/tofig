@@ -42,8 +42,8 @@
    The canvas is lit by the object sitting on it. */
 .p-claude .hero::before {
   background:
-    radial-gradient(38% 32% at 31% 78%, oklch(0.665 0.125 40 / 0.15), transparent 70%),
-    radial-gradient(44% 38% at 69% 78%, oklch(0.588 0.212 284 / 0.18), transparent 70%);
+    radial-gradient(46% 38% at 28% 74%, oklch(0.665 0.125 40 / 0.26), transparent 70%),
+    radial-gradient(46% 40% at 72% 78%, oklch(0.588 0.212 284 / 0.20), transparent 70%);
 }
 
 .cl-hero__copy { position: relative; max-width: 48rem; }
@@ -324,6 +324,11 @@
 .cl-rail {
   list-style: none; margin: 0; padding: 0;
   counter-reset: st;
+  /* The prose inside runs to a reading measure, so at the full 1240
+     content width every stage left ~600px of dead canvas to its
+     right. Narrowing the rail closes that without cramping the prompt
+     block, which is the one child that wants room. */
+  max-width: 64rem;
 }
 
 .cl-stage {
@@ -474,7 +479,19 @@
   border-bottom: 1px solid var(--line);
 }
 @media (min-width: 760px) {
-  .cl-rule { grid-template-columns: 14rem 1fr; align-items: start; }
+  .cl-rule { grid-template-columns: 11rem 1fr; align-items: start; }
+}
+/* Six stacked rows ran to 1244px, nearly half the section. As a
+   two-column reference it halves that and scans better: this is a
+   lookup table, not a narrative. */
+@media (min-width: 1080px) {
+  .cl-rules {
+    display: grid; grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-9);
+    border-top: 0;
+  }
+  .cl-rule { grid-template-columns: 1fr; gap: 6px; padding: var(--space-4) 0; }
+  .cl-rules > .cl-rule:nth-child(-n+2) { border-top: 1px solid var(--line); }
 }
 .cl-rule dt {
   font-family: var(--font-mono); font-size: var(--text-xs);
@@ -620,3 +637,100 @@ html.xray .p-claude .cl-prompt__bar { background: transparent; }
   .cl-prompt code { font-size: 11.5px; line-height: 1.8; }
 }
 
+
+/* ═══════════════════ Ember ground ═════════════════════════════════
+   The page is warm because the journey starts warm. Rather than
+   dropping orange accents onto the standard violet-black, the whole
+   ground shifts to clay's hue: every tinted neutral on this page
+   rides 38 instead of 288. Nothing is "an orange bit on a dark page";
+   the page itself is warm, and violet arrives as the destination.
+
+   Measured on the new ground: ink 16.8:1, ink-2 9.0:1, ink-3 5.7:1,
+   ink-4 4.7:1. All still clear AA. */
+.p-claude {
+  --void:      oklch(0.148 0.030 38);
+  --canvas:    oklch(0.200 0.036 38);
+  --surface:   oklch(0.235 0.040 38);
+  --surface-2: oklch(0.282 0.042 38);
+  --line:      oklch(0.318 0.042 38);
+  --line-2:    oklch(0.402 0.048 38);
+  --dot:       oklch(0.390 0.062 38);
+  background: var(--void);
+}
+
+/* An atmospheric field behind everything: clay pooling at the top
+   where the work starts, violet gathering at the bottom where it
+   lands. Fixed, so it reads as light in the room rather than a
+   decoration attached to any one section. */
+.p-claude::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(86% 46% at 10% -6%,  oklch(0.665 0.125 40 / 0.30), transparent 72%),
+    radial-gradient(66% 36% at 95% 10%,  oklch(0.720 0.120 41 / 0.18), transparent 70%),
+    radial-gradient(80% 34% at 20% 44%,  oklch(0.665 0.125 40 / 0.14), transparent 74%),
+    radial-gradient(70% 30% at 88% 62%,  oklch(0.665 0.125 40 / 0.09), transparent 74%),
+    radial-gradient(80% 40% at 78% 104%, oklch(0.588 0.212 284 / 0.22), transparent 72%);
+}
+
+/* Grain. Two thousandths of an inch of tooth, which is the difference
+   between a flat dark rectangle and a surface. */
+.p-claude::after {
+  content: "";
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none; opacity: 0.4; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* Sections sit on the field rather than hiding it. */
+.p-claude main > section { background-color: transparent; }
+.p-claude .band {
+  background: oklch(0.200 0.036 38 / 0.42);
+  border-block-color: oklch(0.665 0.125 40 / 0.26);
+}
+.p-claude .canvas-ground { background-color: transparent; }
+
+/* The clay stages get their own warmth so the rail reads as a
+   gradient of temperature, not just a change of border colour. */
+.p-claude .cl-stage--clay .cl-stage__body {
+  background: linear-gradient(100deg,
+    oklch(0.665 0.125 40 / 0.10), oklch(0.665 0.125 40 / 0.02) 62%);
+}
+.p-claude .cl-stage--violet .cl-stage__body {
+  background: linear-gradient(100deg,
+    oklch(0.588 0.212 284 / 0.09), oklch(0.588 0.212 284 / 0.02) 62%);
+}
+
+.p-claude .cl-hero .display em { text-shadow: 0 0 48px oklch(0.665 0.125 40 / 0.35); }
+
+@media (prefers-reduced-motion: reduce) { .p-claude::after { opacity: 0.28; } }
+
+
+/* This page is a walkthrough, so it is long by nature. Tightening the
+   section rhythm one step buys back most of a screen without making
+   anything feel cramped. */
+.p-claude main > section { padding-block: var(--space-11); }
+.p-claude main > section.roomy { padding-block: var(--space-12); }
+.p-claude #journey .head { margin-bottom: var(--space-8); }
+
+/* The reassurance line under the hero lede. Quieter than the lede,
+   louder than a caption: it is an aside, not fine print. */
+.p-claude .cl-normal {
+  max-width: 46ch;
+  margin-top: var(--space-5);
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--c-edge);
+  font-size: var(--text-md); font-weight: 300; line-height: 1.6;
+  color: var(--ink-3);
+}
+
+/* The deck section borrows the landing page's two stages, so the
+   Claude side needs its chip in clay. */
+.p-claude .cl-chip--clay {
+  background: var(--c-ghost);
+  border-color: var(--c-edge);
+  color: var(--c-300);
+}
+.p-claude #slides .dest:hover,
+.p-claude #slides .dest:focus-within { border-color: var(--c-edge); }

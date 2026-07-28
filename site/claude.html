@@ -110,7 +110,14 @@
         <p class="lede" data-xn="Text · lede">
           Screenshot a Claude design into Figma and you get <b>one flat image</b>.
           tofig takes the same HTML and rebuilds it as frames, live text and
-          editable vectors.
+          editable vectors. Decks too: a Claude slide deck lands as
+          <b>real Figma slides</b>.
+        </p>
+
+        <p class="cl-normal">
+          Design used to run one way, Figma first and code after. Now it often
+          starts in a conversation instead. Running it backwards is not a
+          workaround, it is just what the work looks like now.
         </p>
 
         <div class="cl-hero__actions" data-xn="Frame · actions">
@@ -240,12 +247,62 @@
        One spine, two sides. Clay is what happens inside Claude,
        violet is what happens inside tofig and Figma, and the rail
        changes colour exactly where the file changes hands. -->
+  <!-- ═══════════════════════ Decks ═══════════════════════ -->
+  <section id="slides" data-rise data-xn="Frame · slides">
+    <div class="wrap">
+      <div class="head head--split">
+        <h2>Decks are<br><b>the best case.</b></h2>
+        <p class="lede">Ask Claude for a slide deck and you get one HTML file holding
+        every slide. Open tofig in a <b>Figma Slides</b> file and each one arrives as a
+        real slide, sized and scaled to fit. Not one flat picture per page.</p>
+      </div>
+
+      <div class="split">
+        <article class="card dest" data-xn="Frame · deck-in">
+          <div class="dest__stage" aria-hidden="true">
+            <div class="sld"><span class="sld__bar sld__bar--t"></span><span class="sld__bar sld__bar--m"></span><span class="sld__bar sld__bar--s"></span></div>
+            <div class="sld"><span class="sld__bar sld__bar--t"></span><span class="sld__bar sld__bar--m"></span><span class="sld__bar sld__bar--s"></span></div>
+            <div class="sld"><span class="sld__bar sld__bar--t"></span><span class="sld__bar sld__bar--m"></span><span class="sld__bar sld__bar--s"></span></div>
+          </div>
+          <div class="dest__body">
+            <span class="dest__chip cl-chip--clay">From Claude</span>
+            <h3>One file, every slide</h3>
+            <p>Claude writes decks as a single document, one section per slide, often
+            with its own JavaScript to page through them. tofig detects the pattern,
+            including the scripted ones, and reads out every slide rather than only
+            the one on screen.</p>
+          </div>
+        </article>
+
+        <article class="card dest" data-xn="Frame · deck-out">
+          <div class="dest__stage" aria-hidden="true">
+            <div class="frm frm--a" data-f="Slide 1"><span class="fbar fbar--t"></span><span class="fbar"></span><span class="fbar fbar--w"></span></div>
+            <div class="frm frm--b" data-f="Slide 2"><span class="fbar fbar--t"></span><span class="fbar"></span><span class="fbar fbar--s"></span><span class="fbar"></span></div>
+            <div class="frm frm--c" data-f="Slide 3"><span class="fbar fbar--t"></span><span class="fbar fbar--w"></span></div>
+          </div>
+          <div class="dest__body">
+            <span class="dest__chip">In Figma Slides</span>
+            <h3>Real slides, still editable</h3>
+            <p>Each slide becomes a Figma slide with its text still text and its shapes
+            still shapes. Retype a headline, restyle a chart label, present it. The
+            deck you generated in a conversation is now a deck you can actually run.</p>
+          </div>
+        </article>
+      </div>
+
+      <p class="caption" style="margin-top:var(--space-7);max-width:var(--measure)">
+        Run the same file in a Design file instead and you get frames, one per
+        section. Where you open tofig decides the output; there is no mode to pick.
+      </p>
+    </div>
+  </section>
+
   <section id="journey" data-xn="Frame · journey">
     <div class="wrap">
       <div class="head" data-rise>
         <h2>Four steps<br><b>from artifact to canvas.</b></h2>
-        <p class="lede">Two of them happen in the conversation, two of them happen in
-        Figma. The first two are the ones that decide whether the last two work.</p>
+        <p class="lede">Two in the conversation, two in Figma. The first two decide
+        whether the last two work.</p>
       </div>
 
       <ol class="cl-rail">
@@ -253,28 +310,24 @@
         <li class="cl-stage cl-stage--clay" data-rise data-xn="Frame · export">
           <div class="cl-stage__body">
             <h3>Get the source, not a picture</h3>
-            <p>Claude renders designs as Artifacts, and an Artifact is a real HTML
-            document. There are two ways to get at it.</p>
+            <p>An artifact is a real HTML document. Two ways to get at it.</p>
             <ul class="cl-list">
-              <li><b>Copy or download the artifact's source.</b> The artifact panel
-              can hand you the file it is rendering. You want the raw HTML, not an
-              image and not a PDF.</li>
-              <li><b>Or ask for it in the conversation.</b> Slower by one message,
-              better by a mile, because you get to specify the shape of the file
-              while you are asking for it. That prompt is the next step.</li>
+              <li><b>Copy or download the source.</b> Raw HTML, not an image, not a PDF.</li>
+              <li><b>Or ask for it in the conversation.</b> One message slower, and
+              much better: you get to specify the shape of the file. That is the
+              next step.</li>
             </ul>
-            <p class="caption">Save it with a <code>.html</code> extension. tofig
-            takes a pasted string or a dropped file, so either is fine.</p>
+            <p class="caption">Save it as <code>.html</code>. tofig takes a pasted
+            string or a dropped file.</p>
           </div>
         </li>
 
         <li class="cl-stage cl-stage--clay" id="ask" data-rise data-xn="Frame · prompt">
           <div class="cl-stage__body">
             <h3>Ask for a file that converts</h3>
-            <p>This is the step that decides everything downstream. A Claude artifact
-            is built to run in a browser tab with the whole internet available to it.
-            tofig runs inside a Figma plugin that has none of that. Say so up front
-            and Claude will write the file the plugin can actually read.</p>
+            <p>An artifact is built for a browser tab with the whole internet
+            available. tofig runs in a plugin with none of it. Say so up front and
+            you get a file the plugin can read.</p>
 
             <div class="cl-prompt" data-xn="Frame · prompt-block">
               <div class="cl-prompt__bar">
@@ -295,49 +348,45 @@
 - No iframes, no &lt;link&gt; tags, no icon fonts.</code></pre>
               </div>
             </div>
-            <p class="caption">Paste it into the conversation after the design is
-            already on screen. It works as a follow-up message, so you are not
-            regenerating the design, only re-emitting it.</p>
+            <p class="caption">Send it after the design is already on screen. As a
+            follow-up it re-emits the design rather than regenerating it.</p>
 
-            <p class="cl-lead-in">Every line in that prompt is there for a reason.</p>
+            <p class="cl-lead-in">Every line earns its place.</p>
 
             <dl class="cl-rules" data-xn="Frame · rules">
               <div class="cl-rule">
                 <dt>inline <code>&lt;style&gt;</code> only</dt>
-                <dd>The plugin declares <code>networkAccess: none</code>. A
-                <code>&lt;link&gt;</code> to a stylesheet resolves to nothing, so the
-                document renders unstyled and you convert a column of black text on
-                white.</dd>
+                <dd>The plugin declares <code>networkAccess: none</code>, so a
+                <code>&lt;link&gt;</code> resolves to nothing and you convert a column
+                of unstyled black text.</dd>
               </div>
               <div class="cl-rule">
                 <dt>no CDN scripts</dt>
-                <dd>Same block, one layer deeper: the plugin UI runs from a
-                <code>data:</code> URL, which is an opaque origin. A script tag
-                pointing at unpkg or a Tailwind CDN build never resolves.</dd>
+                <dd>The plugin UI runs from a <code>data:</code> URL, an opaque
+                origin. unpkg, esm.sh, a Tailwind CDN build: none of them resolve.</dd>
               </div>
               <div class="cl-rule">
                 <dt>no runtime rendering</dt>
-                <dd>tofig renders your document and reads the computed geometry back
-                out. If the markup is an empty root element that a framework fills in
-                later, there is nothing on screen to measure.</dd>
+                <dd>tofig measures computed geometry. An empty root that a framework
+                fills in later gives it nothing to measure.</dd>
               </div>
               <div class="cl-rule">
                 <dt>fonts Figma has</dt>
-                <dd>A face that is not loaded in your document is substituted for the
-                nearest match, then Inter. tofig reports every substitution it makes,
-                but a face you did not choose is still a face you did not choose.</dd>
+                <dd>A missing face falls back to the nearest match, then Inter. tofig
+                reports every substitution, but a face you did not choose is still a
+                face you did not choose.</dd>
               </div>
               <div class="cl-rule">
                 <dt><code>data:</code> images, inline SVG</dt>
                 <dd>Remote images are never fetched, so
-                <code>&lt;img src="https://…"&gt;</code> arrives as an empty frame.
-                Inline SVG comes through as vector paths you can reshape.</dd>
+                <code>&lt;img src="https://…"&gt;</code> lands as an empty frame.
+                Inline SVG becomes editable vector paths.</dd>
               </div>
               <div class="cl-rule">
                 <dt>an explicit width</dt>
-                <dd>The artboard is measured, not guessed. A fixed outer width is the
-                difference between a 1440 frame you asked for and whatever the
-                renderer's default viewport happened to be.</dd>
+                <dd>The artboard is measured, not guessed. Fixed width is the
+                difference between the 1440 frame you wanted and whatever the default
+                viewport was.</dd>
               </div>
             </dl>
           </div>
@@ -353,35 +402,28 @@
         <li class="cl-stage cl-stage--violet" data-rise data-xn="Frame · import">
           <div class="cl-stage__body">
             <h3>Run tofig and convert</h3>
-            <p>Open a Figma <b>Design</b> file or a Figma <b>Slides</b> file, run tofig
-            from the plugins menu, then paste the markup into the window or drop the
-            <code>.html</code> file onto it. Press <b>Convert</b>.</p>
-            <p>There is no mode to pick. tofig reads <code>figma.editorType</code> and
-            targets the right output on its own: frames on the canvas in a Design file,
-            real slides in a Slides file. A multi-section page arrives as one frame per
-            section, each clipped to its own bounds.</p>
+            <p>Open a <b>Design</b> or <b>Slides</b> file, run tofig, paste the markup
+            or drop the <code>.html</code>, press <b>Convert</b>.</p>
+            <p>No mode to pick: tofig reads <code>figma.editorType</code> and targets
+            the right output. Frames in a Design file, real slides in a Slides file,
+            one frame per section for a multi-section page.</p>
             <p class="caption">Nothing leaves your machine. The render happens in a
-            hidden iframe inside the plugin window, on your computer, with the network
-            switched off.</p>
+            hidden iframe on your computer, with the network switched off.</p>
           </div>
         </li>
 
         <li class="cl-stage cl-stage--violet" data-rise data-xn="Frame · output">
           <div class="cl-stage__body">
             <h3>What lands on the canvas</h3>
-            <p>Real Figma nodes, with real properties. Text you can retype and rewrap,
-            mapped to the nearest available weight. Inline SVG as editable vector
-            paths with their control points intact. Fills, linear gradients, strokes,
-            corner radii and opacity arrive as native paints and properties rather
-            than baked into the pixels.</p>
+            <p>Real nodes with real properties. Text you can retype. Inline SVG as
+            vector paths with their control points intact. Fills, gradients, strokes,
+            radii and opacity as native paints, not baked into pixels.</p>
             <div class="cl-props">
               <span>Frame</span><span>Text</span><span>Vector</span><span>Image fill</span>
               <span>Gradient</span><span>Stroke</span><span>Radius</span><span>Opacity</span>
             </div>
-            <p>Layout is absolutely positioned. That is a deliberate trade for visual
-            fidelity: you get placement that matches the render to the pixel, not
-            auto-layout constraints. Auto-layout is on the roadmap, and until it lands
-            this is the honest description of what you get.</p>
+            <p>Layout is absolutely positioned: a deliberate trade for pixel-accurate
+            placement over auto-layout constraints. Auto-layout is on the roadmap.</p>
           </div>
         </li>
 
@@ -394,29 +436,26 @@
     <div class="wrap">
       <div class="head">
         <h2>Some artifacts are<br><b>live apps, not documents.</b></h2>
-        <p class="lede">This is the common case for Claude specifically, so it is worth
-        knowing before it happens rather than after. Claude often ships an artifact as
-        a component that assembles itself when the page loads. Wonderful in a browser
-        tab. Impossible inside the plugin.</p>
+        <p class="lede">Claude often ships an artifact that assembles itself when the
+        page loads. Wonderful in a browser tab, impossible inside the plugin. Worth
+        knowing before it happens.</p>
       </div>
 
       <div class="cl-symptoms" data-xn="Frame · symptoms">
         <div class="cl-symptom">
           <h3>A framework runtime</h3>
-          <p>The document is an empty root element plus a script that builds the
-          interface. There is nothing to measure until the script runs, and it cannot
-          run.</p>
+          <p>An empty root plus a script that builds the interface. Nothing to
+          measure until the script runs, and it cannot run.</p>
         </div>
         <div class="cl-symptom">
           <h3>CDN imports</h3>
-          <p>A <code>&lt;script src&gt;</code> pointing at unpkg or esm.sh, a Tailwind
-          CDN build, a Google Fonts stylesheet. Every one of those is a network request
-          that the plugin will not make.</p>
+          <p>unpkg, esm.sh, a Tailwind CDN build, a Google Fonts stylesheet. Every
+          one is a network request the plugin will not make.</p>
         </div>
         <div class="cl-symptom">
           <h3><code>localStorage</code> and friends</h3>
-          <p>Browser storage on an opaque <code>data:</code> origin throws immediately.
-          The artifact fails before it paints its first pixel.</p>
+          <p>Browser storage on an opaque <code>data:</code> origin throws
+          immediately, before the artifact paints a pixel.</p>
         </div>
       </div>
 
@@ -431,17 +470,15 @@
               keeps that property.</p>
             </div>
           </div>
-          <p><b>The quick fix is upstream.</b> Go back to the conversation and ask for
-          the same design as static HTML and CSS with no framework, using the prompt
-          above. It is one message, and it removes the problem at the source rather
-          than working around it.</p>
-          <p><b>The fix for a file you already have</b> is to render it in a real,
-          unrestricted Chrome on your own machine and import the result. Same
-          extractor, same output, just a browser without the sandbox. The command
-          writes a <code>.tofig.json</code> next to the input; drop that into the
-          plugin and it imports directly.</p>
-          <p class="caption">Requires Node and a local Google Chrome or Chromium.
-          Still entirely local: nothing is uploaded, by tofig or by acaso.</p>
+          <p><b>The quick fix is upstream.</b> Ask for the same design as static HTML
+          and CSS, using the prompt above. One message, and it removes the problem at
+          the source.</p>
+          <p><b>For a file you already have</b>, render it in a real Chrome on your own
+          machine and import the result. Same extractor, same output, no sandbox. The
+          command writes a <code>.tofig.json</code> next to the input; drop that into
+          the plugin.</p>
+          <p class="caption">Requires Node and a local Chrome or Chromium. Still
+          entirely local: nothing is uploaded.</p>
         </div>
 
         <div class="stack gap-4">
@@ -460,9 +497,8 @@
             </div>
           </div>
           <p class="caption"><code>--package=</code> is needed because the binary is
-          named differently from the package. In the plugin, drop the
-          <code>.tofig.json</code> exactly the way you would drop an
-          <code>.html</code> file.</p>
+          named differently from the package. Drop the <code>.tofig.json</code> exactly
+          as you would an <code>.html</code> file.</p>
         </div>
       </div>
     </div>
