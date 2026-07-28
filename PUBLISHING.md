@@ -1,5 +1,10 @@
 # Publishing tofig
 
+> **Status: published and public.** tofig is live on Figma Community at
+> **<https://www.figma.com/community/plugin/1652349254564019815>** — that is the
+> canonical install URL, and every route on the site points to it. What follows is the
+> procedure, kept for each new version.
+
 Figma plugins are published from the **desktop app** (Menu → Plugins → Manage plugins →
 your plugin → **Publish**). The plugin already has an `id` in `manifest.json`, so it's
 ready to publish — no need to "create" it again.
@@ -12,14 +17,15 @@ ready to publish — no need to "create" it again.
 | **Unlisted** | anyone with the share link (not searchable) | any plan | light / fast |
 | **Public** (Community) | anyone, searchable in Community | any plan | full review (days) |
 
-**Current plan: acaso is on Organization** — so the org-private path is available.
+**acaso is on Organization**, so all three paths were available. Both steps of the
+rollout are done:
 
-1. **Internal rollout (now):** publish as **"acaso"** — teammates get it in the org
-   Plugins tab, you control updates, and there's **no Figma review**, so it's live
-   immediately. Note that **guests are excluded** (org members only).
-2. **Open-source / public (later):** switch the same plugin to **Public** for the
-   Community listing. This *does* go through Figma's review. Pair it with the GitHub
-   repo so people can read/build the code.
+1. **Internal rollout:** published as **"acaso"** — teammates got it in the org Plugins
+   tab, with **no Figma review**, so it was live immediately. Guests were excluded
+   (org members only), which is what made the second step necessary.
+2. **Public:** the same plugin is now **Public** on the Community, paired with the
+   public repo so people can read and build the code. Updates to a public plugin can go
+   through review again, so leave time for it before announcing a version.
 
 Caveats worth knowing before you pick the publishing account:
 - Only the plugin's **original publisher** can later change its access (private → public).
@@ -58,9 +64,10 @@ Desktop app → **Menu → Plugins → Manage plugins → tofig → Publish**. F
    A playground file is optional and not built yet.
 3. **Data security** — optional disclosure form. Skip it for the org publish; note that
    if you fill it in later for the public listing, review can take **up to two weeks**.
-4. **Add the final details** — set **Publish to → acaso** (this is what makes it
-   org-private), pick the publisher, support contact, and review the network-access
-   summary. It should report **no network access**, matching `manifest.json`.
+4. **Add the final details** — **Publish to → Community** (it is public now; **acaso**
+   is what made it org-private), pick the publisher, support contact, and review the
+   network-access summary. It should report **no network access**, matching
+   `manifest.json`.
 
 ## Updating after publish
 

@@ -60,7 +60,9 @@ and spread across five frames it would mean nothing.
 
 Wordmark note: "tofig" sets **to** in Sora ExtraLight (200) and **fig** a touch heavier (320) — a subtle nod to "to figma".
 
-Publisher: **acaso**. Visibility: org first, then **Public** (open source).
+Publisher: **acaso**. Visibility: **Public** — live on Figma Community at
+**<https://www.figma.com/community/plugin/1652349254564019815>**. Every install
+route on the site points there; it is the canonical URL for the plugin.
 
 ---
 
@@ -80,56 +82,79 @@ tofig
 ## Description — EN (Community / public)
 
 ```
-Convert self-contained HTML — including the designs Claude generates — into native,
-fully editable Figma layers. Open tofig in a Design file to get frames, or in a Figma
-Slides file to get slides.
+Paste HTML. Get Figma layers.
 
-Everything runs locally. The plugin declares networkAccess: none, so your HTML never
-leaves your machine: no servers, no account, no upload.
+tofig rebuilds self-contained HTML — including the designs you generate with Claude —
+as native, fully editable Figma layers. Real frames, live text, editable vectors. Not a
+screenshot.
+
+Open it in a Design file and you get frames. Open it in a Figma Slides file and you get
+slides. tofig reads which one you are in, so there is no mode to pick.
+
+Everything runs locally, inside the plugin. The manifest declares networkAccess: none,
+so your HTML never leaves your machine: no servers, no account, no upload, no API key.
 
 HOW TO USE
-1. Open tofig in a Design or Slides file.
-2. Paste your HTML, or drop a .html file.
+1. Click "Open in…" at the top of this page and choose a Design or Slides file.
+2. Paste your HTML, or drop a .html file onto the window.
 3. Click Convert.
 
+To run it again later: right-click the canvas → Plugins → tofig, or click Actions in the
+toolbar and type tofig. Pressing Save on this page keeps it at the top of that list.
+
 WHAT YOU GET
-• Real Figma nodes — frames, live text you can retype, editable vectors from inline
-  SVG, image fills, gradients, strokes and corner radii. Not a screenshot.
-• The right output for wherever you are: frames in a Design file, slides in a Slides
-  file. tofig reads figma.editorType, so there is no mode to pick.
+• Frames, clipped to their own bounds — one per section of a multi-section page.
+• Text as live text layers: retype it, restyle it, rewrap it.
+• Inline SVG as vector nodes with their control points intact.
+• data: images as image fills, CSS gradients as native Figma paints, plus strokes,
+  corner radii and opacity — properties you can still change, not baked pixels.
 • Decks, including JavaScript-driven ones, imported one Figma slide per slide.
-• Typography mapped to your Figma fonts by nearest weight and style, with a report
-  of every substitution it made.
+• A report of every font substitution it had to make, so you know what drifted.
+
+COMING FROM CLAUDE
+Ask for a file the plugin can read and it converts on the first try. Send this after the
+design is already on screen, so it re-emits the design instead of regenerating it:
+
+  Give me this design as a single self-contained HTML file. All CSS inline, in one
+  <style> tag — no external stylesheets, no CDN links. No JavaScript: the finished
+  layout must exist in the HTML itself. Images as data: URIs or inline SVG. Use a font
+  family that exists in Figma and tell me which one you used. Set an explicit pixel
+  width on the outermost element.
+
+Slide decks are one of the best cases. Claude writes a deck as one HTML file with a
+section per slide; run tofig in a Figma Slides file and each section arrives as its own
+slide, sized and scaled to fit, with its text still editable.
 
 WHAT DOESN'T SURVIVE
 These limits are real, and knowing them now is cheaper than finding them at 2am.
-• External URLs and assets are never fetched — that is what networkAccess: none
-  means. Keep your HTML self-contained: inline CSS, data: images, inline SVG.
+• External URLs and assets are never fetched — that is what networkAccess: none means.
+  Keep the HTML self-contained: inline CSS, data: images, inline SVG.
 • Fonts must already exist in your Figma. Otherwise text falls back to the nearest
-  match, then Inter, and tofig tells you exactly what changed.
+  weight, then Inter, and tofig tells you exactly what changed.
 • Layout is absolutely positioned, chosen for visual fidelity. You get pixel-accurate
   placement, not responsive constraints. Auto-layout is on the roadmap.
 
 WHEN AN EXPORT WON'T RENDER
-Some files called "HTML" are really live apps: they boot a React runtime, pull React
-or Babel from a CDN, or reach for localStorage. Figma's plugin sandbox blocks all of
-that — and that sandbox is what makes tofig safe to run on untrusted markup. For
-those files, render on your own machine and import the result:
+Some files called "HTML" are really live apps: they boot a React runtime, pull React or
+Babel from a CDN, or reach for localStorage. Figma's plugin sandbox blocks all of that —
+and that sandbox is exactly what makes tofig safe to point at markup you did not write.
+For those files, render on your own machine and import the result:
 
   npx --package=@aca-so/tofig tofig-render export.html
 
 That writes an export.tofig.json — drop it into the plugin and it imports directly.
 Still fully local: it drives your own Chrome, it just isn't sandbox-restricted.
 
-An open-source tool by acaso. MIT licensed.
+Free and open source, MIT licensed. Built and maintained by acaso.
 Site: tofig.aca.so
+Claude → Figma walkthrough: tofig.aca.so/claude.html
 Code: github.com/aca-so/tofig
 Built on @builder.io/html-to-figma (MIT); bundles React/ReactDOM (MIT).
 ```
 
 ---
 
-## Description — PT-BR (caso publique só para a org)
+## Description — PT-BR (tradução alternativa)
 
 **Tagline:** `HTML → camadas editáveis no Figma. Frames ou Slides, 100% local.`
 

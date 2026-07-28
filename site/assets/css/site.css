@@ -264,6 +264,14 @@ section.roomy { padding-block: var(--space-13); }
 }
 .ghstar[data-loaded] .ghstar__n { display: inline-flex; }
 
+/* The install button. tofig is public on Figma Community now, so the
+   shortest path to it is one click from any page rather than a scroll
+   to the install section. It reuses .btn--primary rather than inventing
+   a nav-only style, and it is the only filled control in the row — the
+   X-ray switch beside it stays an outline so the two don't compete. */
+.navcta { min-height: 32px; }
+.navcta i { font-size: 14px; }
+
 /* The X-ray switch. This is the page's one loud control. */
 .xswitch {
   display: inline-flex; align-items: center; gap: var(--space-2);
@@ -1268,6 +1276,19 @@ input[type="range"]::-moz-range-thumb {
   .install__alt { grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: start; }
 }
 
+/* Installing is a designer's job now, not an engineer's: three plain
+   steps in the same numbered rhythm as "how it works", and the two
+   developer routes kept below them in the cards. Order matters more
+   than wording here — a build command sitting above the one-click path
+   makes a one-click path look like a build step. */
+.install__meta {
+  margin-top: var(--space-5);
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-4);
+}
+.install__meta span { display: inline-flex; align-items: center; gap: 6px; }
+.install__meta i { color: var(--v-400); font-size: 13px; }
+.install__steps { margin-top: var(--space-11); text-align: left; }
+
 /* ═══════════════════ Footer ═══════════════════════════════════════ */
 
 .foot { border-top: 1px solid var(--line); padding-block: var(--space-10); background: var(--void); }
@@ -1491,6 +1512,13 @@ h2:hover > .anchor, h3:hover > .anchor, .anchor:focus-visible { opacity: 1; }
   section { padding-block: var(--space-11); }
   section.roomy { padding-block: var(--space-12); }
   .head { margin-bottom: var(--space-8); }
+}
+@media (max-width: 560px) {
+  /* The install button is the last thing to go, after the links and
+     the byline, because it is the most valuable control in the row.
+     Below this width the measurement below leaves no room for it and
+     the hero's own button is one scroll away. */
+  .navcta { display: none; }
 }
 @media (max-width: 480px) {
   .nav__in { gap: var(--space-2); }
