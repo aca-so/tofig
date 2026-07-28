@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────────────────────────────
-   tofig.aca.so/claude.html — Claude to Figma
+   tofig.aca.so/claude — Claude to Figma
 
    Page-scoped layer on top of tokens.css + site.css. Everything here
    is prefixed `cl-` or scoped under `.p-claude`, so nothing leaks

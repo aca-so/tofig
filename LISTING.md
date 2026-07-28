@@ -147,7 +147,7 @@ Still fully local: it drives your own Chrome, it just isn't sandbox-restricted.
 
 Free and open source, MIT licensed. Built and maintained by acaso.
 Site: tofig.aca.so
-Claude → Figma walkthrough: tofig.aca.so/claude.html
+Claude → Figma walkthrough: tofig.aca.so/claude
 Code: github.com/aca-so/tofig
 Built on @builder.io/html-to-figma (MIT); bundles React/ReactDOM (MIT).
 ```

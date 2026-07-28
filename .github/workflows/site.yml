@@ -40,11 +40,13 @@ jobs:
           cd site
           fail=0
           # Local hrefs only: strip anchors and query, map "/" to index.html.
+          # Routes are extensionless — Pages serves /docs from docs.html — so a
+          # link resolves if either the literal path or its .html twin exists.
           for f in $(find . -name '*.html'); do
             grep -oE 'href="/[^"#?]*"' "$f" | sed 's/href="//;s/"//' | sort -u | while read -r href; do
               target=".${href}"
               case "$href" in */) target=".${href}index.html" ;; esac
-              if [ ! -e "$target" ]; then
+              if [ ! -e "$target" ] && [ ! -e "${target}.html" ]; then
                 echo "::error file=site/${f#./}::broken internal link -> $href"
                 exit 1
               fi
