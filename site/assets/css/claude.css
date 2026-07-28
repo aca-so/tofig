@@ -256,7 +256,9 @@
 
 .cl-panel {
   display: flex; flex-direction: column;
-  background: oklch(0.168 0.021 288);
+  /* Half a step above the page ground, derived rather than written
+     out, so it follows the ramp instead of drifting off it. */
+  background: color-mix(in oklab, var(--void), var(--canvas));
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -444,7 +446,7 @@
 
 .cl-prompt {
   position: relative;
-  background: oklch(0.105 0.016 288);
+  background: var(--sunken);
   border: 1px solid var(--c-edge);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -454,7 +456,7 @@
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--line);
-  background: oklch(0.185 0.030 40 / 0.55);
+  background: oklch(0.665 0.125 40 / 0.10);
   font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 500;
   text-transform: uppercase; letter-spacing: 0.1em;
   color: var(--c-300);
@@ -641,70 +643,187 @@ html.xray .p-claude .cl-prompt__bar { background: transparent; }
 /* ═══════════════════ Ember ground ═════════════════════════════════
    The page is warm because the journey starts warm. Rather than
    dropping orange accents onto the standard violet-black, the whole
-   ground shifts to clay's hue: every tinted neutral on this page
-   rides 38 instead of 288. Nothing is "an orange bit on a dark page";
-   the page itself is warm, and violet arrives as the destination.
+   ground shifts to clay's side of the wheel: every tinted neutral on
+   this page rides 38-58 instead of violet's 288.
 
-   Measured on the new ground: ink 16.8:1, ink-2 9.0:1, ink-3 5.7:1,
-   ink-4 4.7:1. All still clear AA. */
+   TINT INTENSITY IS A PERCENTAGE OF THE GAMUT, NOT A CHROMA NUMBER.
+   The first version of this ramp copied violet's chroma figures
+   across to hue 38 and the page came out brown, because the sRGB
+   chroma ceiling is not the same at every hue: at L 0.20 it is 0.118
+   at violet's 288 and only 0.063 at clay's 40. The same 0.036
+   therefore spends 21% of the budget on the home page and 50% here,
+   and 50% is well past the point — around 30% — where a warm dark
+   stops being warm and starts being brown. Measured, the old ramp ran
+   at 39-50% of ceiling at every step while the home page runs at
+   14-23%. That gap is what made the two pages look like different
+   designs rather than two rooms in one.
+
+   So this ramp is solved backwards: take the home page's percentage
+   of ceiling at each step and spend the same share of clay's much
+   smaller budget. The numbers come out roughly half of violet's and
+   the two pages finally read as equally tinted.
+
+   Hue carries a slight torsion, 38 at the ground opening to 56 at the
+   dots. Brown lives at hue 40-60 in the L 0.25-0.50 band, which is
+   exactly where hairlines and grid dots sit, and rotating those steps
+   toward tan walks them out of it. It is invisible as a hue at this
+   chroma; it is only insurance.
+
+   The other half of the fix is that warmth is carried by *light*
+   rather than by pigment. The ground is a warm near-black. The ember
+   is the atmospheric field lying on top of it.
+
+   Measured on the new ground: ink 18.4:1, ink-2 11.1:1, ink-3 6.2:1,
+   ink-4 5.1:1, c-500 6.2:1. All clear AA, all better than before. */
 .p-claude {
-  --void:      oklch(0.148 0.030 38);
-  --canvas:    oklch(0.200 0.036 38);
-  --surface:   oklch(0.235 0.040 38);
-  --surface-2: oklch(0.282 0.042 38);
-  --line:      oklch(0.318 0.042 38);
-  --line-2:    oklch(0.402 0.048 38);
-  --dot:       oklch(0.390 0.062 38);
-  background: var(--void);
+  --void:      oklch(0.145 0.013 38);
+  --canvas:    oklch(0.196 0.014 42);
+  --surface:   oklch(0.230 0.014 45);
+  --surface-2: oklch(0.276 0.014 49);
+  --line:      oklch(0.314 0.013 52);
+  --line-2:    oklch(0.398 0.013 58);
+  --dot:       oklch(0.380 0.018 56);
+
+  /* The grounds under the page plane travel with it, so the code
+     blocks, the terminal and the deck stages stop being cold violet
+     rectangles punched into a warm page. Sunken rather than raised,
+     the way GitHub treats an inset surface: same hue as the page, one
+     step darker. */
+  --sunken:     oklch(0.110 0.013 36);
+  --sunken-bar: oklch(0.152 0.012 39);
+  --stage:      oklch(0.122 0.014 37);
+  --scrim:      oklch(0.145 0.013 38);
+
+  /* Bands and their rules. A hard 1px line across 1440px reads as a
+     stripe laid over the page; these fade out before they reach
+     either edge, so a section boundary reads as a horizon. */
+  --band:      oklch(0.196 0.014 42 / 0.62);
+  --band-rule: oklch(0.665 0.125 40 / 0.22);
 }
 
-/* An atmospheric field behind everything: clay pooling at the top
-   where the work starts, violet gathering at the bottom where it
-   lands. Fixed, so it reads as light in the room rather than a
-   decoration attached to any one section. */
-.p-claude::before {
-  content: "";
-  position: fixed; inset: 0; z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(86% 46% at 10% -6%,  oklch(0.665 0.125 40 / 0.30), transparent 72%),
-    radial-gradient(66% 36% at 95% 10%,  oklch(0.720 0.120 41 / 0.18), transparent 70%),
-    radial-gradient(80% 34% at 20% 44%,  oklch(0.665 0.125 40 / 0.14), transparent 74%),
-    radial-gradient(70% 30% at 88% 62%,  oklch(0.665 0.125 40 / 0.09), transparent 74%),
-    radial-gradient(80% 40% at 78% 104%, oklch(0.588 0.212 284 / 0.22), transparent 72%);
-}
+/* The canvas behind the canvas. Rubber-band past either end of the
+   page on macOS or iOS and the root colour is what shows; the cold
+   violet-black default flashing there is the tell that the page is
+   only warm on the surface. */
+html:has(> body.p-claude) { background: oklch(0.122 0.013 38); }
 
-/* Grain. Two thousandths of an inch of tooth, which is the difference
-   between a flat dark rectangle and a surface. */
-.p-claude::after {
-  content: "";
-  position: fixed; inset: 0; z-index: -1;
-  pointer-events: none; opacity: 0.4; mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+/* ── The atmospheric field ─────────────────────────────────────────
+   This is the page, not a decoration on it, so it lives in the body's
+   own background rather than in a pseudo-element. That is not a
+   stylistic preference: the root element carries an opaque colour, so
+   the body's background is painted by the body box instead of being
+   propagated to the canvas, and a negative-z-index pseudo-element
+   therefore paints *behind* it. The previous field and its grain were
+   both invisible for exactly that reason, which is most of why this
+   page read as a flat brown slab.
+
+   Because the layers belong to the body box they are measured against
+   the whole document rather than the viewport, and that is the point.
+   Clay pools where the work starts, drains through the middle, and
+   violet gathers where the file lands. The crossover sits at 60% of
+   the page, which is where the handoff node falls at every width from
+   390 to 1920 — measured, not guessed. Scrolling the page performs
+   the transformation the page is about, one screen at a time, and
+   because nothing is fixed there is no moment where the light and the
+   content disagree about where they are.
+
+   Top layer is grain, soft-lit at low strength. Its job is dither: a
+   gradient this shallow spread over seven thousand pixels bands
+   badly on a dark panel without it. */
+.p-claude {
+  background-color: var(--void);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E"),
+    radial-gradient(74% 12% at  3%  0%, oklch(0.665 0.125 40 / 0.105), transparent 70%),
+    radial-gradient(48%  8% at 99%  5%, oklch(0.720 0.120 41 / 0.050), transparent 68%),
+    radial-gradient(58%  9% at 24% 27%, oklch(0.665 0.125 40 / 0.045), transparent 72%),
+    radial-gradient(52%  7% at 90% 47%, oklch(0.665 0.125 40 / 0.032), transparent 72%),
+    radial-gradient(56%  9% at  6% 78%, oklch(0.588 0.212 284 / 0.075), transparent 72%),
+    radial-gradient(84% 13% at 58% 99%, oklch(0.588 0.212 284 / 0.150), transparent 72%),
+    linear-gradient(180deg,
+      oklch(0.665 0.125 40 / 0.042)   0%,
+      oklch(0.665 0.125 40 / 0.028)  24%,
+      oklch(0.665 0.125 40 / 0.010)  44%,
+      oklch(0.665 0.125 40 / 0)      54%,
+      oklch(0.588 0.212 284 / 0)     58%,
+      oklch(0.588 0.212 284 / 0.028) 74%,
+      oklch(0.588 0.212 284 / 0.062) 88%,
+      oklch(0.588 0.212 284 / 0.100) 100%);
+  background-blend-mode:
+    soft-light, normal, normal, normal, normal, normal, normal, normal;
 }
 
 /* Sections sit on the field rather than hiding it. */
 .p-claude main > section { background-color: transparent; }
-.p-claude .band {
-  background: oklch(0.200 0.036 38 / 0.42);
-  border-block-color: oklch(0.665 0.125 40 / 0.26);
-}
 .p-claude .canvas-ground { background-color: transparent; }
 
-/* The clay stages get their own warmth so the rail reads as a
-   gradient of temperature, not just a change of border colour. */
-.p-claude .cl-stage--clay .cl-stage__body {
-  background: linear-gradient(100deg,
-    oklch(0.665 0.125 40 / 0.10), oklch(0.665 0.125 40 / 0.02) 62%);
+/* ── Bands ─────────────────────────────────────────────────────────
+   The rhythm stays — grid, band, open, open, band, grid — but the
+   band no longer arrives as a rectangle. Its tint feathers in over a
+   tenth of its own height at each end and its rules fade before the
+   page edge, so the boundary is a change of depth rather than a line
+   drawn across the screen. */
+.p-claude .band {
+  position: relative;
+  border-block: 0;
+  background:
+    linear-gradient(180deg,
+      transparent 0,
+      var(--band) 11%,
+      var(--band) 89%,
+      transparent 100%);
 }
-.p-claude .cl-stage--violet .cl-stage__body {
-  background: linear-gradient(100deg,
-    oklch(0.588 0.212 284 / 0.09), oklch(0.588 0.212 284 / 0.02) 62%);
+.p-claude .band::before,
+.p-claude .foot::before {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, var(--band-rule) 22%,
+                    var(--band-rule) 78%, transparent) top center / 100% 1px no-repeat;
 }
+.p-claude .band::before {
+  background:
+    linear-gradient(90deg, transparent, var(--band-rule) 22%,
+                    var(--band-rule) 78%, transparent) top center / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, var(--band-rule) 22%,
+                    var(--band-rule) 78%, transparent) bottom center / 100% 1px no-repeat;
+}
+
+/* The footer was the one opaque slab left: painted in --void it cut
+   the field off at a hard edge just as the violet reached full
+   strength. It is the end of the journey, so it should be the most
+   violet thing on the page, not the only place the page stops. */
+.p-claude .foot {
+  position: relative;
+  background: transparent;
+  border-top-color: transparent;
+}
+
+/* The last canvas is Figma's, so its grid is violet. The first one,
+   under the hero, keeps the page's clay --dot. Same device at both
+   ends of the page, the colour saying which side of the handoff you
+   are standing on. */
+.p-claude #install { --dot: oklch(0.375 0.042 288); }
+
+/* No wash behind the stage text. A gradient laid on an unbounded
+   block has hard edges wherever the block ends, so it read as a
+   rectangle of slightly different dark floating behind the copy
+   rather than as light on the page. The rail already carries the
+   temperature: the numbered node is clay for the two steps that
+   happen in the conversation and violet for the two in Figma, and the
+   connector changes colour at the handoff. That is the signal; the
+   wash was only ever restating it, badly. */
 
 .p-claude .cl-hero .display em { text-shadow: 0 0 48px oklch(0.665 0.125 40 / 0.35); }
 
-@media (prefers-reduced-motion: reduce) { .p-claude::after { opacity: 0.28; } }
+/* X-ray is the measurement mode and measurement is violet, so the
+   page drops its clay skin when you press X. `html.xray body` already
+   sets the whole background shorthand, which clears the field with
+   it; all that is left is to take the warm rules off the bands so the
+   inspection ground is one flat plane. */
+html.xray .p-claude .band::before,
+html.xray .p-claude .foot::before { display: none; }
 
 
 /* This page is a walkthrough, so it is long by nature. Tightening the
@@ -725,12 +844,20 @@ html.xray .p-claude .cl-prompt__bar { background: transparent; }
   color: var(--ink-3);
 }
 
-/* The deck section borrows the landing page's two stages, so the
-   Claude side needs its chip in clay. */
+/* The deck section borrows the landing page's two stages, and the
+   pair is the handoff in miniature: the file Claude wrote on the
+   left, the slides Figma opens on the right. Both stages now take the
+   page's warm ground from --stage, so the difference between them is
+   carried where it means something — the chip, the hover edge, and
+   the accent bar on the little slides. */
 .p-claude .cl-chip--clay {
   background: var(--c-ghost);
   border-color: var(--c-edge);
   color: var(--c-300);
 }
-.p-claude #slides .dest:hover,
-.p-claude #slides .dest:focus-within { border-color: var(--c-edge); }
+.p-claude .dest--claude:hover,
+.p-claude .dest--claude:focus-within {
+  border-color: var(--c-edge);
+  background: oklch(0.665 0.125 40 / 0.05);
+}
+.p-claude .dest--claude .sld__bar--t { background: oklch(0.665 0.125 40 / 0.38); }
