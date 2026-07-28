@@ -567,7 +567,10 @@ html.xray .p-claude .cl-prompt {
   border-color: oklch(0.588 0.212 284 / 0.4) !important;
   box-shadow: none !important;
 }
-html.xray .p-claude .cl-wash { display: none; }
+/* The warm cast is a render, and X-ray strips renders. The dashed
+   clay bound stays: it is a measurement, which is the one thing the
+   mode keeps. */
+html.xray .p-claude .cl-overlay--flat { background: none; }
 html.xray .p-claude .cl-chip,
 html.xray .p-claude .cl-el--cta,
 html.xray .p-claude .cl-el--rule,
@@ -598,6 +601,10 @@ html.xray .p-claude .cl-prompt__bar { background: transparent; }
   .cl-card, .cl-overlay { left: 4%; top: 12%; width: 92%; height: 70%; }
   .cl-btag--inner { display: none; }
   .cl-btag { font-size: max(9px, 2.4cqw); }
+  /* With only two names left, put one on each side of the seam, so the
+     reduced-motion still frame carries one of each rather than two
+     clay labels and no violet one. */
+  .cl-btag--frame { left: auto; right: 0; }
   .cl-seamline { bottom: -2%; }
   /* The outlines carry more of the comparison now that four of the six
      names are gone, so give them a little more presence. */
