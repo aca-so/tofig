@@ -15,7 +15,11 @@ before and got a soup of unnamed rectangles. Their context is mid-task, with a
 file open and a deadline.
 
 **acaso's own team**, who use tofig internally and need a link to send
-colleagues. They read Portuguese first.
+colleagues.
+
+The site is English only. A pt-BR pair shipped briefly and was withdrawn: two
+documents drifting out of sync is a worse outcome than one that is right, and
+this audience reads English technical documentation daily.
 
 The job: decide in under thirty seconds whether this tool will actually rebuild
 their design as editable layers, and install it if so.
@@ -34,27 +38,39 @@ render in-plugin and reaches the external renderer instead of bouncing.
 
 ## Brand Personality
 
-Quiet, exact, technical. Syntropic's own words: "professional, calm, confident,
-functional. No marketing exclamation points, no winking copy, no emoji."
+Separate the voice from the surface; they are not the same register.
 
-Three words: **precise, unhurried, candid.**
+**The voice is exact and candid.** No marketing exclamation points, no winking
+copy, no emoji, no superlatives. Every claim is specific enough to be checked.
+Three words: **precise, unhurried, candid.** The page should read like it was
+written by the person who built it.
+
+**The surface is confident and loud.** Hairline display type at 96px, a
+committed violet on a near-black canvas, a signature that runs on a loop. The
+old surface was quiet in both registers and read as competent rather than
+memorable; a brand page that nobody remembers has failed at its only job.
 
 The emotional goal is trust through specificity. This audience is persuaded by
-accurate constraints, not superlatives. Saying "fonts must exist in Figma or we
+accurate constraints, not claims. Saying "fonts must exist in Figma or we
 substitute and tell you exactly what changed" earns more confidence than any
-claim of magic. The page should read like it was written by the person who
-built it.
+claim of magic — and *showing* it, in a cell you can click, earns more than
+saying it.
 
 ## Anti-references
 
-- **The AI-tool landing page.** Dark hero, acid-green accent, floating gradient
-  orbs, "10x your workflow", logo wall of companies that never used it.
+- **The AI dev-tool landing page.** Slate-900, JetBrains Mono headline, acid
+  green accent, floating gradient orbs, "10x your workflow", a logo wall of
+  companies that never used it. Being dark is not the problem; being *that*
+  dark is. See DESIGN.md on why this page's dark is product-derived.
 - **The hero-metric template.** Big number, small label, supporting stats.
-- **Gradient text and glassmorphism.** Syntropic bans gradients in production
-  UI outright; tofig's own violet→magenta marketing gradient does not belong on
-  an acaso surface.
+- **Gradient text and glassmorphism.** Neither appears. tofig's own
+  violet→magenta plugin-store gradient is a listing treatment and stays there.
 - **Identical card grids.** Icon + heading + paragraph, repeated six times.
-- **Uppercase tracked eyebrows above every section.**
+  The survival ledger is six different working instruments instead.
+- **A kicker above every section.** One named device is voice; a label over
+  every heading is scaffolding.
+- **Scroll-jacking.** The signature animation is time-based so the page never
+  holds the scroll hostage.
 - **Overclaiming.** tofig has real limits — absolute positioning, font
   substitution, no external assets. Hiding them would break the one thing this
   audience responds to.
@@ -68,11 +84,12 @@ built it.
    `networkAccess: none` is a feature. Font substitution reporting is a
    feature. The page that admits what it can't do is the page that gets
    believed.
-3. **One family, full range.** Sora from 200 to 700 does all the typographic
-   work. Discipline in the type system is what makes an acaso surface
-   recognizable.
-4. **Quiet surfaces, one charismatic accent.** Calibrated grey carries the
-   page; violet appears where it means something.
+3. **Two voices, no more.** Sora from 100 to 700 carries everything human;
+   Azeret Mono is the instrument voice and appears only where the page is
+   measuring, naming or counting something. Mono is never used for prose.
+4. **Violet means structure.** It is not an accent sprinkled for warmth — it
+   is the colour of a node, a bound, a measurement, wherever one appears.
+   Amber, used sparingly, means a limit. Colour carries meaning or it goes.
 5. **Practice what it preaches.** A tool that produces clean, well-named layers
    cannot ship a site with sloppy structure. Semantic HTML, real headings,
    keyboard-navigable, no div soup.
@@ -80,17 +97,24 @@ built it.
 ## Accessibility & Inclusion
 
 WCAG 2.2 AA. Body text ≥ 4.5:1, large text ≥ 3:1 — verified, not assumed.
-Syntropic's `--fg-secondary` (`rgb(74,78,84)`) on paper clears it; the lighter
-`--fg-tertiary` is reserved for large or non-essential text.
+On the near-black canvas `--ink-4` clears it at 5.0:1; on the lighter panel
+grounds it does not, so nothing below `--ink-3` is used inside a panel.
 
-Full keyboard operability with a visible focus ring — Syntropic specifies a 2px
-`brand/400` ring at 2px offset. The interactive hero demo must be operable
-without a pointer and must never be the only way to understand the product.
+Full keyboard operability with a visible focus ring — 2px `--v-400` at 3px
+offset. Every interactive demonstration must be operable
+without a pointer and must never be the only way to understand the product —
+the bezier control points are `role="slider"` and move with arrow keys, and
+X-ray mode is reachable by keyboard and exits on `Escape`.
 
 `prefers-reduced-motion: reduce` collapses every transition to a crossfade or
 an instant state change. Content is never gated behind a scroll-triggered
 reveal: everything renders visible by default, so a headless renderer or a
 background tab still shows a complete page.
 
-Bilingual EN / pt-BR as separate documents with correct `lang` attributes and
-`hreflang` pairs, so screen readers announce the right language.
+English only, with a correct `lang` attribute.
+
+Contrast is verified rather than assumed, by a script that routes every
+computed colour through a canvas — computed style keeps `oklch()` verbatim, so
+naive parsing silently reports nonsense — and composites translucent layers
+properly. Targets meet the 24×24px minimum; inline links inside a sentence are
+the documented exception.

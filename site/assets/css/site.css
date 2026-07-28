@@ -1,701 +1,1389 @@
 /* ──────────────────────────────────────────────────────────────────
-   tofig.aca.so — site styles
+   tofig.aca.so
+
+   The page is a canvas. The designs on it are paper. Press X and the
+   canvas shows you its own structure — every element measured,
+   outlined and named, exactly the way tofig hands it to Figma.
    ────────────────────────────────────────────────────────────────── */
 
 *, *::before, *::after { box-sizing: border-box; }
 
+@property --x { syntax: "<number>"; inherits: true; initial-value: 0; }
+
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  background: #100d18;
 }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  font-weight: 400;
+  font-weight: 350;
   font-size: var(--text-md);
-  line-height: var(--leading-body);
+  line-height: 1.55;
   letter-spacing: var(--tracking);
-  color: var(--fg-secondary);
-  background: var(--bg-page);
+  color: var(--ink-2);
+  background: var(--void);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
-img, svg { display: block; max-width: 100%; }
+img, svg, canvas { display: block; max-width: 100%; }
 
 :focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
+  outline: 2px solid var(--v-400);
+  outline-offset: 3px;
   border-radius: var(--radius-xs);
 }
 
-::selection { background: var(--brand-tint); color: var(--neutral-950); }
+::selection { background: oklch(0.588 0.212 284 / 0.4); color: var(--ink); }
 
 .skip {
-  position: absolute;
-  left: -9999px;
-  top: var(--space-3);
+  position: absolute; left: -9999px; top: var(--space-3);
   z-index: var(--z-toast);
   padding: var(--space-3) var(--space-5);
-  background: var(--neutral-950);
-  color: var(--neutral-0);
+  background: var(--v-600); color: #fff;
   border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  text-decoration: none;
+  font-size: var(--text-sm); font-weight: 600; text-decoration: none;
 }
 .skip:focus { left: var(--space-4); }
 
-/* ─────────────────────────── Typography ─────────────────────────── */
+.vh {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* ═══════════════════════ Typography ═══════════════════════════════ */
 
 h1, h2, h3, h4 {
-  margin: 0;
-  color: var(--fg-primary);
-  letter-spacing: var(--tracking);
+  margin: 0; color: var(--ink);
+  letter-spacing: var(--tracking-tight);
   text-wrap: balance;
+  font-weight: 300;
 }
 
+/* Sora at 100–200 set very large. On a dark ground thin weights gain
+   optical mass, so the hairline reads as composure, not weakness. */
 .display {
-  font-size: clamp(2.75rem, 8.5vw, 6rem);
-  font-weight: 200;
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  font-size: clamp(2.9rem, 8.2vw, 6rem);
+  font-weight: 150;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
 }
-.display em {
-  font-style: normal;
-  font-weight: 500;
-}
+.display b   { font-weight: 600; }
+.display em  { font-style: normal; font-weight: 600; color: var(--ink); }
 
 h2 {
-  font-size: clamp(1.75rem, 3.4vw, 2rem);
-  font-weight: 600;
-  line-height: var(--leading-heading);
+  font-size: clamp(1.9rem, 4.4vw, 3.25rem);
+  font-weight: 200;
+  line-height: 1.02;
+  letter-spacing: -0.042em;
 }
+h2 b { font-weight: 600; }
 
-h3 {
-  font-size: var(--text-xl);
-  font-weight: 600;
-  line-height: var(--leading-display);
-}
+h3 { font-size: var(--text-xl); font-weight: 500; line-height: 1.2; letter-spacing: -0.032em; }
+h4 { font-size: var(--text-md); font-weight: 500; letter-spacing: -0.028em; }
 
 p { margin: 0; text-wrap: pretty; }
 
 .lede {
-  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  font-size: clamp(1.0625rem, 1.35vw, 1.3125rem);
   font-weight: 300;
-  line-height: 1.5;
-  color: var(--fg-secondary);
-  max-width: 54ch;
+  line-height: 1.55;
+  color: var(--ink-3);
+  max-width: 56ch;
 }
+.lede b { color: var(--ink-2); font-weight: 500; }
 
-.label {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--fg-primary);
+.caption { font-size: var(--text-xs); line-height: 1.5; color: var(--ink-4); }
+
+/* The instrument voice — measurements, node names, counters, code. */
+.mono, code, kbd, pre, .num {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-mono);
+  font-variant-numeric: tabular-nums;
 }
-
-/* Syntropic sets captions at weight 300 / neutral-600. Both are raised here:
-   600 on paper is 4.48:1, under the 4.5 floor for 12px, and 300 at this size
-   renders too thin to read comfortably. Accessibility wins over fidelity. */
-.caption {
+.mono {
   font-size: var(--text-xs);
   font-weight: 400;
-  line-height: 1.35;
-  color: var(--fg-secondary);
+  color: var(--ink-4);
 }
 
-a { color: var(--brand-600); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
-a:hover { color: var(--brand-700); }
-
-code, kbd, pre { font-family: var(--font-mono); letter-spacing: 0; }
+a { color: var(--v-300); text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
+a:hover { color: var(--v-200); }
 
 code:not(pre code) {
-  font-size: 0.875em;
-  background: var(--neutral-100);
-  border: 1px solid var(--border-subtle);
+  /* A literal is one token. Letting it wrap splits the box across two
+     lines and reads as two separate values. */
+  white-space: nowrap;
+  font-size: 0.9em;
+  background: oklch(0.588 0.212 284 / 0.12);
+  border: 1px solid var(--v-edge);
   border-radius: var(--radius-xs);
-  padding: 0.1em 0.36em;
-  color: var(--neutral-850);
+  padding: 0.12em 0.4em;
+  color: var(--v-200);
 }
 
-/* ───────────────────────────── Layout ───────────────────────────── */
+/* ═══════════════════════ Layout ═══════════════════════════════════ */
 
 .wrap {
-  width: 100%;
-  max-width: var(--content);
-  margin-inline: auto;
-  padding-inline: var(--space-6);
+  width: 100%; max-width: var(--content);
+  margin-inline: auto; padding-inline: var(--space-6);
 }
+.wrap--wide { max-width: var(--wide); }
 
-section { padding-block: var(--space-11); }
-section.tight  { padding-block: var(--space-9); }
-section.roomy  { padding-block: var(--space-13); }
-section.banded { background: var(--bg-section); border-block: 1px solid var(--border-subtle); }
+section { padding-block: var(--space-12); position: relative; }
+section.tight { padding-block: var(--space-11); }
+section.roomy { padding-block: var(--space-13); }
 
-.stack   { display: flex; flex-direction: column; }
-.gap-2 { gap: var(--space-2); } .gap-3 { gap: var(--space-3); }
-.gap-4 { gap: var(--space-4); } .gap-6 { gap: var(--space-6); }
-.gap-7 { gap: var(--space-7); } .gap-9 { gap: var(--space-9); }
+.stack { display: flex; flex-direction: column; }
+.gap-2{gap:var(--space-2)} .gap-3{gap:var(--space-3)} .gap-4{gap:var(--space-4)}
+.gap-5{gap:var(--space-5)} .gap-6{gap:var(--space-6)} .gap-7{gap:var(--space-7)}
+.gap-9{gap:var(--space-9)}
 
-.head { max-width: 60ch; margin-bottom: var(--space-9); }
-.head h2 + p { margin-top: var(--space-4); }
-
-/* Grid and flex children default to min-width:auto, so one non-wrapping
-   <pre> widens its whole track past the viewport and the code block's
-   overflow-x never engages. This is what made every page scroll at 390px. */
-.split > *, .docs > *, .stack > *, .hero__grid > *, .def > * { min-width: 0; }
+/* Grid/flex children default to min-width:auto, so one non-wrapping
+   <pre> widens its track past the viewport. */
+.split > *, .docs > *, .stack > *, .def > *, .toy > * { min-width: 0; }
 .code, .tbl-scroll { max-width: 100%; }
 
-/* ───────────────────────────── Nav ──────────────────────────────── */
+/* Section heads run to two thirds and hang the rule off the left, so
+   the page never falls into centred-heading rhythm. */
+.head { max-width: 46rem; margin-bottom: var(--space-10); }
+.head h2 + .lede { margin-top: var(--space-5); }
+
+/* One section sets its heading against its lede instead of above it,
+   so the page does not fall into a single repeated head rhythm. */
+@media (min-width: 960px) {
+  .head--split {
+    max-width: none;
+    display: grid; grid-template-columns: 1.15fr 1fr;
+    gap: var(--space-10); align-items: end;
+  }
+  .head--split h2 + .lede { margin-top: 0; }
+  .head--split .lede { padding-bottom: 6px; }
+}
+
+/* The canvas ground — Figma's dot grid. Bands are the plain surfaces
+   between; the alternation is grid-versus-none as much as tone. */
+.canvas-ground {
+  background-color: var(--void);
+  background-image: radial-gradient(circle at 1px 1px, var(--dot) 1.4px, transparent 0);
+  background-size: 30px 30px;
+}
+.band { background: var(--canvas); border-block: 1px solid var(--line); }
+
+.rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+/* ═══════════════════════ Nav ══════════════════════════════════════ */
 
 .nav {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-  background: color-mix(in srgb, var(--neutral-0) 88%, transparent);
+  position: sticky; top: 0; z-index: var(--z-sticky);
+  background: oklch(0.135 0.018 288 / 0.72);
   border-bottom: 1px solid transparent;
-  transition: border-color var(--dur-fast) var(--ease),
-              background   var(--dur-fast) var(--ease);
+  transition: border-color var(--t-fast) var(--e-out-q),
+              background var(--t-fast) var(--e-out-q);
 }
 @supports (backdrop-filter: blur(8px)) {
-  .nav { backdrop-filter: blur(10px) saturate(1.4); }
+  .nav { backdrop-filter: blur(16px) saturate(1.5); }
 }
-.nav.is-stuck { border-bottom-color: var(--border-subtle); }
+.nav.is-stuck { border-bottom-color: var(--line); background: oklch(0.135 0.018 288 / 0.88); }
 
 .nav__in {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  height: 60px;
+  display: flex; align-items: center; gap: var(--space-5);
+  height: var(--nav-h);
 }
 
 .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  text-decoration: none;
-  color: var(--fg-primary);
-  flex: none;
+  display: inline-flex; align-items: center; gap: var(--space-3);
+  text-decoration: none; color: var(--ink); flex: none;
 }
 .brand__mark { width: 22px; height: 22px; flex: none; }
-.brand__sep {
-  width: 1px; height: 18px;
-  background: var(--border-default);
-  transform: rotate(15deg);
-}
-/* The wordmark device: `to` light, `fig` heavier — carried over from the
-   plugin's own mark rather than invented here. */
-.brand__word {
-  font-size: var(--text-lg);
-  letter-spacing: -0.04em;
-  color: var(--fg-primary);
-}
+.brand__word { font-size: var(--text-lg); letter-spacing: -0.05em; color: var(--ink); }
 .brand__word b { font-weight: 500; }
-.brand__word span { font-weight: 200; }
+.brand__word span { font-weight: 150; }
+
+/* acaso attribution rides beside the wordmark, not buried in the
+   footer — tofig is an acaso tool and says so on first contact. */
+.byline {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 0 4px var(--space-3);
+  margin-left: 2px;
+  border-left: 1px solid var(--line-2);
+  font-size: var(--text-xs); font-weight: 400;
+  color: var(--ink-4); text-decoration: none;
+  transition: color var(--t-fast) var(--e-out-q);
+}
+.byline b { font-weight: 500; color: var(--ink-3); transition: color var(--t-fast) var(--e-out-q); }
+.byline:hover, .byline:hover b { color: var(--v-300); }
 
 .nav__links {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  margin-left: auto;
-  list-style: none;
-  margin-block: 0;
-  padding: 0;
+  display: flex; align-items: center; gap: var(--space-6);
+  margin-left: auto; list-style: none; margin-block: 0; padding: 0;
 }
 .nav__links a {
-  font-size: var(--text-sm);
-  font-weight: 400;
-  color: var(--fg-secondary);
-  text-decoration: none;
-  transition: color var(--dur-fast) var(--ease);
+  display: inline-block; padding-block: 5px;
+  font-size: var(--text-sm); font-weight: 400;
+  color: var(--ink-3); text-decoration: none;
+  transition: color var(--t-fast) var(--e-out-q);
 }
-.nav__links a:hover { color: var(--fg-primary); }
-.nav__links a[aria-current="page"] { color: var(--fg-primary); font-weight: 600; }
+.nav__links a:hover, .nav__links a[aria-current="page"] { color: var(--ink); }
+
+.nav__tools { display: flex; align-items: center; gap: var(--space-3); margin-left: auto; }
+.nav__links + .nav__tools { margin-left: var(--space-2); }
+
+/* GitHub star widget, in GitHub's own two-part idiom. The count is
+   fetched at runtime; if the API is rate-limited or offline the
+   number cell is removed and the button still works as a link. */
+.ghstar {
+  display: inline-flex; align-items: stretch;
+  border: 1px solid var(--line-2); border-radius: var(--radius-sm);
+  font-size: var(--text-xs); font-weight: 500;
+  text-decoration: none; overflow: hidden;
+  transition: border-color var(--t-fast) var(--e-out-q);
+}
+.ghstar:hover { border-color: var(--v-500); }
+.ghstar__b {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px var(--space-3);
+  background: var(--surface); color: var(--ink-2);
+  transition: background var(--t-fast) var(--e-out-q), color var(--t-fast) var(--e-out-q);
+}
+.ghstar:hover .ghstar__b { background: var(--surface-2); color: var(--ink); }
+.ghstar__b i { font-size: 13px; color: var(--a-400); }
+.ghstar__n {
+  display: none; align-items: center;
+  padding: 6px var(--space-3);
+  border-left: 1px solid var(--line-2);
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  color: var(--ink-3); background: oklch(0.205 0.024 288 / 0.4);
+}
+.ghstar[data-loaded] .ghstar__n { display: inline-flex; }
+
+/* The X-ray switch. This is the page's one loud control. */
+.xswitch {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: 6px var(--space-3) 6px 9px;
+  border: 1px solid var(--v-edge);
+  border-radius: var(--radius-sm);
+  background: oklch(0.588 0.212 284 / 0.1);
+  color: var(--v-200);
+  font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 500;
+  cursor: pointer; white-space: nowrap;
+  transition: background var(--t-fast) var(--e-out-q),
+              border-color var(--t-fast) var(--e-out-q),
+              color var(--t-fast) var(--e-out-q),
+              box-shadow var(--t-fast) var(--e-out-q);
+}
+.xswitch:hover { background: oklch(0.588 0.212 284 / 0.2); border-color: var(--v-500); color: var(--ink); }
+.xswitch__led {
+  width: 7px; height: 7px; border-radius: 50%; flex: none;
+  background: var(--v-500);
+  box-shadow: 0 0 0 0 oklch(0.588 0.212 284 / 0.6);
+  transition: background var(--t-fast) var(--e-out-q), box-shadow var(--t-fast) var(--e-out-q);
+}
+.xswitch[aria-pressed="true"] {
+  background: var(--v-500); border-color: var(--v-400); color: #fff;
+  box-shadow: 0 0 24px -4px oklch(0.588 0.212 284 / 0.7);
+}
+.xswitch[aria-pressed="true"] .xswitch__led { background: #fff; box-shadow: 0 0 8px 1px #fff; }
+.xswitch kbd {
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 1px 4px; border-radius: 3px;
+  border: 1px solid currentColor; opacity: 0.5;
+}
 
 .lang {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-pill);
-  padding: 2px;
-  gap: 2px;
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--line-2); border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 .lang a {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  text-decoration: none;
-  color: var(--fg-tertiary);
-  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  padding: 6px 9px; text-decoration: none; color: var(--ink-4);
+  transition: background var(--t-fast) var(--e-out-q), color var(--t-fast) var(--e-out-q);
 }
-.lang a:hover { color: var(--fg-primary); }
-.lang a[aria-current="true"] { background: var(--neutral-950); color: var(--neutral-0); }
+.lang a:hover { color: var(--ink); background: var(--surface); }
+.lang a[aria-current="true"] { background: var(--surface-2); color: var(--ink); }
 
-@media (max-width: 720px) {
-  /* Six links don't fit at 390px. Drop the two same-page anchors — the
-     sections are a scroll away and both are repeated in the footer. */
-  .nav__links > li:nth-child(1),
-  .nav__links > li:nth-child(2) { display: none; }
-  .nav__links { gap: var(--space-4); }
-  .nav__in { gap: var(--space-3); }
-  .brand__word { font-size: var(--text-md); }
-  .wrap { padding-inline: var(--space-5); }
-}
-
-/* ─────────────────────────── Buttons ────────────────────────────── */
+/* ═══════════════════════ Buttons ══════════════════════════════════ */
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-flex; align-items: center; justify-content: center;
   gap: var(--space-2);
-  padding: 10px var(--space-5);
+  padding: 12px var(--space-6);
   border-radius: var(--radius-md);
   border: 1px solid transparent;
-  font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: 600;
+  font-family: inherit; font-size: var(--text-sm); font-weight: 500;
   letter-spacing: var(--tracking);
-  text-decoration: none;
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease),
-              border-color var(--dur-fast) var(--ease),
-              color var(--dur-fast) var(--ease);
+  text-decoration: none; cursor: pointer;
+  transition: background var(--t-fast) var(--e-out-q),
+              border-color var(--t-fast) var(--e-out-q),
+              color var(--t-fast) var(--e-out-q),
+              box-shadow var(--t-fast) var(--e-out-q),
+              transform var(--t-tap) var(--e-out-q);
 }
-.btn--primary { background: var(--brand-600); color: var(--fg-on-brand); }
-.btn--primary:hover  { background: var(--brand-700); color: var(--fg-on-brand); }
-.btn--primary:active { background: var(--brand-800); }
+.btn:active { transform: translateY(1px); }
 
-.btn--ghost {
-  background: transparent;
-  color: var(--fg-primary);
-  border-color: var(--border-default);
+.btn--primary {
+  background: var(--v-600); color: #fff;
+  box-shadow: 0 0 0 1px oklch(0.700 0.160 284 / 0.4),
+              0 8px 32px -8px oklch(0.588 0.212 284 / 0.6);
 }
-.btn--ghost:hover { background: var(--neutral-100); color: var(--fg-primary); }
-
-.btn--onDark {
-  background: var(--neutral-0);
-  color: var(--neutral-950);
+.btn--primary:hover {
+  background: var(--v-500); color: #fff;
+  box-shadow: 0 0 0 1px oklch(0.795 0.115 284 / 0.5),
+              0 12px 44px -8px oklch(0.588 0.212 284 / 0.75);
 }
-.btn--onDark:hover { background: var(--neutral-300); color: var(--neutral-950); }
 
-.btn--sm { padding: 6px var(--space-4); font-size: var(--text-xs); }
+.btn--ghost { background: transparent; color: var(--ink); border-color: var(--line-2); }
+.btn--ghost:hover { background: var(--surface); border-color: var(--ink-4); color: var(--ink); }
 
-/* ──────────────────────────── Hero ──────────────────────────────── */
+.btn--sm { padding: 7px var(--space-4); font-size: var(--text-xs); }
+.btn--lg { padding: 15px var(--space-7); font-size: var(--text-md); }
 
-/* Single column: the display type needs the full measure to land, and the
-   demo needs the full content width to stop looking like a thumbnail. */
-.hero { padding-block: var(--space-12) var(--space-8); }
-.hero__grid { display: grid; gap: var(--space-9); max-width: 54rem; }
+.btn i { font-size: 15px; }
+.btn--primary .ph-arrow-right {
+  transition: transform var(--t-fast) var(--e-out-q);
+}
+.btn--primary:hover .ph-arrow-right { transform: translateX(3px); }
+
+/* ═══════════════════════ Hero ═════════════════════════════════════ */
+
+.hero {
+  padding-block: clamp(var(--space-11), 11vh, var(--space-13)) var(--space-10);
+  position: relative; overflow: clip;
+}
+
+/* One soft violet source behind the specimen — the canvas lit by the
+   object sitting on it, not a decorative orb. */
+.hero::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(58% 48% at 72% 42%,
+              oklch(0.588 0.212 284 / 0.18), transparent 70%);
+  pointer-events: none;
+}
+
+.hero__grid { position: relative; display: grid; gap: var(--space-10); align-items: center; }
+@media (min-width: 1040px) {
+  /* 46/54 — deliberately not half and half. */
+  .hero__grid { grid-template-columns: 46fr 54fr; gap: var(--space-9); }
+}
+
 .hero .display { margin-bottom: var(--space-6); }
-.hero-demo { padding-bottom: var(--space-12); }
+.hero .lede { max-width: 44ch; }
+
 .hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);
   margin-top: var(--space-8);
 }
 .hero__note {
-  margin-top: var(--space-5);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-7);
+  display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5);
+  font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-4);
 }
 .hero__note span { display: inline-flex; align-items: center; gap: 6px; }
-.hero__note i { color: var(--brand-500); font-size: 14px; }
+.hero__note i { color: var(--v-400); font-size: 13px; }
+.hero__note a { color: var(--ink-3); text-decoration-color: var(--line-2); }
+.hero__note a:hover { color: var(--v-300); }
 
-/* ══════════════════ SIGNATURE — the decomposition ══════════════════
-   One rendered HTML card. Activate it and the render peels back to show
-   what tofig actually emits: every element outlined as a named Figma
-   node, with the layer tree assembling alongside.
-   Default state is the fully-rendered design — nothing is gated. */
+/* ══════════ SIGNATURE — the decomposition ═════════════════════════
+   The specimen is built the way tofig emits: absolutely positioned
+   layers, one per DOM depth. At --x:0 they stack flush and read as a
+   rendered card. As --x runs to 1 the scene tilts and each layer
+   lifts on its own z-plane. One variable drives the whole thing, so
+   the load choreography and the scroll scrub share a single truth. */
 
-.demo {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--neutral-0);
-  overflow: hidden;
-}
-
-.demo__bar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--neutral-50);
-}
-.demo__dots { display: flex; gap: 6px; }
-.demo__dots i {
-  width: 9px; height: 9px; border-radius: var(--radius-full);
-  background: var(--neutral-400);
-}
-.demo__file {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0;
-  color: var(--fg-secondary);
-}
-.demo__toggle { margin-left: auto; }
-
-.demo__stage {
-  display: grid;
-  grid-template-columns: 1fr;
-  min-height: 400px;
-}
-
-.demo__canvas {
+.xplode {
   position: relative;
-  padding: var(--space-10) var(--space-7);
-  display: grid;
-  place-items: center;
-  background-color: var(--neutral-100);
-  /* Figma's canvas grid, quietly */
-  background-image:
-    linear-gradient(to right,  var(--neutral-200) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--neutral-200) 1px, transparent 1px);
-  background-size: 16px 16px;
-}
-
-/* The specimen being converted */
-.spec {
-  position: relative;
-  width: min(380px, 100%);
-  background: var(--neutral-0);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  padding: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-7);
-}
-.spec__row { display: flex; align-items: center; gap: var(--space-3); }
-.spec__av {
-  width: 40px; height: 40px; flex: none;
-  border-radius: var(--radius-full);
-  background: var(--brand-400);
+  perspective: 1500px;
+  perspective-origin: 50% 44%;
   display: grid; place-items: center;
-  color: #fff; font-weight: 600; font-size: var(--text-sm);
-}
-.spec__name { font-weight: 600; color: var(--fg-primary); font-size: var(--text-sm); }
-.spec__role { font-size: var(--text-xs); color: var(--fg-secondary); font-weight: 400; }
-.spec__bars { display: flex; flex-direction: column; gap: var(--space-2); }
-.spec__bar { height: 8px; border-radius: var(--radius-xs); background: var(--neutral-200); }
-.spec__bar:nth-child(2) { width: 82%; }
-.spec__bar:nth-child(3) { width: 56%; }
-.spec__cta {
-  padding: 8px var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--brand-600);
-  color: #fff;
-  font-size: var(--text-xs);
-  font-weight: 600;
-  text-align: center;
+  min-height: min(60vh, 520px);
+  padding-block: var(--space-8);
 }
 
-/* Node outlines — present but invisible until converted, so toggling
-   costs no layout and never reflows the specimen. */
-[data-node] {
-  outline: 1.5px solid transparent;
-  outline-offset: 2px;
-  transition: outline-color var(--dur-mid) var(--ease);
+.xplode__scene {
+  position: relative;
+  width: min(380px, 82vw);
+  aspect-ratio: 380 / 268;
+  transform-style: preserve-3d;
+  transform:
+    rotateX(calc(var(--x) * 13deg))
+    rotateY(calc(var(--x) * -27deg))
+    rotateZ(calc(var(--x) * 1.5deg))
+    scale(calc(1 - var(--x) * 0.06));
+  will-change: transform;
 }
-[data-node]::after {
-  content: attr(data-node);
+
+.lyr {
   position: absolute;
-  top: -8px;
-  left: -2px;
-  transform: translateY(-2px);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0;
-  line-height: 1;
-  padding: 2px 4px;
-  border-radius: 3px;
-  background: var(--brand-600);
-  color: #fff;
-  white-space: nowrap;
-  opacity: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--x) * var(--d) * 40px));
+  border-radius: var(--radius-md);
+  /* Inspection chrome rides a later ramp than the lift, so the card
+     is fully clean at rest and fully annotated at full extension. */
+  --pane: calc(max(0, var(--x) - 0.3) / 0.7);
+}
+
+/* The base plate is the design's own frame — paper on a dark canvas. */
+.lyr--frame {
+  inset: 0;
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--lift-3);
+}
+
+/* Each lifted plane gets a faint violet pane so the stack reads as
+   glass sheets in space rather than floating debris. The ramp starts
+   late on purpose: at rest the card must be a clean render, with no
+   inspection chrome bleeding through it. */
+.lyr:not(.lyr--frame)::before {
+  content: "";
+  position: absolute; inset: -10px;
+  border: 1px solid oklch(0.588 0.212 284 / calc(var(--pane) * 0.6));
+  border-radius: var(--radius-md);
+  background: oklch(0.588 0.212 284 / calc(var(--pane) * 0.08));
   pointer-events: none;
-  transition: opacity var(--dur-mid) var(--ease),
-              transform var(--dur-mid) var(--ease);
-}
-.spec [data-node] { position: relative; }
-
-.demo.is-converted [data-node] { outline-color: var(--brand-500); }
-
-/* Fan the badges out so no two share a band. */
-.spec__av[data-node]::after   { top: auto; bottom: -8px; left: -2px; }
-.spec__name[data-node]::after { top: 50%; left: auto; right: -2px;
-                                transform: translate(100%, -50%); }
-.demo.is-converted .spec__name[data-node]::after { transform: translate(calc(100% + 6px), -50%); }
-.demo.is-converted [data-node]::after {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: calc(var(--i, 0) * 45ms);
 }
 
-/* Layer tree — Figma's own idiom */
-.demo__panel {
-  border-top: 1px solid var(--border-subtle);
-  background: var(--neutral-0);
-  padding: var(--space-4);
-  min-width: 0;
+/* Node name badges ride out with the layers. */
+.lyr__tag {
+  position: absolute; top: -10px; left: -10px;
+  transform: translateY(-100%);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  line-height: 1; white-space: nowrap;
+  padding: 4px 6px; border-radius: var(--radius-xs);
+  background: var(--v-600); color: #fff;
+  opacity: var(--pane);
+  pointer-events: none;
 }
-.demo__panel h4 {
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--neutral-700);
-  margin-bottom: var(--space-3);
+/* In x-ray the stack is annotated whatever its extension. */
+html.xray .lyr__tag { opacity: 1; }
+
+/* Fanned so no two badges share a band. Four of the six layers sit in
+   the same top-left quadrant, and anchoring them all identically
+   piled them into an unreadable stack at full extension. */
+.lyr--frame .lyr__tag { top: auto; bottom: -10px; transform: translateY(100%); }
+.lyr--av    .lyr__tag { top: auto; bottom: -10px; transform: translateY(100%); }
+.lyr--cta   .lyr__tag { top: auto; bottom: -10px; transform: translateY(100%); }
+.lyr--name  .lyr__tag { left: auto; right: -10px; }
+.lyr--badge .lyr__tag { left: auto; right: -10px; }
+.lyr--copy  .lyr__tag { top: 50%; left: -14px; transform: translate(-100%, -50%); }
+
+/* Specimen geometry is percentage-based against a locked aspect
+   ratio, so the whole stack scales down intact on a phone instead of
+   spilling out of the plate. */
+.lyr--row   { left: 6.32%;  top: 8.96%;  width: 56.84%; height: 16.42%; }
+.lyr--av    { left: 6.32%;  top: 8.96%;  width: 11.58%; height: 16.42%; }
+.lyr--name  { left: 21.05%; top: 10.45%; width: 46.32%; height: 13.43%; }
+.lyr--badge { left: 70.53%; top: 8.96%;  width: 23.16%; height: 9.70%; }
+.lyr--copy  { left: 6.32%;  top: 32.84%; width: 87.37%; height: 22.39%; }
+.lyr--cta   { left: 6.32%;  top: 64.18%; width: 87.37%; height: 16.42%; }
+
+.sp-av {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: linear-gradient(140deg, var(--v-400), var(--v-600));
+  display: grid; place-items: center;
+  color: #fff; font-weight: 600; font-size: var(--text-sm); letter-spacing: -0.02em;
 }
-.tree { list-style: none; margin: 0; padding: 0; font-size: var(--text-xs); }
-.tree li {
-  display: flex;
+.sp-name { font-size: var(--text-sm); font-weight: 600; line-height: 1.35;
+  color: var(--paper-ink); letter-spacing: -0.03em; }
+.sp-role { font-size: var(--text-xs); line-height: 1.35; color: var(--paper-ink-2); }
+.sp-bar { height: 9px; border-radius: 4px; background: var(--paper-line); }
+.sp-bar + .sp-bar { margin-top: 9px; }
+.sp-bar:nth-child(2) { width: 84%; }
+.sp-bar:nth-child(3) { width: 52%; }
+.sp-cta {
+  width: 100%; height: 100%; border-radius: var(--radius-md);
+  background: var(--paper-ink); color: var(--paper);
+  display: grid; place-items: center;
+  font-size: var(--text-sm); font-weight: 500; letter-spacing: -0.03em;
+}
+.sp-badge {
+  width: 100%; height: 100%; border-radius: var(--radius-full);
+  background: oklch(0.588 0.212 284 / 0.14);
+  border: 1px solid oklch(0.588 0.212 284 / 0.3);
+  color: var(--v-600);
+  display: grid; place-items: center;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.02em;
+}
+
+/* The loop. Timing lives per keyframe so the lift, the hold and the
+   collapse each get their own curve instead of one easing smeared
+   across all three. Rest is a clean rendered card; full extension is
+   the annotated stack; the two long holds are what make it readable
+   rather than restless. */
+@keyframes xplode-loop {
+  0%,  6% { --x: 0; animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1); }
+  26%     { --x: 1; animation-timing-function: linear; }
+  52%     { --x: 1; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  70%,
+  100%    { --x: 0; }
+}
+.xplode__scene { animation: xplode-loop 9s infinite both; }
+.xplode.is-paused .xplode__scene { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The information without the movement: held open, permanently. */
+  .xplode__scene { animation: none; }
+  .xplode { --x: 0.62; }
+}
+
+/* The readout sits directly under the specimen, tight to it, so it
+   reads as the object's own label rather than floating chrome. */
+.xplode__meter {
+  position: absolute; left: 50%; bottom: var(--space-2);
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: var(--space-3);
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--ink-4); white-space: nowrap;
+}
+.xplode__meter b { color: var(--v-300); font-weight: 500; }
+.xplode__meter i { color: var(--ink-4); font-style: normal; }
+
+/* The second door into x-ray. The nav switch is for people who
+   already know; this is for people who don't. */
+.xinvite {
+  display: inline-flex; align-items: center; gap: var(--space-3);
+  margin-top: var(--space-7);
+  padding: 11px var(--space-4) 11px var(--space-5);
+  border: 1px solid var(--v-edge);
+  border-radius: var(--radius-md);
+  background: oklch(0.588 0.212 284 / 0.07);
+  color: var(--ink-2);
+  font-family: inherit; font-size: var(--text-sm); font-weight: 400;
+  letter-spacing: var(--tracking);
+  cursor: pointer; text-align: left;
+  transition: background var(--t-fast) var(--e-out-q),
+              border-color var(--t-fast) var(--e-out-q),
+              color var(--t-fast) var(--e-out-q);
+}
+.xinvite:hover {
+  background: oklch(0.588 0.212 284 / 0.16);
+  border-color: var(--v-500); color: var(--ink);
+}
+.xinvite .xswitch__led { animation: led 2.6s var(--e-in-out) infinite; }
+.xinvite kbd {
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 3px 6px; border-radius: var(--radius-xs);
+  border: 1px solid var(--line-2); background: var(--surface);
+  color: var(--v-300);
+}
+@keyframes led {
+  0%, 62%, 100% { box-shadow: 0 0 0 0 oklch(0.588 0.212 284 / 0.55); }
+  80%           { box-shadow: 0 0 0 6px oklch(0.588 0.212 284 / 0); }
+}
+@media (prefers-reduced-motion: reduce) { .xinvite .xswitch__led { animation: none; } }
+
+/* ═══════════════════════ X-RAY MODE ═══════════════════════════════
+   A class on <html>. CSS carries the whole transformation, so nothing
+   is recomputed while you scroll — outlines and badges travel with
+   their elements for free. JS only builds the layers panel and the
+   hover readout. */
+
+.xray-hint {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  color: var(--ink-4);
+}
+.xray-hint kbd {
+  padding: 2px 6px; border-radius: var(--radius-xs);
+  border: 1px solid var(--line-2); background: var(--surface);
+  color: var(--v-300); font-size: 11px;
+}
+
+[data-xn] { position: relative; }
+
+html.xray body { background: oklch(0.115 0.018 288); }
+
+html.xray .canvas-ground {
+  background-color: oklch(0.115 0.018 288);
+  background-image:
+    radial-gradient(circle at 1px 1px, oklch(0.588 0.212 284 / 0.28) 1px, transparent 0),
+    linear-gradient(to right,  oklch(0.588 0.212 284 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.588 0.212 284 / 0.06) 1px, transparent 1px);
+  background-size: 32px 32px, 8px 8px, 8px 8px;
+}
+html.xray .band { background: oklch(0.135 0.018 288); }
+
+/* Every measured element gets its bounds and its name. */
+html.xray [data-xn] {
+  outline: 1px solid oklch(0.588 0.212 284 / 0.5);
+  outline-offset: 2px;
+}
+html.xray [data-xn]::after {
+  content: attr(data-xn);
+  position: absolute;
+  /* Any element may already be using ::after for its own decoration.
+     Reset the whole box before drawing the badge, or leftover
+     geometry from that rule survives and deforms it. */
+  inset: auto auto auto -1px;
+  top: -3px;
+  width: auto; height: auto;
+  min-width: 0; min-height: 0; max-width: none;
+  margin: 0;
+  transform: translateY(-100%);
+  font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+  line-height: 1; letter-spacing: 0.01em; white-space: nowrap;
+  padding: 3px 5px; border-radius: var(--radius-xs) var(--radius-xs) var(--radius-xs) 0;
+  background: var(--v-700); color: #fff;
+  pointer-events: none; z-index: var(--z-xray);
+  animation: xn-in var(--t-mid) var(--e-out) backwards;
+  animation-delay: calc(var(--xi, 0) * 12ms);
+}
+html.xray [data-xn][data-xn-below]::after {
+  top: auto; bottom: -3px; transform: translateY(100%);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) var(--radius-xs);
+}
+@keyframes xn-in {
+  from { opacity: 0; transform: translateY(-100%) translateX(-4px); }
+}
+
+/* The render is stripped: paper goes to wireframe, fills go to ghost,
+   images become the crossed placeholder Figma shows for a missing
+   fill. Text stays readable — it is the one thing that survives. */
+html.xray .paper,
+html.xray .lyr--frame,
+html.xray .toy__stage,
+html.xray .card {
+  background: oklch(0.588 0.212 284 / 0.05) !important;
+  border-color: oklch(0.588 0.212 284 / 0.4) !important;
+  box-shadow: none !important;
+  color: var(--ink-3);
+}
+html.xray .sp-name, html.xray .sp-role,
+html.xray .paper h3, html.xray .paper p, html.xray .paper strong { color: var(--ink-2) !important; }
+html.xray .sp-cta, html.xray .sp-bar, html.xray .sp-badge, html.xray .sp-av {
+  background: oklch(0.588 0.212 284 / 0.16) !important;
+  border: 1px solid oklch(0.588 0.212 284 / 0.4);
+  color: var(--v-200) !important;
+  background-image: none !important;
+}
+html.xray .btn--primary {
+  background: oklch(0.588 0.212 284 / 0.16);
+  color: var(--v-200);
+  box-shadow: inset 0 0 0 1px oklch(0.588 0.212 284 / 0.45);
+}
+html.xray .hero::before { opacity: 0.35; }
+
+/* Crossed placeholder for anything raster. */
+html.xray [data-xn-img] {
+  position: relative;
+  background-image:
+    linear-gradient(to top left,
+      transparent calc(50% - 0.5px), oklch(0.588 0.212 284 / 0.45) 50%,
+      transparent calc(50% + 0.5px)),
+    linear-gradient(to top right,
+      transparent calc(50% - 0.5px), oklch(0.588 0.212 284 / 0.45) 50%,
+      transparent calc(50% + 0.5px)) !important;
+}
+
+/* Hover readout — the only thing JS positions, and only for one
+   element at a time. */
+.xprobe {
+  position: fixed; z-index: var(--z-xray);
+  pointer-events: none;
+  border: 1px solid var(--v-300);
+  background: oklch(0.588 0.212 284 / 0.08);
+  opacity: 0; transition: opacity var(--t-tap) linear;
+}
+.xprobe.is-on { opacity: 1; }
+.xprobe__dim {
+  position: absolute; left: 50%; bottom: -9px;
+  transform: translate(-50%, 100%);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  padding: 3px 6px; border-radius: var(--radius-xs);
+  background: var(--v-300); color: oklch(0.16 0.05 284);
+  white-space: nowrap;
+}
+.xprobe__h, .xprobe__v { position: absolute; background: oklch(0.795 0.115 284 / 0.35); }
+.xprobe__h { left: 0; right: 0; height: 1px; top: 50%; }
+.xprobe__v { top: 0; bottom: 0; width: 1px; left: 50%; }
+
+/* ═══════════════════ Layers panel ═════════════════════════════════
+   Floats over the canvas rather than resizing it — opening it must
+   never reflow the page you are reading. */
+
+.lpanel {
+  position: fixed; z-index: var(--z-panel);
+  right: var(--space-4); top: calc(var(--nav-h) + var(--space-4));
+  width: 268px; max-height: min(560px, calc(100vh - var(--nav-h) - var(--space-8)));
+  display: flex; flex-direction: column;
+  background: oklch(0.168 0.021 288 / 0.94);
+  border: 1px solid var(--v-edge);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--lift-3), 0 0 40px -12px oklch(0.588 0.212 284 / 0.35);
+  opacity: 0; visibility: hidden;
+  transform: translateX(12px) scale(0.98);
+  transition: opacity var(--t-mid) var(--e-out),
+              transform var(--t-mid) var(--e-out),
+              visibility 0s linear var(--t-mid);
+}
+@supports (backdrop-filter: blur(8px)) { .lpanel { backdrop-filter: blur(20px); } }
+html.xray .lpanel {
+  opacity: 1; visibility: visible; transform: none;
+  transition-delay: 0s, 0s, 0s;
+}
+
+.lpanel__bar {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3);
+}
+.lpanel__bar b { color: var(--v-300); font-weight: 500; margin-left: auto; text-transform: none; letter-spacing: 0.01em; }
+
+.lpanel__list {
+  list-style: none; margin: 0; padding: var(--space-2);
+  overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
+}
+.lpanel__list li { margin: 0; }
+.lpanel__list button {
+  display: flex; align-items: center; gap: var(--space-2);
+  width: 100%; text-align: left;
+  padding: 6px var(--space-2);
+  padding-left: calc(var(--space-2) + var(--lvl, 0) * 14px);
+  border: 0; border-radius: var(--radius-xs);
+  background: transparent; color: var(--ink-3);
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background var(--t-tap) linear, color var(--t-tap) linear;
+}
+.lpanel__list button:hover { background: oklch(0.588 0.212 284 / 0.16); color: var(--ink); }
+.lpanel__list li.is-inview button { color: var(--ink-2); }
+.lpanel__list li.is-lit button { background: var(--v-600); color: #fff; }
+.lpanel__list li.is-lit .lico { color: #fff; }
+.lico { width: 12px; height: 12px; flex: none; color: var(--v-400); }
+.lpanel__list li.is-inview .lico { color: var(--v-300); }
+
+.lpanel__foot {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-3);
+  line-height: 1.55;
+}
+
+/* Wide enough to dock: the panel takes its own column rather than
+   sitting on top of the design, exactly as it does in Figma. The
+   reflow happens once, on an explicit mode change. */
+@media (min-width: 1100px) {
+  html.xray main, html.xray .foot { padding-right: 292px; }
+}
+
+@media (max-width: 900px) {
+  .lpanel {
+    right: var(--space-3); left: var(--space-3); top: auto;
+    bottom: var(--space-3); width: auto;
+    max-height: 42vh;
+    transform: translateY(12px);
+  }
+}
+
+/* ═══════════════════ Pipeline strip ═══════════════════════════════ */
+
+.pipe {
+  display: grid; gap: var(--space-4);
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: var(--space-2);
-  padding: 5px var(--space-2);
-  border-radius: var(--radius-xs);
-  color: var(--fg-secondary);
-  opacity: 0.45;
-  transition: opacity var(--dur-mid) var(--ease),
-              background var(--dur-mid) var(--ease),
-              color var(--dur-mid) var(--ease);
+  padding-block: var(--space-9);
 }
-.tree li i { font-size: 13px; color: var(--fg-muted); flex: none; }
-.tree .indent-1 { padding-left: var(--space-5); }
-.tree .indent-2 { padding-left: var(--space-8); }
-.demo.is-converted .tree li {
-  opacity: 1;
-  color: var(--fg-secondary);
-  transition-delay: calc(var(--i, 0) * 45ms);
+@media (min-width: 860px) {
+  .pipe { grid-template-columns: 1fr auto 1fr auto 1fr; gap: var(--space-6); }
 }
-.demo.is-converted .tree li i { color: var(--brand-500); }
-.demo.is-converted .tree li.is-sel { background: var(--brand-tint); color: var(--neutral-950); }
+.pipe__cell {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--canvas);
+}
+.pipe__cell--mid {
+  border-color: var(--v-edge);
+  background: oklch(0.588 0.212 284 / 0.1);
+  box-shadow: 0 0 32px -10px oklch(0.588 0.212 284 / 0.5);
+}
+.pipe__k { font-family: var(--font-mono); font-size: var(--text-2xs);
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); }
+.pipe__v { font-size: var(--text-md); font-weight: 400; color: var(--ink); letter-spacing: -0.03em; }
+.pipe__cell--mid .pipe__v { color: var(--v-200); }
+.pipe__arrow {
+  display: grid; place-items: center; color: var(--line-2); font-size: 18px;
+  justify-self: center;
+}
+@media (max-width: 859px) { .pipe__arrow { transform: rotate(90deg); } }
 
-.demo__status {
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px dashed var(--border-subtle);
-}
+/* ═══════════════════ Steps ════════════════════════════════════════
+   A genuine ordered sequence, so it is numbered and connected. The
+   widths are uneven on purpose: three equal columns is the tell. */
 
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-8); counter-reset: s; }
 @media (min-width: 900px) {
-  .demo__stage { grid-template-columns: 1fr 264px; }
-  .demo__panel { border-top: 0; border-left: 1px solid var(--border-subtle); }
+  .steps { grid-template-columns: 1.05fr 1fr 1.15fr; gap: var(--space-9); }
 }
-
-/* ──────────────────────────── Steps ─────────────────────────────── */
-/* Numbered because this genuinely is a sequence — three ordered actions
-   a person performs. Not decoration. */
-
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-7); counter-reset: s; }
-@media (min-width: 800px) { .steps { grid-template-columns: repeat(3, 1fr); gap: var(--space-9); } }
-
-.steps li { counter-increment: s; display: flex; flex-direction: column; gap: var(--space-3); }
+.steps li {
+  counter-increment: s; position: relative;
+  display: flex; flex-direction: column; gap: var(--space-3);
+  padding-top: var(--space-7);
+  /* The connector rides a background-image rather than ::after. Each
+     step carries data-xn, and X-ray paints its node badge on ::after
+     too — sharing the pseudo-element let the connector's `right: 0`
+     leak into the badge and stretch it across the whole card. This
+     way both survive, and the line stays visible in X-ray. */
+  background-repeat: no-repeat;
+  background-position: 26px 6px;
+  background-size: calc(100% - 26px) 1px;
+  background-image: linear-gradient(var(--line), var(--line));
+}
+.steps li:last-child {
+  background-image: linear-gradient(to right, var(--line), transparent);
+}
 .steps li::before {
   content: counter(s, decimal-leading-zero);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0;
-  color: var(--brand-500);
-  font-weight: 500;
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--border-subtle);
+  position: absolute; top: 0; left: 0;
+  font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 500;
+  color: var(--v-400);
 }
-.steps h3 { font-size: var(--text-lg); }
+.steps h3 { font-size: var(--text-lg); font-weight: 500; }
+.steps p { font-size: var(--text-sm); color: var(--ink-3); }
 
-/* ──────────────────────── Capability list ───────────────────────── */
-/* A definition list, not a card grid — the content is term→detail. */
-
-.defs { display: grid; gap: 0; margin: 0; }
-@media (min-width: 760px) { .defs { grid-template-columns: 1fr 1fr; column-gap: var(--space-10); } }
-
-.def {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  gap: var(--space-4);
-  padding-block: var(--space-6);
-  border-top: 1px solid var(--border-subtle);
-  align-items: start;
-}
-.def i { font-size: 20px; color: var(--brand-500); line-height: 1.2; }
-.def dt { font-weight: 600; color: var(--fg-primary); font-size: var(--text-md); }
-.def dd { margin: var(--space-2) 0 0; font-size: var(--text-sm); color: var(--fg-secondary); }
-.def__body { min-width: 0; }
-
-/* ───────────────────────── Split / cards ────────────────────────── */
+/* ═══════════════════ Destinations ═════════════════════════════════ */
 
 .split { display: grid; gap: var(--space-7); }
-@media (min-width: 900px) { .split { grid-template-columns: 1fr 1fr; gap: var(--space-9); } }
+@media (min-width: 940px) { .split { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
 
-/* Syntropic: border OR shadow, never both. Border form. */
 .card {
-  background: var(--neutral-0);
-  border: 1px solid var(--border-subtle);
+  background: var(--canvas);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: var(--space-7);
+  transition: border-color var(--t-mid) var(--e-out-q),
+              background var(--t-mid) var(--e-out-q);
 }
 .card h3 { margin-bottom: var(--space-3); }
-.card--target { display: flex; flex-direction: column; gap: var(--space-4); }
-.card__chip {
+.card p { font-size: var(--text-sm); color: var(--ink-3); }
+
+.dest {
+  display: flex; flex-direction: column; gap: var(--space-5);
+  padding: 0; overflow: hidden;
+}
+.dest:hover, .dest:focus-within { border-color: var(--v-edge); background: oklch(0.588 0.212 284 / 0.05); }
+.dest__body { padding: 0 var(--space-7) var(--space-7); display: flex; flex-direction: column; gap: var(--space-3); }
+.dest__chip {
   align-self: flex-start;
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--brand-tint);
-  color: var(--brand-800);
-  border: 1px solid var(--border-brand);
+  font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 500;
+  padding: 4px 9px; border-radius: var(--radius-full);
+  background: oklch(0.588 0.212 284 / 0.14);
+  color: var(--v-200); border: 1px solid var(--v-edge);
 }
 
-/* ───────────────────────────── Code ─────────────────────────────── */
+/* Two small stages that show the shape of each output. */
+.dest__stage {
+  position: relative; height: 188px;
+  border-bottom: 1px solid var(--line);
+  background-color: oklch(0.115 0.018 288);
+  background-image: radial-gradient(circle at 1px 1px, var(--line) 1px, transparent 0);
+  background-size: 20px 20px;
+  overflow: hidden;
+}
+.frm {
+  position: absolute; border-radius: var(--radius-sm);
+  background: var(--paper); box-shadow: var(--lift-2);
+  padding: 9px;
+  /* No overflow clip here — the frame's name label sits outside its
+     own bounds, exactly as it does on a Figma canvas. */
+  transition: transform var(--t-slow) var(--e-out), box-shadow var(--t-slow) var(--e-out);
+}
+.frm::before {
+  content: attr(data-f);
+  position: absolute; top: -7px; left: 0; transform: translateY(-100%);
+  font-family: var(--font-mono); font-size: 8.5px; color: var(--v-300); white-space: nowrap;
+}
+.frm--a { left: 30px;  top: 44px; width: 104px; height: 76px; }
+.frm--b { left: 152px; top: 34px; width: 84px;  height: 96px; }
+.frm--c { left: 254px; top: 52px; width: 116px; height: 62px; }
+/* One frame is selected, the way exactly one usually is. */
+.frm--b { box-shadow: var(--lift-2), 0 0 0 1.5px var(--v-500); }
+.frm--b::before { color: var(--v-200); }
+/* These are spans, and an inline box ignores height. */
+.fbar { display: block; height: 5px; border-radius: 3px; background: var(--paper-line); }
+.fbar + .fbar { margin-top: 5px; }
+.fbar--t { height: 8px; width: 62%; background: oklch(0.588 0.212 284 / 0.32); margin-bottom: 8px; }
+.fbar--s { width: 48%; }
+.fbar--w { width: 78%; }
+.dest:hover .frm--a, .dest:focus-within .frm--a { transform: translate(-4px, -6px); }
+.dest:hover .frm--b, .dest:focus-within .frm--b { transform: translateY(-9px); }
+.dest:hover .frm--c, .dest:focus-within .frm--c { transform: translate(4px, -4px); }
+
+.sld {
+  position: absolute; left: 50%; top: 50%;
+  width: 168px; height: 96px; margin: -48px 0 0 -84px;
+  border-radius: var(--radius-sm);
+  background: var(--paper); box-shadow: var(--lift-2);
+  transform-origin: 50% 130%;
+  transition: transform var(--t-slow) var(--e-out);
+}
+.sld:nth-child(1) { transform: rotate(-7deg) translateY(6px); background: var(--paper-2); }
+.sld:nth-child(2) { transform: rotate(-2deg) translateY(3px); background: oklch(0.985 0.001 288); }
+.sld:nth-child(3) { transform: rotate(3deg); }
+.dest:hover .sld:nth-child(1), .dest:focus-within .sld:nth-child(1) { transform: rotate(-15deg) translate(-26px, 2px); }
+.dest:hover .sld:nth-child(2), .dest:focus-within .sld:nth-child(2) { transform: rotate(-4deg) translate(-8px, -4px); }
+.dest:hover .sld:nth-child(3), .dest:focus-within .sld:nth-child(3) { transform: rotate(8deg) translate(20px, 2px); }
+.sld__bar { position: absolute; left: 14px; right: 14px; height: 6px; border-radius: 3px; background: var(--paper-line); }
+.sld__bar--t { top: 18px; height: 9px; width: 64px; background: oklch(0.588 0.212 284 / 0.35); }
+.sld__bar--m { top: 40px; }
+.sld__bar--s { top: 54px; right: 60px; }
+
+/* ═══════════════════ Survival ledger — the six toys ═══════════════
+   Every claim on this page is demonstrated in the browser rather
+   than asserted. Six small instruments; four accept input. */
+
+.ledger { display: grid; gap: 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 780px)  { .ledger { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1140px) { .ledger { grid-template-columns: repeat(3, 1fr); } }
+
+.toy {
+  display: flex; flex-direction: column; gap: var(--space-4);
+  padding: var(--space-7);
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  position: relative;
+  transition: background var(--t-mid) var(--e-out-q);
+}
+.toy:hover { background: oklch(0.588 0.212 284 / 0.035); }
+.ledger .toy:nth-child(-n+1) { border-top: 1px solid var(--line); }
+@media (min-width: 780px) {
+  .ledger .toy:nth-child(2n+1) { border-left: 0; }
+}
+@media (min-width: 1140px) {
+  .ledger .toy:nth-child(2n+1) { border-left: 1px solid var(--line); }
+  .ledger .toy:nth-child(3n+1) { border-left: 0; }
+}
+@media (max-width: 779px) { .toy { border-left: 0; } }
+
+.toy__head { display: flex; align-items: baseline; gap: var(--space-3); }
+.toy__head i { font-size: 16px; color: var(--v-400); flex: none; align-self: center; }
+.toy--limit .toy__head i { color: var(--a-400); }
+.toy h3 { font-size: var(--text-md); font-weight: 500; }
+.toy p { font-size: var(--text-sm); color: var(--ink-3); }
+
+.toy__stage {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--canvas);
+  padding: var(--space-5);
+  min-height: 108px;
+  display: flex; flex-direction: column; justify-content: center; gap: var(--space-3);
+}
+.toy__out {
+  font-family: var(--font-mono); font-size: var(--text-2xs); line-height: 1.55;
+  color: var(--ink-3); min-height: 1.55em;
+}
+.toy__out b { color: var(--v-300); font-weight: 500; }
+.toy--limit .toy__out b { color: var(--a-300); }
+
+/* 1 — text stays text */
+.t-edit {
+  font-size: var(--text-lg); font-weight: 400; color: var(--ink);
+  letter-spacing: -0.03em;
+  border: 1px dashed var(--v-edge); border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  cursor: text; outline-offset: 2px;
+  transition: border-color var(--t-fast) var(--e-out-q), background var(--t-fast) var(--e-out-q);
+}
+.t-edit:hover { border-color: var(--v-400); }
+.t-edit:focus { border-style: solid; border-color: var(--v-400);
+  background: oklch(0.588 0.212 284 / 0.06); outline: none; }
+
+/* 2 — inline SVG becomes vectors */
+.t-vec { width: 100%; height: 92px; touch-action: none; cursor: grab; }
+.t-vec:active { cursor: grabbing; }
+.t-vec .vpath { fill: none; stroke: var(--v-300); stroke-width: 2; stroke-linecap: round; }
+.t-vec .vhair { stroke: oklch(0.588 0.212 284 / 0.45); stroke-width: 1; stroke-dasharray: 3 3; }
+.t-vec .vpt {
+  fill: var(--void); stroke: var(--v-300); stroke-width: 1.5;
+  cursor: grab; transition: fill var(--t-tap) linear, r var(--t-tap) var(--e-out-q);
+}
+.t-vec .vpt:hover, .t-vec .vpt:focus { fill: var(--v-400); outline: none; }
+.t-vec .vanchor { fill: var(--v-500); stroke: var(--paper); stroke-width: 1.5; }
+
+/* 3 — fills, strokes, radii */
+.t-swatch {
+  height: 56px; border-radius: var(--r, 10px);
+  background: linear-gradient(135deg, var(--v-400), var(--v-600));
+  border: var(--sw, 0px) solid var(--ink);
+  transition: border-radius var(--t-fast) var(--e-out-q), border-width var(--t-fast) var(--e-out-q);
+}
+.t-row { display: flex; align-items: center; gap: var(--space-3); }
+.t-row label { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-3); flex: none; width: 46px; }
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 24px; background: transparent; cursor: pointer; margin: 0;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px; background: var(--line-2); border-radius: 2px;
+}
+input[type="range"]::-moz-range-track {
+  height: 2px; background: var(--line-2); border-radius: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; margin-top: -6px; border-radius: 50%;
+  background: var(--v-400); border: 2px solid var(--void); cursor: grab;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--void);
+  background: var(--v-400); cursor: grab;
+}
+
+/* 4 — font substitution */
+.t-font {
+  font-size: var(--text-2xl); font-weight: 300; color: var(--ink);
+  letter-spacing: -0.04em; line-height: 1.1;
+  transition: font-family var(--t-mid) step-end, letter-spacing var(--t-mid) var(--e-out-q);
+}
+.t-font.is-sub { font-family: "Times New Roman", Times, serif; letter-spacing: -0.01em; }
+
+/* 5 — absolute positioning */
+.t-abs { position: relative; height: 88px; }
+.t-abs__n {
+  position: absolute; border-radius: var(--radius-xs);
+  background: oklch(0.588 0.212 284 / 0.18);
+  border: 1px solid oklch(0.588 0.212 284 / 0.4);
+  transition: background var(--t-tap) linear;
+}
+.t-abs__n:hover { background: oklch(0.588 0.212 284 / 0.36); }
+.t-abs__n::after {
+  content: attr(data-xy);
+  position: absolute; left: 4px; top: 3px;
+  font-family: var(--font-mono); font-size: 8.5px; color: var(--v-200);
+  white-space: nowrap;
+}
+
+/* 6 — no network */
+.t-net { display: flex; align-items: center; gap: var(--space-4); }
+.t-net__slot {
+  width: 68px; height: 68px; flex: none;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--a-400);
+  background:
+    linear-gradient(to top left,  transparent calc(50% - .5px), oklch(0.805 0.145 76 / .4) 50%, transparent calc(50% + .5px)),
+    linear-gradient(to top right, transparent calc(50% - .5px), oklch(0.805 0.145 76 / .4) 50%, transparent calc(50% + .5px));
+}
+.t-net__log { font-family: var(--font-mono); font-size: var(--text-2xs); line-height: 1.7; color: var(--ink-3); }
+.t-net__log b { color: var(--a-300); font-weight: 500; }
+
+/* ═══════════════════ Notice ═══════════════════════════════════════ */
+
+.notice {
+  display: grid; grid-template-columns: 20px 1fr; gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--a-ghost);
+  border: 1px solid oklch(0.805 0.145 76 / 0.3);
+}
+.notice i { color: var(--a-400); font-size: 17px; }
+.notice strong { color: var(--a-300); font-weight: 500; display: block; margin-bottom: 4px; }
+.notice p { color: var(--ink-3); font-size: var(--text-sm); }
+
+/* ═══════════════════ Terminal ═════════════════════════════════════ */
+
+.term {
+  position: relative;
+  background: oklch(0.105 0.016 288);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.term__bar {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  background: oklch(0.145 0.018 288);
+}
+.term__dots { display: flex; gap: 6px; }
+.term__dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); }
+.term__title { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-3); }
+.term__body { padding: var(--space-5) var(--space-6); }
+/* The scroller is the <pre>, not the block: an absolutely positioned
+   Copy button inside an overflow container scrolls away with the
+   content, and short commands run underneath it. */
+.term pre { margin: 0; overflow-x: auto; padding-right: 62px; scrollbar-width: thin; }
+.term code {
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.85;
+  color: var(--ink-2); white-space: pre;
+}
+.term .c-dim { color: var(--ink-4); }
+.term .c-fn  { color: var(--v-300); }
+.term .c-ok  { color: oklch(0.80 0.14 155); }
+.term .c-arg { color: var(--a-300); }
+.term__caret {
+  display: inline-block; width: 7px; height: 1.05em;
+  vertical-align: text-bottom; background: var(--v-400);
+  animation: blink 1.1s steps(2, start) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.term.is-done .term__caret { display: none; }
+
+.copy {
+  position: absolute; top: var(--space-3); right: var(--space-3);
+  border: 1px solid var(--line-2);
+  background: var(--surface); color: var(--ink-3);
+  border-radius: var(--radius-sm); padding: 6px 10px;
+  font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 500;
+  cursor: pointer; z-index: var(--z-raised);
+  transition: background var(--t-fast) var(--e-out-q), color var(--t-fast) var(--e-out-q),
+              border-color var(--t-fast) var(--e-out-q);
+}
+.copy:hover { background: var(--surface-2); color: var(--ink); border-color: var(--v-500); }
+/* In the terminal the button is chrome, so it lives in the title bar
+   and is centred by the bar's own flex alignment rather than guessed
+   at with a fixed offset. */
+.term__bar .copy { position: static; margin-left: auto; }
+.copy[data-copied="true"] { background: var(--v-500); border-color: var(--v-400); color: #fff; }
 
 .code {
   position: relative;
-  background: var(--neutral-950);
-  border-radius: var(--radius-lg);
+  background: oklch(0.105 0.016 288);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
   padding: var(--space-5) var(--space-6);
-  overflow-x: auto;
+  overflow: hidden;
 }
-.code pre { margin: 0; }
+.code pre { margin: 0; overflow-x: auto; padding-right: 62px; scrollbar-width: thin; }
 .code code {
-  font-size: var(--text-sm);
-  line-height: 1.7;
-  color: var(--neutral-300);
-  white-space: pre;
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.8;
+  color: var(--ink-2); white-space: pre;
 }
-.code .c-dim { color: var(--neutral-500); }
-.code .c-fn  { color: var(--brand-400); }
-.code .c-str { color: #8fd4a8; }
+.code .c-dim { color: var(--ink-4); }
+.code .c-fn  { color: var(--v-300); }
+.code .c-arg { color: var(--a-300); }
 
-.copy {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.06);
-  color: var(--neutral-300);
-  border-radius: var(--radius-sm);
-  padding: 4px 9px;
-  font-family: var(--font-sans);
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+/* ═══════════════════ Install ══════════════════════════════════════ */
+
+.install {
+  position: relative; overflow: clip;
+  border-top: 1px solid var(--line);
 }
-.copy:hover { background: rgba(255,255,255,0.14); color: #fff; }
-.copy[data-copied="true"] { background: var(--success-500); border-color: var(--success-500); color: #fff; }
-
-/* ───────────────────── Inverse band (install) ───────────────────── */
-/* Syntropic's documented dark-hero device: pure black, violet interior. */
-
-.inverse {
-  background: var(--bg-inverse);
-  color: var(--fg-on-inverse);
-  border-block: 0;
+.install::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(70% 90% at 50% 108%,
+              oklch(0.588 0.212 284 / 0.32), transparent 66%);
+  pointer-events: none;
 }
-.inverse h2 { color: var(--neutral-0); }
-.inverse .lede { color: var(--neutral-400); }
-.inverse .caption { color: var(--neutral-500); }
-.inverse .card {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.12);
+.install__in { position: relative; text-align: center; }
+.install .display { margin-inline: auto; }
+.install .lede { margin: var(--space-6) auto 0; text-align: center; }
+.install__actions {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3);
+  margin-top: var(--space-9);
 }
-.inverse .card h3 { color: var(--neutral-0); }
-.inverse .code { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); }
-.inverse a:not(.btn) { color: var(--brand-400); }
-.inverse a:not(.btn):hover { color: var(--brand-300); }
-
-/* ──────────────────────────── Notice ────────────────────────────── */
-
-.notice {
-  display: grid;
-  grid-template-columns: 22px 1fr;
-  gap: var(--space-4);
-  padding: var(--space-5) var(--space-6);
-  border-radius: var(--radius-lg);
-  background: var(--warning-100);
-  border: 1px solid #f0d29a;
-  color: #6b430c;
+.install__alt {
+  margin-top: var(--space-11);
+  display: grid; gap: var(--space-6); text-align: left;
 }
-.notice i { color: var(--warning-700); font-size: 18px; }
-.notice strong { color: #58370a; }
-.notice p { color: #6b430c; font-size: var(--text-sm); }
-
-/* ──────────────────────────── Footer ────────────────────────────── */
-
-.foot {
-  border-top: 1px solid var(--border-subtle);
-  padding-block: var(--space-9);
-  background: var(--neutral-0);
+@media (min-width: 860px) {
+  /* Hug the content: stretched cards left a dead half-column under
+     the shorter one. */
+  .install__alt { grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: start; }
 }
-.foot__in { display: flex; flex-wrap: wrap; gap: var(--space-7); align-items: flex-start; }
-.foot__links { display: flex; flex-wrap: wrap; gap: var(--space-7); margin-left: auto; }
+
+/* ═══════════════════ Footer ═══════════════════════════════════════ */
+
+.foot { border-top: 1px solid var(--line); padding-block: var(--space-10); background: var(--void); }
+.foot__in { display: flex; flex-wrap: wrap; gap: var(--space-9); align-items: flex-start; }
+.foot__links { display: flex; flex-wrap: wrap; gap: var(--space-9); margin-left: auto; }
 .foot__col { display: flex; flex-direction: column; gap: var(--space-2); }
-.foot__col h4 {
-  font-size: var(--text-2xs); font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--neutral-700); margin-bottom: var(--space-1);
-}
-.foot__col a { font-size: var(--text-sm); color: var(--fg-secondary); text-decoration: none; }
-.foot__col a:hover { color: var(--fg-primary); text-decoration: underline; }
-.foot__legal { font-size: var(--text-xs); color: var(--fg-secondary); font-weight: 400; line-height:1.5; }
+.foot__col .collabel { margin-bottom: var(--space-2); }
+.foot__col a { font-size: var(--text-sm); color: var(--ink-3); text-decoration: none; padding-block: 3px; }
+.foot__col a:hover { color: var(--v-300); }
+.foot__legal { font-size: var(--text-xs); color: var(--ink-4); line-height: 1.7; max-width: 34ch; }
+.foot__legal a { color: var(--ink-3); }
+.foot__legal a:hover { color: var(--v-300); }
 
-/* ───────────────────────────── Docs ─────────────────────────────── */
+/* ═══════════════════ Docs ═════════════════════════════════════════ */
 
 .docs { display: grid; gap: var(--space-9); align-items: start; }
-@media (min-width: 960px) { .docs { grid-template-columns: 216px 1fr; gap: var(--space-11); } }
+@media (min-width: 980px) { .docs { grid-template-columns: 210px 1fr; gap: var(--space-11); } }
 
-.toc { position: sticky; top: 84px; }
-.toc h4 {
-  font-size: var(--text-2xs); font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--neutral-700); margin: 0 0 var(--space-3);
+.toc { position: sticky; top: calc(var(--nav-h) + var(--space-5)); }
+.toc .collabel, .foot__col .collabel {
+  font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3);
+  margin: 0 0 var(--space-3);
 }
 .toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
 .toc a {
-  display: block;
-  font-size: var(--text-sm);
-  color: var(--fg-secondary);
-  text-decoration: none;
-  padding: 6px var(--space-3);
-  border-radius: var(--radius-sm);
-  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  display: block; font-size: var(--text-sm); min-height: 24px; color: var(--ink-3);
+  text-decoration: none; padding: 6px var(--space-3);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-left: 1px solid var(--line);
+  transition: background var(--t-fast) var(--e-out-q), color var(--t-fast) var(--e-out-q),
+              border-color var(--t-fast) var(--e-out-q);
 }
-.toc a:hover { background: var(--neutral-100); color: var(--fg-primary); }
-.toc a.is-active { background: var(--brand-tint); color: var(--brand-800); font-weight: 600; }
+.toc a:hover { background: var(--surface); color: var(--ink); }
+.toc a.is-active { border-left-color: var(--v-500); color: var(--v-200); background: oklch(0.588 0.212 284 / 0.1); }
 
-.prose { max-width: var(--measure); }
+/* Sub-headings, injected from the real document so the tree can never
+   drift from the content. The h2 list is in the markup, so a failed
+   script still leaves a usable table of contents. */
+.toc__sub { list-style: none; margin: 0; padding: 0; }
+.toc__sub a {
+  font-size: var(--text-xs); padding-left: var(--space-6);
+  color: var(--ink-4); min-height: 22px;
+}
+.toc__sub a.is-active { color: var(--v-300); }
+
+/* ── Prose ──────────────────────────────────────────────────────────
+   Text runs to a reading measure; tables, code and callouts take the
+   full column, which is what makes them scannable. `ch` is a bad
+   proxy in Sora — its zero is wide, so 66ch rendered at 780px, about
+   94 characters. This is calibrated in rem against the real glyphs. */
+
+.prose { max-width: 58rem; }
+/* :where() holds this at zero specificity so the flow rule below wins
+   on margin-top. It must also come first: as an equal-specificity
+   plain selector it won on source order, and every list sat flush
+   against the heading above it. */
+.prose :where(ul, ol) { margin: 0; padding-left: var(--space-6); color: var(--ink-3); }
 .prose > * + * { margin-top: var(--space-5); }
-.prose h2 { margin-top: var(--space-11); scroll-margin-top: 84px; }
-.prose h2:first-child { margin-top: 0; }
-.prose h3 { margin-top: var(--space-8); scroll-margin-top: 84px; }
-.prose ul, .prose ol { margin: 0; padding-left: var(--space-6); }
+.prose > p,
+.prose > ul,
+.prose > ol,
+.prose > h2,
+.prose > h3,
+.prose > .caption,
+.prose > .doc-head { max-width: var(--measure); }
+
+.prose h2 {
+  margin-top: var(--space-12);
+  scroll-margin-top: calc(var(--nav-h) + var(--space-5));
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+  max-width: none;
+}
+.prose > :first-child { margin-top: 0; }
+.prose h3 { margin-top: var(--space-8); scroll-margin-top: calc(var(--nav-h) + var(--space-5)); }
+/* :where() keeps this reset at zero specificity, so the flow rule
+   above still supplies the top margin. As a plain selector it won,
+   and every list sat flush against its heading. */
 .prose li + li { margin-top: var(--space-2); }
-.prose .code { margin-top: var(--space-5); }
+.prose li::marker { color: var(--ink-4); }
+.prose .code, .prose .notice { margin-top: var(--space-5); }
+.prose strong { color: var(--ink-2); font-weight: 600; }
+
+/* Every section is linkable, which is most of what makes a docs page
+   useful to someone answering a question in a thread. */
+.anchor {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 24px; min-height: 24px;
+  margin-left: var(--space-2);
+  font-family: var(--font-mono); font-weight: 400;
+  font-size: 0.62em; color: var(--v-400);
+  text-decoration: none; vertical-align: middle;
+  opacity: 0; transition: opacity var(--t-fast) var(--e-out-q), color var(--t-fast) var(--e-out-q);
+}
+h2:hover > .anchor, h3:hover > .anchor, .anchor:focus-visible { opacity: 1; }
+.anchor:hover { color: var(--v-200); }
+@media (hover: none) { .anchor { opacity: 0.5; } }
+
+.doc-head { margin-bottom: var(--space-11); }
+.doc-head .display { font-size: clamp(2.25rem, 5vw, 3.25rem); }
+.doc-head .lede { margin-top: var(--space-4); }
+.doc-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-6);
+  font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-3);
+}
+.doc-meta a { color: var(--ink-3); text-decoration-color: var(--line-2); padding-block: 4px; }
+.doc-meta a:hover { color: var(--v-300); }
+.doc-ver {
+  display: none; align-items: center; gap: 6px;
+  padding: 3px var(--space-3); border-radius: var(--radius-full);
+  border: 1px solid var(--v-edge); background: oklch(0.588 0.212 284 / 0.1);
+  color: var(--v-200);
+}
+.doc-ver[data-loaded] { display: inline-flex; }
+
+.doc-end {
+  margin-top: var(--space-12); padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6);
+  align-items: center;
+  font-size: var(--text-sm); color: var(--ink-3);
+  max-width: none;
+}
+.doc-end a { display: inline-flex; align-items: center; gap: 6px; padding-block: 3px; }
 
 .tbl { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
-.tbl th, .tbl td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
-.tbl th { font-weight: 600; color: var(--fg-primary); font-size: var(--text-xs); }
+.tbl th, .tbl td {
+  text-align: left; padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line); vertical-align: top;
+}
+.tbl th { font-weight: 500; color: var(--ink); font-size: var(--text-xs);
+  font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+.tbl td { color: var(--ink-3); }
 .tbl td code { white-space: nowrap; }
 .tbl-scroll { overflow-x: auto; }
 
-/* ───────────────────── Reveal (enhancement only) ────────────────── */
-/* Sections are visible by default. JS adds .reveal-ready only when it
-   runs, so a headless render or a failed script still shows the page. */
+/* ═══════════════════ Reveal ═══════════════════════════════════════
+   Enhancement only. The opt-in class is added by JS, so a headless
+   render, a background tab or a failed script still shows the page
+   complete. Each family gets its own entrance rather than one
+   uniform fade applied to everything. */
 
-.reveal-ready [data-reveal] {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+.reveal-ready [data-rise] {
+  opacity: 0; transform: translateY(18px);
+  transition: opacity var(--t-reveal) var(--e-out), transform var(--t-reveal) var(--e-out);
 }
-.reveal-ready [data-reveal].is-in { opacity: 1; transform: none; }
+.reveal-ready [data-rise].is-in { opacity: 1; transform: none; }
+
+.reveal-ready [data-wipe] { clip-path: inset(0 100% 0 0); transition: clip-path var(--t-reveal) var(--e-glide); }
+.reveal-ready [data-wipe].is-in { clip-path: inset(0 0 0 0); }
+
+.reveal-ready [data-stagger] > * {
+  opacity: 0; transform: translateY(14px);
+  transition: opacity var(--t-slow) var(--e-out), transform var(--t-slow) var(--e-out);
+}
+.reveal-ready [data-stagger].is-in > * {
+  opacity: 1; transform: none;
+  transition-delay: calc(var(--si, 0) * 60ms);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .reveal-ready [data-rise],
+  .reveal-ready [data-stagger] > * { opacity: 1; transform: none; }
+  .reveal-ready [data-wipe] { clip-path: none; }
+  .xplode__scene, .lyr { transition: none !important; }
+  .term__caret { animation: none; }
+}
+
+/* ═══════════════════ Responsive ═══════════════════════════════════ */
+
+@media (max-width: 1080px) {
+  .nav__links { gap: var(--space-5); }
+  .nav__links > li:nth-child(1), .nav__links > li:nth-child(2) { display: none; }
+}
+@media (max-width: 820px) {
+  .nav__links { display: none; }
+  .byline { display: none; }
+  .ghstar__b span { display: none; }
+  .xswitch kbd { display: none; }
+  .wrap { padding-inline: var(--space-5); }
+  section { padding-block: var(--space-11); }
+  section.roomy { padding-block: var(--space-12); }
+  .head { margin-bottom: var(--space-8); }
+}
+@media (max-width: 480px) {
+  .nav__in { gap: var(--space-2); }
+  .xswitch span { display: none; }
+  .xswitch { padding: 6px 9px; }
+  .foot__links { gap: var(--space-7); }
 }

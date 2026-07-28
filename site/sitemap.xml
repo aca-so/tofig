@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url><loc>https://tofig.aca.so/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://tofig.aca.so/"/>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://tofig.aca.so/pt/"/>
-  </url>
-  <url><loc>https://tofig.aca.so/docs.html</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://tofig.aca.so/docs.html"/>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://tofig.aca.so/pt/docs.html"/>
-  </url>
-  <url><loc>https://tofig.aca.so/pt/</loc></url>
-  <url><loc>https://tofig.aca.so/pt/docs.html</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tofig.aca.so/</loc><priority>1.0</priority></url>
+  <url><loc>https://tofig.aca.so/docs.html</loc><priority>0.8</priority></url>
 </urlset>
