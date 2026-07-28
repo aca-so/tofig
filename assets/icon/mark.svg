@@ -1,0 +1,43 @@
+<!--
+  tofig mark — the glyph alone, no tile.
+
+  This is the site's favicon: a browser tab already supplies its own
+  background, and a bare mark reads better in a tab strip than a shrunken
+  tile whose rim and bloom turn to mud at 16px.
+
+  The contours are Sora's own, not a redraw. `t` is instanced at wght 300 and
+  the solidus at wght 600 — the same pair icon.html sets — and laid out with
+  the same metrics: font-size 52 in a 100 tile, letter-spacing -0.06em, and
+  -0.03em pulling the slash back. They are extracted from the font file
+  because no browser will load a webfont for an SVG favicon, so the mark has
+  to carry outlines while the icon can stay live text.
+
+  Regenerate after any change to icon.html's type settings:
+  the extractor is documented in LISTING.md under Regeneration.
+
+  The viewBox is a square drawn around the glyph's own bounds (35.46 × 43.68)
+  plus 3 units of air, rather than the tile's 100 × 100, so the mark fills
+  the favicon instead of floating in the tile's padding.
+
+  Theme-aware: the `v-500` token on light chrome, lifting to `v-400` on
+  dark, where the darker violet sits too close to the tab strip. Browsers
+  that ignore the media query get the light value, which is legible on both.
+
+  Note for editors: XML forbids a double hyphen inside a comment, so those
+  token names are written bare, and so is the validator flag below. Spelling
+  either with its real prefix makes this file fail to parse, and a broken SVG
+  favicon fails silently — the tab just falls back to a globe. Validate after
+  editing with xmllint, passing its `noout` flag, per LISTING.md.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49.68 49.68" width="49.68" height="49.68" role="img" aria-label="tofig">
+  <style>
+    svg { --ink: #745ff3; }
+    @media (prefers-color-scheme: dark) { svg { --ink: #948efd; } }
+  </style>
+  <g fill="var(--ink, #745ff3)">
+    <!-- t · Sora wght 300 -->
+    <path d="M21.38 43.85Q18.54 43.85 16.45 43.03Q14.36 42.21 13.22 40.21Q12.09 38.22 12.09 34.84V7.37H15.83V35.40Q15.83 37.77 17.13 39.06Q18.43 40.35 20.79 40.35H25.76V43.85ZM7.11 19.02V16.03H25.76V19.02Z"/>
+    <!-- solidus · Sora wght 600 -->
+    <path d="M24.63 46.68 35.34 3.00H42.57L31.86 46.68Z"/>
+  </g>
+</svg>

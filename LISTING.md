@@ -1,17 +1,62 @@
 # tofig — Figma Community listing copy
 
-Brand: **acaso** design system (font Sora, brand gradient `#6C03FA → #EC17F7`, acaso symbol).
+Brand: the **tofig.aca.so** system — see [DESIGN.md](./DESIGN.md). Sora (150–600) plus
+Azeret Mono on the violet-tinted dark canvas, violet anchored to acaso's `#745FF3`.
+The listing used to run acaso's old `#6C03FA → #EC17F7` store gradient on a light
+ground; it now matches the site, so the two surfaces read as one product.
+
 ## Assets (match Figma's publish form)
-- **Icon** *(required)* — `assets/icon.png` · **128×128**. Full-bleed t/ monogram on the tonal-purple gradient; Figma applies its own rounded mask, so the art has no baked corners (avoids white corners).
+- **Icon** *(required)* — upload **`assets/icon/icon-128.png`**. The set ships
+  16/32/48/64/128/256/512 from one master; Figma's form wants 128, the rest exist for the
+  site, docs and anywhere else the mark is needed.
+
+  The site as an icon: a paper `t/` on the `void` ground with one violet source behind it
+  and a violet rim. Full-bleed, because Figma applies its own rounded mask and a baked
+  corner would composite to white. Verified legible at 32px, the size Figma uses in its own
+  plugin menus.
+
+  | File | Purpose |
+  |---|---|
+  | `assets/icon/icon.html` | master — the tile: ground, bloom, rim, and Sora set live |
+  | `assets/icon/mark.svg` | the glyph alone, transparent and theme-aware; source of the site favicon |
+  | `assets/icon/icon-*.png` | rasterised set, all downscaled from one 1024 render |
+
+  **The glyph is Sora, set live — that is the mark.** It was once redrawn as hand-made
+  vector paths to remove the webfont dependency, with a shortened `t` tail because Sora's
+  own long curled tail thins toward the solidus at small sizes. That redraw was rejected:
+  Sora's letterform *is* the identity, and a cleaned-up approximation of it is not. Weights
+  are 300 against 600 — the wordmark's light-against-heavy device at monogram scale.
+
+  The webfont dependency is real but confined to **regeneration**, not to what ships: the
+  artefacts are PNGs, and `render.mjs` calls `document.fonts.check()` at both weights and
+  hard-fails if Sora is missing. Without that guard the tile still renders — in system-ui —
+  and nothing downstream notices.
+
+  `mark.svg` is the one place that cannot use live text, because no browser will load a
+  webfont for an SVG favicon. Rather than redraw it, its two contours are **extracted from
+  the font file** at the same weights and laid out with the same metrics, so the favicon and
+  the icon show the same letterform. See Regeneration for how to re-extract them.
+
+  Two colour alternatives were rejected on measurement, not taste: a **violet mark on void**
+  lost the glyph entirely at 32px, and a **paper ground** left the tile with no edge at all
+  on Figma's light menu chrome. The rim is what holds the edge on dark chrome, so it is
+  load-bearing rather than decorative. A mono-violet ramp also works and reads fine — it was
+  dropped because Figma Community is saturated with near-identical violet tiles, and a
+  near-black tile is the one thing that grid doesn't have.
 - **Thumbnail** *(required)* — `assets/marketing/01-thumbnail.png` · **1920×1080**.
+  The site's signature specimen held at its `prefers-reduced-motion` pose: a paper frame
+  decomposed into named, badged layers.
 - **Carousel** (additional thumbnail images, **1920×1080** each — upload after the thumbnail):
-  - `assets/marketing/02-how-it-works.png` — 3-step flow + a real screenshot of the plugin UI
-  - `assets/marketing/03-design-slides.png` — auto Design/Slides target (figma.editorType)
-  - `assets/marketing/04-before-after.png` — HTML → editable layers (with a Figma Layers panel)
-  - `assets/marketing/05-why-tofig.png` — value props grid
+  - `assets/marketing/02-how-it-works.png` — the In → locally → Out pipeline, beside an
+    unretouched capture of the actual plugin panel
+  - `assets/marketing/03-design-slides.png` — auto Design/Slides target (`figma.editorType`)
+  - `assets/marketing/04-nodes.png` — HTML source → the layer tree, with real node types
+  - `assets/marketing/05-what-survives.png` — the survival ledger: three things that come
+    through in violet, three real limits in amber
 - **Playground file** *(optional)* — a Figma/Slides file with a sample HTML pre-pasted, so people can try it. (Not built yet — say the word.)
 
-Sources (regenerate any time): `assets/icon.html`, `assets/marketing/marketing.html` (Sora via Google Fonts; acaso symbol/wordmark inlined). Real UI shot lives at `assets/marketing/plugin-ui.png`.
+Amber appears on frame 5 and nowhere else, per DESIGN.md: it means "this is a real limit",
+and spread across five frames it would mean nothing.
 
 Wordmark note: "tofig" sets **to** in Sora ExtraLight (200) and **fig** a touch heavier (320) — a subtle nod to "to figma".
 
@@ -35,47 +80,49 @@ tofig
 ## Description — EN (Community / public)
 
 ```
-Convert self-contained HTML — including designs you generate with Claude — into
-native, fully editable Figma layers. Open it in a Design file to get frames, or in
-a Figma Slides file to get slides.
+Convert self-contained HTML — including the designs Claude generates — into native,
+fully editable Figma layers. Open tofig in a Design file to get frames, or in a Figma
+Slides file to get slides.
 
-Everything runs locally: your HTML never leaves your machine. No servers, no account,
-no upload.
+Everything runs locally. The plugin declares networkAccess: none, so your HTML never
+leaves your machine: no servers, no account, no upload.
 
 HOW TO USE
 1. Open tofig in a Design or Slides file.
 2. Paste your HTML, or drop a .html file.
 3. Click Convert.
 
-WHAT IT DOES
-• Rebuilds your HTML as real Figma nodes: frames, text, editable vectors (inline
-  SVG), image fills, gradients, strokes and corner radii.
-• Auto-targets Design (frames) or Slides depending on where you run it.
-• Detects JavaScript slide decks and imports each slide as its own Figma slide.
-• Maps typography to your Figma fonts (nearest weight/style) and tells you which
-  fonts weren't available.
+WHAT YOU GET
+• Real Figma nodes — frames, live text you can retype, editable vectors from inline
+  SVG, image fills, gradients, strokes and corner radii. Not a screenshot.
+• The right output for wherever you are: frames in a Design file, slides in a Slides
+  file. tofig reads figma.editorType, so there is no mode to pick.
+• Decks, including JavaScript-driven ones, imported one Figma slide per slide.
+• Typography mapped to your Figma fonts by nearest weight and style, with a report
+  of every substitution it made.
 
-BEST WITH SELF-CONTAINED HTML
-Inline CSS, data:/base64 images, inline SVG, and web fonts that exist in Figma.
-External URLs and assets are not fetched — the plugin has no network access by design.
+WHAT DOESN'T SURVIVE
+These limits are real, and knowing them now is cheaper than finding them at 2am.
+• External URLs and assets are never fetched — that is what networkAccess: none
+  means. Keep your HTML self-contained: inline CSS, data: images, inline SVG.
+• Fonts must already exist in your Figma. Otherwise text falls back to the nearest
+  match, then Inter, and tofig tells you exactly what changed.
+• Layout is absolutely positioned, chosen for visual fidelity. You get pixel-accurate
+  placement, not responsive constraints. Auto-layout is on the roadmap.
 
 WHEN AN EXPORT WON'T RENDER
-Some "HTML" files are really live apps — they boot a React runtime, pull React or
-Babel from a CDN, or touch localStorage. Figma's plugin sandbox blocks all of that,
-so those can't render inside the plugin. For them, render on your own machine with
-the companion CLI and import the result:
+Some files called "HTML" are really live apps: they boot a React runtime, pull React
+or Babel from a CDN, or reach for localStorage. Figma's plugin sandbox blocks all of
+that — and that sandbox is what makes tofig safe to run on untrusted markup. For
+those files, render on your own machine and import the result:
 
   npx --package=@aca-so/tofig tofig-render export.html
 
 That writes an export.tofig.json — drop it into the plugin and it imports directly.
-Still fully local (it drives your own Chrome); it just isn't sandbox-restricted.
+Still fully local: it drives your own Chrome, it just isn't sandbox-restricted.
 
-GOOD TO KNOW
-• Fonts must be available in Figma; otherwise text falls back to the nearest match
-  (then Inter), and tofig reports exactly what was substituted.
-• Layout uses absolute positioning for visual fidelity (auto-layout is on the roadmap).
-
-An open-source plugin by acaso. MIT licensed.
+An open-source tool by acaso. MIT licensed.
+Site: tofig.aca.so
 Code: github.com/aca-so/tofig
 Built on @builder.io/html-to-figma (MIT); bundles React/ReactDOM (MIT).
 ```
@@ -135,9 +182,56 @@ Código: github.com/aca-so/tofig
 ---
 
 ## Regeneration
-- Icon: open `assets/icon.html` in a browser, screenshot the square, downscale to 128×128.
-- Thumbnail + carousel: open `assets/marketing/marketing.html` (five stacked 1920×1080
-  sections), screenshot each section element, downscale to 1920×1080.
-All self-contained (Sora via Google Fonts; acaso symbol/wordmark inlined). The thumbnail's
-embedded plugin screenshot is `plugin-ui.png` (a real capture of `ui.html`).
+
+One command, no manual screenshotting:
+
+```bash
+node assets/marketing/render.mjs
+```
+
+It drives your local Chrome over three sources and overwrites every published image in
+place:
+
+| Source | Outputs |
+|---|---|
+| `assets/marketing/marketing.html` | the five 1920×1080 listing frames |
+| `assets/icon/icon.html` | `assets/icon/icon-*.png` and `site/assets/apple-touch-icon.png` |
+| `assets/icon/mark.svg` | `site/assets/tofig-mark.svg` and `site/assets/favicon-32.png` |
+
+The listing frames are captured at 2x and downscaled; a straight 1x capture renders the
+150-weight display type thin and fringed. The icon set is rasterised once at 1024 and
+downscaled from there, so 512/256/128/64/32/16 are all clean power-of-two resamples of a
+single render rather than seven independent rasterisations.
+
+`site/assets/tofig-mark.svg` is a **copy**, not a hand-maintained file. Edit
+`assets/icon/mark.svg` and re-run the script; editing the deployed copy directly means the
+two drift.
+
+`marketing.html` and `icon.html` both pull Sora from Google Fonts, so the render needs
+network access. That's a property of the *asset pipeline* only — the plugin itself still
+declares `networkAccess: none`. The script waits on `document.fonts.ready` before every
+capture, and for the icon it additionally calls `document.fonts.check()` at both weights
+and refuses to write the file if Sora is absent. Without that guard the tile still renders,
+in system-ui, and nothing downstream notices.
+
+### Re-extracting the favicon outlines
+
+`mark.svg` is the only asset carrying Sora as outlines rather than live text, because no
+browser will load a webfont for an SVG favicon. Its two contours come out of the font file
+via `assets/icon/extract-outlines.py`, which instances the variable font at wght 300 and
+600 and lays the pair out with icon.html's own metrics.
+
+**Re-run it whenever `icon.html`'s type settings change** — font size, either weight, the
+letter spacing, or the slash's negative margin. The script's constants mirror those values,
+and the favicon only matches the icon while the two agree. Usage is in its docstring.
+
+**If you edit either SVG, validate it** — `xmllint --noout assets/icon/*.svg`. XML forbids
+a double hyphen inside a comment, so a token name written with its CSS custom property
+prefix breaks the file, and a broken SVG fails *silently*: it rasterises to a zero-size
+broken image and a favicon just falls back to a globe. The script now hard-fails on that
+rather than writing an empty PNG, but the validator catches it sooner.
+
+The plugin panel embedded in frame 2 is `assets/marketing/plugin-ui.png`, a real capture
+of `ui.html` at its native 880×1200, shown uncropped. Keeping it real matters: Figma's
+review guidelines check that screenshots match the product.
 ```

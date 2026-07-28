@@ -42,9 +42,11 @@ export default tseslint.config(
     },
   },
   {
-    // The renderer CLI runs in Node, but its page.evaluate()/waitForFunction()
-    // callbacks execute in the browser — they reference document/window.
-    files: ['bin/**/*.mjs'],
+    // Puppeteer drivers: Node scripts whose page.evaluate()/waitForFunction()
+    // callbacks execute in the browser, so they reference document/window.
+    // `bin/` is the renderer CLI; `assets/` is the listing-art and icon
+    // renderer. Both need the union of the two global sets.
+    files: ['bin/**/*.mjs', 'assets/**/*.mjs'],
     languageOptions: {
       globals: { ...globals.node, ...globals.browser },
     },
