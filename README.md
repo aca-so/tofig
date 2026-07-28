@@ -12,6 +12,17 @@ An open-source take on the "HTML → Figma" direction: you author in HTML, tofig
 rebuilds it as real Figma nodes (frames, text, vectors, gradients, image fills).
 No server, no browser extension, no account — just a Figma plugin.
 
+## Install
+
+**[Get tofig on Figma Community](https://www.figma.com/community/plugin/1652349254564019815)**
+— click **Open in…**, pick a Design or Slides file, and Figma installs it and runs it
+there. Then paste your HTML and hit **Convert**. Reopen it later with right-click →
+**Plugins** → **tofig**.
+
+Guides for using it, including the [Claude walkthrough](https://tofig.aca.so/claude.html),
+are at [tofig.aca.so](https://tofig.aca.so). The rest of this README is about building
+and running it from source.
+
 ## How it works
 
 The plugin's UI is a real browser, so it renders your HTML in a hidden iframe,
@@ -28,7 +39,7 @@ npm run watch        # rebuild on change
 npm run typecheck
 ```
 
-## Run it in Figma (desktop app)
+## Run your own build in Figma (desktop app)
 
 1. `npm run build`
 2. Figma → **Plugins → Development → Import plugin from manifest…**
@@ -72,7 +83,7 @@ directly, no in-plugin render. Requires a local Google Chrome / Chromium.
 
 ### Using the renderer without cloning the repo
 
-If you installed tofig from the Figma plugin list, you don't have this repo — the
+If you installed tofig from Figma Community, you don't have this repo — the
 renderer is published separately as [`@aca-so/tofig`](https://www.npmjs.com/package/@aca-so/tofig):
 
 ```bash
