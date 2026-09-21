@@ -14,7 +14,7 @@ No server, no browser extension, no account — just a Figma plugin.
 
 ## Install
 
-**[Get tofig on Figma Community](https://www.figma.com/community/plugin/1652349254564019815)**
+**[Get tofig on Figma Community](https://www.figma.com/community/plugin/1683670798113236656)**
 — click **Open in…**, pick a Design or Slides file, and Figma installs it and runs it
 there. Then paste your HTML and hit **Convert**. Reopen it later with right-click →
 **Plugins** → **tofig**.

@@ -61,7 +61,7 @@ and spread across five frames it would mean nothing.
 Wordmark note: "tofig" sets **to** in Sora ExtraLight (200) and **fig** a touch heavier (320) — a subtle nod to "to figma".
 
 Publisher: **acaso**. Visibility: **Public** — live on Figma Community at
-**<https://www.figma.com/community/plugin/1652349254564019815>**. Every install
+**<https://www.figma.com/community/plugin/1683670798113236656>**. Every install
 route on the site points there; it is the canonical URL for the plugin.
 
 ---
