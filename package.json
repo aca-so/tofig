@@ -52,7 +52,7 @@
     "@figma/plugin-typings": "*",
     "eslint": "^10.5.0",
     "globals": "^17.7.0",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.62.0"
   }
 }
