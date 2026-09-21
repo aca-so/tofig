@@ -1,7 +1,7 @@
 # Publishing tofig
 
 > **Status: published and public.** tofig is live on Figma Community at
-> **<https://www.figma.com/community/plugin/1652349254564019815>** — that is the
+> **<https://www.figma.com/community/plugin/1683670798113236656>** — that is the
 > canonical install URL, and every route on the site points to it. What follows is the
 > procedure, kept for each new version.
 
