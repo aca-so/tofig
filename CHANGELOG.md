@@ -7,6 +7,23 @@ All notable changes to tofig are documented here. Format loosely follows
 The **Release notes** block under each version is the text to paste into Figma's
 "Publish new version" dialog.
 
+## [0.3.2] — 2026-09-20
+
+### Changed
+- **New Figma plugin ID** — `1683670798113236656`. The manifest, every install link on
+  tofig.aca.so, and the docs that name the canonical URL now point at the new Community
+  listing; the old ID (`1652349254564019815`) is gone from the repo. Conversion behaviour
+  is untouched.
+
+### Release notes
+
+```
+Housekeeping: the plugin now lives under its new Figma Community listing.
+Nothing about the conversion itself changed.
+```
+
+[0.3.2]: https://github.com/aca-so/tofig/releases/tag/v0.3.2
+
 ## [0.3.1] — 2026-07-27
 
 First released version — published to the acaso organization and to npm. Earlier `0.x`
