@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@builder.io/html-to-figma": "^0.0.3",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.2",
     "puppeteer-core": "^25.5.0"
   },
   "devDependencies": {
