@@ -1,6 +1,6 @@
 {
   "name": "@aca-so/tofig",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Convert HTML (e.g. Claude designs) into native Figma designs or Slides",
   "license": "MIT",
   "author": "acaso (https://aca.so)",
